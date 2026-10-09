@@ -150,13 +150,13 @@ export function Header() {
   ];
   return (
     <>
-      <Link
+      <a
         className="skip-link"
-        to={{ pathname: location.pathname, search: location.search, hash: '#main' }}
+        href="#main"
         onClick={() => document.getElementById('main')?.focus({ preventScroll: true })}
       >
         {t('Skip to content', 'Перейти к содержимому')}
-      </Link>
+      </a>
       <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
         <div className="header-inner wrap">
           <Brand />
