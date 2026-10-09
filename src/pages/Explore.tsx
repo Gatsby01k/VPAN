@@ -179,7 +179,7 @@ export function CountryPage() {
           </Eyebrow>
           <h1 className="display">
             <span>{t(market.name, market.ru).toUpperCase()}.</span>
-            <span className="serif accent">{t('Next connections.', 'Новые связи.')}</span>
+            <span className="display-accent accent">{t('Next connections.', 'Новые связи.')}</span>
           </h1>
           <p className="country-intro">
             {t(market.focus, market.focusRu)}.{' '}
@@ -206,7 +206,7 @@ export function CountryPage() {
             <h2 className="section-title">
               {t('Understand the', 'Понимайте')}
               <br />
-              <span className="serif">{t('local edge.', 'местные особенности.')}</span>
+              <span className="display-accent">{t('local edge.', 'местные особенности.')}</span>
             </h2>
             <p className="section-description">
               {t(
@@ -251,7 +251,9 @@ export function CountryPage() {
             <h2 className="section-title">
               {t('Local people.', 'Местные эксперты.')}
               <br />
-              <span className="serif">{t('Relevant experience.', 'Подходящий опыт.')}</span>
+              <span className="display-accent">
+                {t('Relevant experience.', 'Подходящий опыт.')}
+              </span>
             </h2>
           </div>
           <Action to={`/apply?market=${market.slug}`}>
@@ -474,7 +476,9 @@ export function AboutPage() {
           <p>
             {t('Good connections are built.', 'Хорошие связи создают.')}
             <br />
-            <span className="serif">{t('Great ones are earned.', 'Лучшие — заслуживают.')}</span>
+            <span className="display-accent">
+              {t('Great ones are earned.', 'Лучшие — заслуживают.')}
+            </span>
           </p>
         </Reveal>
         <Reveal className="about-statement-note">
@@ -494,7 +498,7 @@ export function AboutPage() {
             <h2 className="section-title">
               {t('A few things', 'То, во что')}
               <br />
-              <span className="serif">{t('we believe.', 'мы верим.')}</span>
+              <span className="display-accent">{t('we believe.', 'мы верим.')}</span>
             </h2>
           </div>
           <div className="accordion">
@@ -525,7 +529,7 @@ export function AboutPage() {
         <Eyebrow number="02">{t('Our outlook', 'Наш взгляд')}</Eyebrow>
         <h2 className="section-title">
           {t('Local roots.', 'Локальные знания.')}{' '}
-          <span className="serif">{t('Open horizons.', 'Открытые горизонты.')}</span>
+          <span className="display-accent">{t('Open horizons.', 'Открытые горизонты.')}</span>
         </h2>
         <div className="about-market-links">
           {markets.map((m) => (

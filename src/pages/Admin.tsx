@@ -172,7 +172,8 @@ export default function AdminPage() {
         <div>
           <Eyebrow>{t('PAN / Operations', 'PAN / Операционная панель')}</Eyebrow>
           <h1>
-            {t('Partner', 'Партнёрский')} <span className="serif">{t('desk.', 'отдел.')}</span>
+            {t('Partner', 'Партнёрский')}{' '}
+            <span className="display-accent">{t('desk.', 'отдел.')}</span>
           </h1>
           <p>{t('A clear view of every introduction.', 'Понятный обзор каждого обращения.')}</p>
         </div>
@@ -234,7 +235,9 @@ export default function AdminPage() {
             <h3>
               {t('Every introduction.', 'Каждая заявка.')}
               <br />
-              <span className="serif">{t('A useful next step.', 'Понятный следующий шаг.')}</span>
+              <span className="display-accent">
+                {t('A useful next step.', 'Понятный следующий шаг.')}
+              </span>
             </h3>
             <p>
               {t(

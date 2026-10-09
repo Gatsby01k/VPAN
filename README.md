@@ -4,16 +4,17 @@ The PAN website for affiliates, payment teams, PSPs, merchants and regional part
 
 ## Interface
 
-React 19 + TypeScript, Vite 8, React Router 7, Motion 14 and Three.js / React Three Fiber. The design uses oversized variable typography, a live metallic 3D connection sculpture, magenta accents and contrasting dark/paper sections. Fonts are hosted with the app.
+React 19 + TypeScript, Vite 8, React Router 7 and Motion 14. PAN’s crowned mascot, cracked black stone, liquid gold and magenta define the identity. Self-hosted Oswald, Manrope and Inter cover English and Russian. The mascot responds to mouse movement; the route trace draws when markets change, with reduced-motion support.
 
 All 22 pages are prerendered, with route-specific metadata and an actual 404 response. Public navigation works with direct URLs. The interactive interface adds:
 
-- Animated route transitions, scroll reveals, parallax and magnetic buttons.
+- A PAN route builder: select a role, up to three markets, local payment methods and a business category; preview a brief, copy a shareable route link, and carry the choices into the application.
+- Animated route transitions, scroll reveals, a responsive mascot and magnetic buttons.
 - Searchable quick navigation with Cmd/Ctrl+K, a native mobile dialog and EN/RU switching.
 - Search and regional filters for ten country pages.
 - Role and market preselection in the application flow, a session draft, stable retry IDs and a saved application reference.
 - A private partner desk with actual counts, full application details, search, status filters and CSV export.
-- Responsive layouts, keyboard focus states and reduced-motion support. The 3D illustration has a static fallback.
+- Responsive layouts, keyboard focus states and reduced-motion support. The mascot and material backgrounds render without WebGL.
 
 ## Run locally
 
@@ -68,4 +69,4 @@ npm test
 
 `npm test` builds both client and prerendered pages, then checks every public route, missing assets, 404/HEAD behavior, validation, merchant fields, origin restrictions, retries, multibyte names across HTTP chunks, admin access, audit rollback and migration from the previous database schema.
 
-Original artwork remains in `public/assets`. New 3D artwork is generated live by `src/components/Sculpture.tsx`. Fonts are distributed under OFL-1.1 by Fontsource. No external font service is required.
+Original artwork remains in `public/assets`. See `BRAND_ASSETS.md` for the supplied references and the transparent mascot preparation. Fonts are distributed under OFL-1.1 by Fontsource. No external font service is required.

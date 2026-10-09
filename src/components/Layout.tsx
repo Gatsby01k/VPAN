@@ -12,6 +12,11 @@ function CommandMenu({ open, onClose }: { open: boolean; onClose: () => void }) 
   const [query, setQuery] = useState('');
   const items = [
     {
+      title: t('Build your route', 'Собрать маршрут'),
+      subtitle: t('Role, markets and payment methods', 'Роль, рынки и методы'),
+      path: '/#forge',
+    },
+    {
       title: t('The network', 'Партнёрская сеть'),
       subtitle: t('Find your place', 'Найдите своё направление'),
       path: '/#partners',
@@ -140,7 +145,7 @@ export function Header() {
   const links = [
     ['/#partners', t('Network', 'Сеть')],
     ['/markets', t('Markets', 'Рынки')],
-    ['/#process', t('How it works', 'Как это работает')],
+    ['/#forge', t('Route builder', 'Мой маршрут')],
     ['/about', t('About', 'О PAN')],
   ];
   return (
@@ -186,7 +191,7 @@ export function Header() {
               <kbd>⌘K</kbd>
             </button>
             <Link className="header-apply" to="/apply">
-              {t('Let’s connect', 'Давайте знакомиться')}
+              {t('Join PAN', 'Войти в PAN')}
               <ArrowUpRight size={17} />
             </Link>
             <button
@@ -258,7 +263,7 @@ export function Footer() {
             <Link to="/apply" className="footer-invite">
               {t('Make your', 'Сделайте свой')}
               <br />
-              <span className="serif">{t('next move.', 'следующий шаг.')}</span>
+              <span className="display-accent">{t('next move.', 'следующий шаг.')}</span>
               <ArrowUpRight aria-hidden="true" />
             </Link>
           </div>

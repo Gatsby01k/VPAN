@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './fonts.css';
 import './styles.css';
+import './pan.css';
 
 const root = document.getElementById('root')!;
 const app = (

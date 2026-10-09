@@ -71,7 +71,8 @@ export default function ApplyPage() {
   useEffect(() => {
     let next = freshDraft(initialRole),
       savedStep = 0,
-      other = '';
+      other = '',
+      sameEntry = false;
     try {
       const stored = JSON.parse(sessionStorage.getItem(DRAFT_KEY) || 'null');
       if (
@@ -90,19 +91,38 @@ export default function ApplyPage() {
           else if (typeof stored.draft[key] === 'string')
             Object.assign(next, { [key]: stored.draft[key] });
         }
+        sameEntry = stored.entry === query;
         savedStep = Math.max(0, Math.min(2, Number(stored.step) || 0));
         other = typeof stored.otherMarkets === 'string' ? stored.otherMarkets : '';
       }
     } catch {
       /* Continue with a clean draft if browser storage is unavailable. */
     }
-    if (roleQuery && roles.some((r) => r.id === roleQuery)) {
+    if (!sameEntry && roleQuery && roles.some((r) => r.id === roleQuery)) {
       if (next.role !== initialRole) savedStep = 0;
       next.role = initialRole;
     }
     const market = markets.find((m) => m.slug === params.get('market'));
-    if (market && !next.markets.includes(market.name))
+    if (!sameEntry && market && !next.markets.includes(market.name))
       next.markets = [...next.markets, market.name].slice(0, 10);
+    if (params.get('source') === 'forge' && !sameEntry) {
+      const selected = markets
+        .filter((m) => (params.get('markets') || '').split(',').includes(m.slug))
+        .slice(0, 3);
+      if (selected.length) {
+        next.markets = selected.map((m) => m.name).slice(0, 3);
+        other = '';
+        const allowedMethods = new Set(selected.flatMap((m) => m.methods));
+        next.methods = [
+          ...new Set(
+            (params.get('methods') || '').split(',').filter((method) => allowedMethods.has(method)),
+          ),
+        ].join(', ');
+        if (['iGaming', 'e-commerce', 'other'].includes(params.get('category') || ''))
+          next.category = params.get('category')!;
+        savedStep = 1;
+      }
+    }
     if (!/^[a-f0-9-]{36}$/i.test(next.requestId)) next.requestId = crypto.randomUUID();
     setDraft(next);
     setStep(savedStep);
@@ -114,11 +134,14 @@ export default function ApplyPage() {
   useEffect(() => {
     if (!ready || reference) return;
     try {
-      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ version: 2, draft, step, otherMarkets }));
+      sessionStorage.setItem(
+        DRAFT_KEY,
+        JSON.stringify({ version: 2, draft, step, otherMarkets, entry: query }),
+      );
     } catch {
       /* Form submission does not depend on storage. */
     }
-  }, [draft, step, otherMarkets, ready, reference]);
+  }, [draft, step, otherMarkets, ready, reference, query]);
   useEffect(() => () => controller.current?.abort(), []);
   useEffect(() => {
     const view = reference || String(step);
@@ -286,7 +309,7 @@ export default function ApplyPage() {
         <h1>
           {t('LET’S', 'ДАВАЙТЕ')}
           <br />
-          <span className="serif accent">{t('connect.', 'знакомиться.')}</span>
+          <span className="display-accent accent">{t('connect.', 'знакомиться.')}</span>
         </h1>
         <p>
           {t(
@@ -343,7 +366,7 @@ export default function ApplyPage() {
               <h2>
                 {t('A GOOD', 'ХОРОШЕЕ')}
                 <br />
-                <span className="serif">{t('first move.', 'начало.')}</span>
+                <span className="display-accent">{t('first move.', 'начало.')}</span>
               </h2>
               <p>
                 {t(
@@ -382,6 +405,17 @@ export default function ApplyPage() {
             </motion.div>
           ) : (
             <motion.form ref={form} onSubmit={advance} key="form" className="application-form">
+              {ready && params.get('source') === 'forge' && (
+                <div className="forge-arrival">
+                  <Check size={15} />
+                  <span>
+                    {t(
+                      'Your PAN route is here. Review it and add your contact.',
+                      'Маршрут PAN перенесён. Проверьте его и добавьте контакт.',
+                    )}
+                  </span>
+                </div>
+              )}
               <div className="form-topline">
                 <span>PAN / PARTNER INTRODUCTION</span>
                 <span>{(step + 1).toString().padStart(2, '0')} — 03</span>
@@ -399,7 +433,7 @@ export default function ApplyPage() {
                       <h2>
                         {t('What do you', 'Что вы')}
                         <br />
-                        <span className="serif">{t('bring?', 'предлагаете?')}</span>
+                        <span className="display-accent">{t('bring?', 'предлагаете?')}</span>
                       </h2>
                       <p className="form-description">
                         {t(
@@ -438,7 +472,7 @@ export default function ApplyPage() {
                       <h2>
                         {t('Your local', 'Ваша локальная')}
                         <br />
-                        <span className="serif">{t('advantage.', 'экспертиза.')}</span>
+                        <span className="display-accent">{t('advantage.', 'экспертиза.')}</span>
                       </h2>
                       <p className="form-description">
                         {t(
@@ -532,7 +566,7 @@ export default function ApplyPage() {
                       <h2>
                         {t('Make an', 'Начните')}
                         <br />
-                        <span className="serif">{t('introduction.', 'знакомство.')}</span>
+                        <span className="display-accent">{t('introduction.', 'знакомство.')}</span>
                       </h2>
                       <p className="form-description">
                         {t(
