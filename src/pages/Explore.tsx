@@ -39,11 +39,16 @@ export function MarketsPage() {
             aria-label={t('Filter by region', 'Фильтр по региону')}
           >
             {['All', 'Africa', 'LATAM', 'Asia'].map((r) => (
-              <button key={r} aria-pressed={r === region} onClick={() => setRegion(r)}>
+              <button
+                key={r}
+                aria-pressed={r === region}
+                aria-label={r === 'All' ? t('All markets', 'Все рынки') : undefined}
+                onClick={() => setRegion(r)}
+              >
                 {r === region && <span className="filter-active" />}
                 <span>
                   {r === 'All'
-                    ? t('All markets', 'Все рынки')
+                    ? t('All', 'Все')
                     : r === 'Africa'
                       ? t('Africa', 'Африка')
                       : r === 'Asia'

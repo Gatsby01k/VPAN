@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowUpRight, Check, Copy, Download, Plus } from 'lucide-react';
 import { markets, roles, type RoleId } from '../data';
 import { useLocale } from '../locale';
+import { CategoryPicker } from './FormControls';
 import { restorePartnerProfile, savePartnerProfile } from './partner-profile';
 
 const questions: Record<RoleId, [string, string][]> = {
@@ -210,23 +211,14 @@ export function BriefStudio({ role, onRole }: { role: RoleId; onRole: (id: RoleI
                 )}
               </p>
             </fieldset>
-            <div className="profile-business">
-              <label htmlFor="profile-category">
-                03 / {t('BUSINESS CATEGORY', 'КАТЕГОРИЯ БИЗНЕСА')}
-              </label>
-              <select
-                id="profile-category"
-                value={category}
-                onChange={(e) => {
-                  setCategory(e.target.value);
-                  setCopiedFor('');
-                }}
-              >
-                <option value="iGaming">iGaming</option>
-                <option value="e-commerce">e-commerce</option>
-                <option value="other">{t('Other', 'Другая')}</option>
-              </select>
-            </div>
+            <CategoryPicker
+              value={category}
+              onChange={(value) => {
+                setCategory(value);
+                setCopiedFor('');
+              }}
+              label={`03 / ${t('BUSINESS CATEGORY', 'КАТЕГОРИЯ БИЗНЕСА')}`}
+            />
             {available.length > 0 && (
               <fieldset className="profile-methods">
                 <legend>04 / {t('METHODS TO DISCUSS', 'МЕТОДЫ ДЛЯ ОБСУЖДЕНИЯ')}</legend>

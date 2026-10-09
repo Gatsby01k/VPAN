@@ -12,6 +12,7 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import { Dialog, Eyebrow } from '../components/UI';
+import { SelectControl } from '../components/FormControls';
 import { roles, statuses, type Application, type ApplicationStatus } from '../data';
 import { useLocale } from '../locale';
 
@@ -225,7 +226,7 @@ export default function AdminPage() {
                 ? t('Connecting…', 'Подключаемся…')
                 : t('Open partner desk', 'Открыть панель')}
             </button>
-            <p role="alert" className="form-error">
+            <p role="alert" className="form-error" hidden={!error}>
               {error}
             </p>
           </form>
@@ -278,21 +279,18 @@ export default function AdminPage() {
                 aria-label={t('Search applications', 'Поиск заявок')}
               />
             </div>
-            <label className="admin-filter">
+            <div className="admin-filter">
               <SlidersHorizontal size={15} />
-              <select
+              <SelectControl
+                label={t('Filter by status', 'Фильтр по статусу')}
                 value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                aria-label={t('Filter by status', 'Фильтр по статусу')}
-              >
-                <option value="all">{t('All statuses', 'Все статусы')}</option>
-                {statuses.map((s) => (
-                  <option key={s} value={s}>
-                    {labels[s]}
-                  </option>
-                ))}
-              </select>
-            </label>
+                onChange={setFilter}
+                options={[
+                  { value: 'all', label: t('All statuses', 'Все статусы') },
+                  ...statuses.map((status) => ({ value: status, label: labels[status] })),
+                ]}
+              />
+            </div>
             <button
               className="icon-button"
               onClick={() => void load()}
@@ -311,7 +309,7 @@ export default function AdminPage() {
             </button>
           </div>
           <div className="admin-feedback">
-            <p className="form-error" role="alert">
+            <p className="form-error" role="alert" hidden={!error}>
               {error}
             </p>
             <p className="status-notification" aria-live="polite">
@@ -344,23 +342,16 @@ export default function AdminPage() {
                   <strong>{roleName(item.role)}</strong>
                   <span>{item.markets}</span>
                 </div>
-                <label className="inbox-status">
+                <div className="inbox-status">
                   <span className={`status-dot status-${item.status}`} />
-                  <select
+                  <SelectControl
                     value={item.status}
                     disabled={savingId === item.id}
-                    aria-label={`${t('Status for', 'Статус заявки')} ${item.reference}`}
-                    onChange={(e) =>
-                      void updateStatus(item.id, e.target.value as ApplicationStatus)
-                    }
-                  >
-                    {statuses.map((s) => (
-                      <option key={s} value={s}>
-                        {labels[s]}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                    label={`${t('Status for', 'Статус заявки')} ${item.reference}`}
+                    onChange={(value) => void updateStatus(item.id, value as ApplicationStatus)}
+                    options={statuses.map((status) => ({ value: status, label: labels[status] }))}
+                  />
+                </div>
                 <span className="inbox-date">{date(item.created_at)}</span>
               </div>
             ))}
@@ -423,23 +414,17 @@ export default function AdminPage() {
                 </div>
               ))}
             </dl>
-            <label className="field">
+            <div className="field">
               <span>{t('Application status', 'Статус заявки')}</span>
-              <select
+              <SelectControl
                 value={selected.status}
                 disabled={savingId === selected.id}
-                onChange={(e) =>
-                  void updateStatus(selected.id, e.target.value as ApplicationStatus)
-                }
-              >
-                {statuses.map((s) => (
-                  <option key={s} value={s}>
-                    {labels[s]}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <p className="form-error" role="alert">
+                label={t('Application status', 'Статус заявки')}
+                onChange={(value) => void updateStatus(selected.id, value as ApplicationStatus)}
+                options={statuses.map((status) => ({ value: status, label: labels[status] }))}
+              />
+            </div>
+            <p className="form-error" role="alert" hidden={!error}>
               {error}
             </p>
             <p className="status-notification" aria-live="polite">

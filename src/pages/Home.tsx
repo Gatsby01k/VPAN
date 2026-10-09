@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowDown, ArrowUpRight, Plus } from 'lucide-react';
 import { BriefStudio } from '../components/BriefStudio';
+import { SelectControl } from '../components/FormControls';
 import { restorePartnerProfile } from '../components/partner-profile';
 import { useLocale } from '../locale';
 import { markets, roles, type RoleId } from '../data';
@@ -109,21 +110,19 @@ function PartnerCover({ role, onRole }: { role: RoleId; onRole: (id: RoleId) => 
             <span>{t('YOUR WAY IN', 'ТВОЙ ВХОД В PAN')}</span>
             <ArrowUpRight size={20} />
           </div>
-          <div className="cover-entry-body" key={role}>
-            <label className="cover-mobile-role">
+          <div className="cover-entry-body">
+            <div className="cover-mobile-role">
               <span>{t('I am', 'Я')}</span>
-              <select
-                aria-label={t('My role in PAN', 'Моя роль в PAN')}
+              <SelectControl
+                label={t('My role in PAN', 'Моя роль в PAN')}
                 value={role}
-                onChange={(e) => onRole(e.target.value as RoleId)}
-              >
-                {roles.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.id === 'provider' ? 'PSP' : t(r.title, r.ru)}
-                  </option>
-                ))}
-              </select>
-            </label>
+                onChange={(value) => onRole(value as RoleId)}
+                options={roles.map((r) => ({
+                  value: r.id,
+                  label: r.id === 'provider' ? 'PSP' : t(r.title, r.ru),
+                }))}
+              />
+            </div>
             <span className="cover-role">
               {role === 'provider' ? 'PSP / PAYMENT SOLUTIONS' : t(current.title, current.ru)}
             </span>

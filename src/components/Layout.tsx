@@ -193,8 +193,15 @@ export function Header() {
               <Search size={18} />
               <kbd>⌘K</kbd>
             </button>
-            <Link className="header-apply" to="/apply">
-              {t('Partner with PAN', 'Стать партнёром')}
+            <Link
+              className="header-apply"
+              to="/apply"
+              aria-label={t('Partner with PAN', 'Стать партнёром')}
+            >
+              <span className="header-apply-full">{t('Partner with PAN', 'Стать партнёром')}</span>
+              <span className="header-apply-short" aria-hidden="true">
+                {t('Join PAN', 'Заявка')}
+              </span>
               <ArrowUpRight size={17} />
             </Link>
             <button

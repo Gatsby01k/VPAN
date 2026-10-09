@@ -9,8 +9,10 @@ import {
   LoaderCircle,
   LockKeyhole,
   Mail,
+  Plus,
 } from 'lucide-react';
 import { Action, Eyebrow } from '../components/UI';
+import { CategoryPicker } from '../components/FormControls';
 import { markets, roles, type RoleId } from '../data';
 import { useLocale } from '../locale';
 
@@ -475,7 +477,10 @@ export default function ApplyPage() {
                         )}
                       </p>
                       <fieldset className="market-choice-fieldset">
-                        <legend>{t('Partnership markets', 'Рынки для сотрудничества')} *</legend>
+                        <legend>
+                          {t('Partnership markets', 'Рынки для сотрудничества')} *
+                          <span>{selectedMarkets.length} / 10</span>
+                        </legend>
                         <div className="market-choices">
                           {markets.map((m) => (
                             <label
@@ -487,8 +492,15 @@ export default function ApplyPage() {
                                 checked={draft.markets.includes(m.name)}
                                 onChange={() => toggleMarket(m.name)}
                               />
+                              <b>{m.code}</b>
                               <span>{t(m.name, m.ru)}</span>
-                              {draft.markets.includes(m.name) && <Check size={12} />}
+                              <span className="market-choice-mark">
+                                {draft.markets.includes(m.name) ? (
+                                  <Check size={14} />
+                                ) : (
+                                  <Plus size={14} />
+                                )}
+                              </span>
                             </label>
                           ))}
                         </div>
@@ -501,32 +513,16 @@ export default function ApplyPage() {
                             setOtherMarkets(e.target.value);
                             setError('');
                           }}
-                          placeholder={t(
-                            'Separate countries with commas',
-                            'Названия стран через запятую',
-                          )}
+                          placeholder={t('e.g. Canada, Brazil', 'Например, Канада, Бразилия')}
                           maxLength={140}
                         />
                       </label>
-                      <label className="field">
-                        <span>{t('Business category', 'Бизнес-категория')}</span>
-                        <select
-                          value={draft.category}
-                          onChange={(e) => update('category', e.target.value)}
-                        >
-                          <option value="">
-                            {t('Select if relevant', 'Выберите, если применимо')}
-                          </option>
-                          <option value="iGaming">iGaming</option>
-                          <option value="e-commerce">e-commerce</option>
-                          <option value="other">
-                            {t(
-                              'Other — describe in the next step',
-                              'Другое — опишите на следующем шаге',
-                            )}
-                          </option>
-                        </select>
-                      </label>
+                      <CategoryPicker
+                        value={draft.category}
+                        onChange={(value) => update('category', value)}
+                        label={t('Business category', 'Бизнес-категория')}
+                        optional
+                      />
                       <div className="field-grid">
                         {field(
                           'methods',
@@ -645,7 +641,12 @@ export default function ApplyPage() {
                   )}
                 </div>
               </>
-              <div className="form-error" role={error ? 'alert' : undefined} aria-live="polite">
+              <div
+                className="form-error"
+                role={error ? 'alert' : undefined}
+                aria-live="polite"
+                hidden={!error}
+              >
                 {error}
               </div>
               <div className="form-actions">
