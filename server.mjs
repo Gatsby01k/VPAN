@@ -4,6 +4,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
+import { createGrowth, cleanAttribution } from './growth/engine.mjs';
+import { staticRoutes } from './growth/catalog.mjs';
+import { renderHead } from './growth/seo.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.resolve(HERE, 'dist');
@@ -18,6 +21,7 @@ const TYPES = {
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
   '.txt': 'text/plain; charset=utf-8',
+  '.xml': 'application/xml; charset=utf-8',
   '.woff2': 'font/woff2',
   '.woff': 'font/woff',
 };
@@ -59,7 +63,7 @@ async function jsonBody(req) {
     throw fail('Expected a JSON object', 400);
   return body;
 }
-function openDatabase(dbPath) {
+export function openDatabase(dbPath) {
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
   const db = new DatabaseSync(dbPath);
   db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
@@ -85,6 +89,13 @@ function openDatabase(dbPath) {
   ) {
     db.exec("ALTER TABLE applications ADD COLUMN category TEXT NOT NULL DEFAULT ''");
   }
+  if (
+    !db
+      .prepare('PRAGMA table_info(applications)')
+      .all()
+      .some((column) => column.name === 'attribution')
+  )
+    db.exec("ALTER TABLE applications ADD COLUMN attribution TEXT NOT NULL DEFAULT '{}'");
   return db;
 }
 function serveFile(req, res, urlPath) {
@@ -133,17 +144,151 @@ export function createApp({
   adminToken = process.env.ADMIN_TOKEN || '',
   allowedOrigin = process.env.ALLOWED_ORIGIN || '',
   trustProxy = process.env.TRUST_PROXY === '1',
+  publicSiteUrl = process.env.PUBLIC_SITE_URL || '',
+  growthEnabled = false,
+  growthOptions = {},
 } = {}) {
   const db = openDatabase(dbPath);
+  const growth = createGrowth(db, {
+    publicSiteUrl,
+    enabled: growthEnabled,
+    aiKey: process.env.AI_GATEWAY_API_KEY || '',
+    aiModel: process.env.AI_GATEWAY_MODEL || '',
+    aiAutoPublish: process.env.GROWTH_AI_AUTOPUBLISH === '1',
+    gscFile: process.env.GSC_SERVICE_ACCOUNT_FILE || '',
+    gscProperty: process.env.GSC_PROPERTY || '',
+    ...growthOptions,
+  });
   const attempts = new Map();
+  const eventAttempts = new Map();
+  let renderer;
+  async function publicPage(req, res, url) {
+    const pathname = url.pathname.replace(/\/$/, '') || '/';
+    const data = growth.publicData(
+      pathname.startsWith('/knowledge/') ? pathname.slice('/knowledge/'.length) : '',
+    );
+    const article = data.articles.find((g) => '/knowledge/' + g.slug === pathname);
+    if (!staticRoutes.includes(pathname) && !article && pathname !== '/admin')
+      return serveFile(req, res, url.pathname);
+    const shellPath = path.join(PUBLIC, 'shell.html');
+    if (!fs.existsSync(shellPath)) return serveFile(req, res, url.pathname);
+    // Reload an updated SSR bundle when the local preview is rebuilt.
+    const entry = path.join(HERE, 'dist-server/entry-server.mjs');
+    const revision = fs.statSync(entry).mtimeMs;
+    if (!renderer || renderer.revision !== revision)
+      renderer = {
+        revision,
+        module: await import('./dist-server/entry-server.mjs?rev=' + revision),
+      };
+    const language = url.searchParams.get('lang') === 'ru' ? 'ru' : 'en';
+    let html = fs
+      .readFileSync(shellPath, 'utf8')
+      .replace(
+        '<!--app-html-->',
+        renderer.module.renderPage(url.pathname + url.search, { ...data, language }),
+      );
+    const metadata = renderer.module.pageMeta(pathname, language);
+    html = renderHead(html, {
+      origin: growth.origin,
+      pathname,
+      language,
+      metadata,
+      article,
+      bootstrap: data,
+      noindex: pathname === '/admin',
+    });
+    res.writeHead(200, {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Content-Language': language,
+      'Cache-Control': 'no-cache',
+    });
+    res.end(req.method === 'HEAD' ? undefined : html);
+  }
   const handler = async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-    const pathname = new URL(req.url || '/', 'http://localhost').pathname;
+    const url = new URL(req.url || '/', 'http://localhost');
+    const pathname = url.pathname;
     if (req.method === 'GET' && pathname === '/health') return reply(res, 200, { status: 'ok' });
+    if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/sitemap.xml') {
+      const xml = growth.sitemap();
+      if (!xml)
+        return reply(res, 503, {
+          error: 'Configure PUBLIC_SITE_URL to serve the production sitemap.',
+        });
+      res.writeHead(200, {
+        'Content-Type': 'application/xml; charset=utf-8',
+        'Cache-Control': 'public, max-age=300',
+      });
+      return res.end(req.method === 'HEAD' ? undefined : xml);
+    }
+    if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/robots.txt') {
+      res.writeHead(200, {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'public, max-age=300',
+      });
+      return res.end(
+        req.method === 'HEAD'
+          ? undefined
+          : 'User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nDisallow: /shell.html\n' +
+              (growth.origin ? 'Sitemap: ' + growth.origin + '/sitemap.xml\n' : ''),
+      );
+    }
+    if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/feed.xml') {
+      if (!growth.origin)
+        return reply(res, 503, {
+          error: 'Configure PUBLIC_SITE_URL to serve the production feed.',
+        });
+      const { escapeHtml } = await import('./growth/engine.mjs');
+      const items = growth
+        .articles()
+        .slice(0, 30)
+        .map(
+          (g) =>
+            `<item><title>${escapeHtml(g.title)}</title><link>${growth.origin}/knowledge/${g.slug}</link><guid isPermaLink="true">${growth.origin}/knowledge/${g.slug}</guid><description>${escapeHtml(g.summary)}</description><pubDate>${new Date(g.publishedAt).toUTCString()}</pubDate></item>`,
+        )
+        .join('');
+      res.writeHead(200, {
+        'Content-Type': 'application/rss+xml; charset=utf-8',
+        'Cache-Control': 'public, max-age=300',
+      });
+      return res.end(
+        req.method === 'HEAD'
+          ? undefined
+          : `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>PAN — Partner field notes</title><link>${growth.origin}/knowledge</link><description>Payment partner preparation guides and checklists.</description>${items}</channel></rss>`,
+      );
+    }
+    // The build shell is an internal rendering artifact, not a public duplicate homepage.
+    if (pathname === '/shell.html') return reply(res, 404, { error: 'Not found' });
     if (pathname.startsWith('/api/')) {
+      if (req.method === 'GET' && pathname === '/api/content')
+        return reply(res, 200, growth.publicData(safeText(url.searchParams.get('article'), 100)));
+      if (req.method === 'POST' && pathname === '/api/events') {
+        if (req.headers.dnt === '1' || req.headers['sec-gpc'] === '1')
+          return reply(res, 200, { ok: true });
+        if (
+          (allowedOrigin && req.headers.origin && req.headers.origin !== allowedOrigin) ||
+          /bot|crawler|spider/i.test(String(req.headers['user-agent'] || ''))
+        )
+          return reply(res, 200, { ok: true });
+        const ip = req.socket.remoteAddress || 'unknown';
+        const record = eventAttempts.get(ip) || { count: 0, until: Date.now() + 60000 };
+        if (Date.now() > record.until) {
+          record.count = 0;
+          record.until = Date.now() + 60000;
+        }
+        record.count++;
+        eventAttempts.set(ip, record);
+        if (eventAttempts.size > 5000)
+          for (const [key, value] of eventAttempts)
+            if (value.until < Date.now()) eventAttempts.delete(key);
+        if (record.count > 90) return reply(res, 429, { error: 'Too many events' });
+        const body = await jsonBody(req);
+        growth.view(safeText(body.path, 180), cleanAttribution(body.attribution));
+        return reply(res, 200, { ok: true });
+      }
       if (req.method === 'POST' && pathname === '/api/apply') {
         if (allowedOrigin && req.headers.origin && req.headers.origin !== allowedOrigin)
           return reply(res, 403, { error: 'This request origin is not allowed.' });
@@ -195,8 +340,8 @@ export function createApp({
           '-' +
           crypto.randomBytes(4).toString('hex').toUpperCase();
         db.prepare(
-          `INSERT INTO applications (id, request_key, reference, created_at, updated_at, role, markets, name, company, email, telegram, size, methods, volume, experience, message, category, status)
-          VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+          `INSERT INTO applications (id, request_key, reference, created_at, updated_at, role, markets, name, company, email, telegram, size, methods, volume, experience, message, category, status, attribution)
+          VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         ).run(
           id,
           requestKey,
@@ -216,6 +361,7 @@ export function createApp({
           safeText(body.message, 1500),
           safeText(body.category, 80),
           'new',
+          JSON.stringify(cleanAttribution(body.attribution)),
         );
         return reply(res, 201, { reference });
       }
@@ -230,10 +376,45 @@ export function createApp({
         if (req.method === 'GET' && pathname === '/api/admin/applications') {
           const items = db
             .prepare(
-              'SELECT id, reference, created_at, role, markets, name, company, email, telegram, size, methods, volume, experience, message, category, status FROM applications ORDER BY created_at DESC LIMIT 500',
+              'SELECT id, reference, created_at, role, markets, name, company, email, telegram, size, methods, volume, experience, message, category, status, attribution FROM applications ORDER BY created_at DESC LIMIT 500',
             )
             .all();
           return reply(res, 200, { items });
+        }
+        if (req.method === 'GET' && pathname === '/api/admin/growth')
+          return reply(res, 200, growth.report());
+        if (req.method === 'POST' && pathname === '/api/admin/growth/run') {
+          // Return immediately; the durable run and its outcome appear in the operations report.
+          void growth.run(true);
+          return reply(res, 202, { accepted: true });
+        }
+        if (req.method === 'PATCH' && pathname === '/api/admin/growth') {
+          const body = await jsonBody(req);
+          if (typeof body.paused !== 'boolean')
+            return reply(res, 422, { error: 'Expected a pause setting' });
+          growth.pause(body.paused);
+          return reply(res, 200, { ok: true });
+        }
+        const contentMatch = pathname.match(/^\/api\/admin\/growth\/articles\/([a-z0-9-]{1,100})$/);
+        if (req.method === 'PATCH' && contentMatch) {
+          const body = await jsonBody(req);
+          const row = db
+            .prepare('SELECT status FROM growth_articles WHERE slug=?')
+            .get(contentMatch[1]);
+          if (!row) return reply(res, 404, { error: 'Article not found' });
+          if (body.status === 'published') {
+            try {
+              growth.publish(contentMatch[1], 'operator');
+            } catch (error) {
+              return reply(res, 422, { error: error.message });
+            }
+          } else if (body.status === 'archived')
+            db.prepare('UPDATE growth_articles SET status=? WHERE slug=?').run(
+              'archived',
+              contentMatch[1],
+            );
+          else return reply(res, 422, { error: 'Unknown publication state' });
+          return reply(res, 200, { ok: true });
         }
         const match = pathname.match(/^\/api\/admin\/applications\/([a-f0-9-]{36})$/i);
         if (req.method === 'PATCH' && match) {
@@ -263,7 +444,7 @@ export function createApp({
       }
       return reply(res, 404, { error: 'Not found' });
     }
-    if (req.method === 'GET' || req.method === 'HEAD') return serveFile(req, res, pathname);
+    if (req.method === 'GET' || req.method === 'HEAD') return publicPage(req, res, url);
     return reply(res, 405, { error: 'Method not allowed' });
   };
   const server = http.createServer((req, res) => {
@@ -273,7 +454,8 @@ export function createApp({
       else res.destroy();
     });
   });
-  server.on('close', () => db.close());
+  growth.start();
+  server.on('close', () => void growth.stop().finally(() => db.close()));
   return server;
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -281,7 +463,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   if (fs.existsSync(envFile)) process.loadEnvFile(envFile);
   const port = Number(process.env.PORT || 3000),
     host = process.env.HOST || '0.0.0.0';
-  const server = createApp();
+  const server = createApp({ growthEnabled: process.env.GROWTH_ENABLED !== '0' });
   server.listen(port, host, () => process.stdout.write(`PAN running on http://${host}:${port}\n`));
   ['SIGTERM', 'SIGINT'].forEach((signal) => process.on(signal, () => server.close()));
 }

@@ -12,6 +12,8 @@ import {
 } from './pages/Explore';
 import ApplyPage from './pages/Apply';
 import AdminPage from './pages/Admin';
+import { GrowthProvider, type GrowthData } from './growth';
+import { KnowledgePage, KnowledgeArticle } from './pages/Knowledge';
 
 function Pages() {
   return (
@@ -27,6 +29,8 @@ function Pages() {
           <Route path="/merchants" element={<PartnerPage roleId="merchant" />} />
           <Route path="/markets" element={<MarketsPage />} />
           <Route path="/markets/:slug" element={<CountryPage />} />
+          <Route path="/knowledge" element={<KnowledgePage />} />
+          <Route path="/knowledge/:slug" element={<KnowledgeArticle />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/apply" element={<ApplyPage />} />
           <Route path="/admin" element={<AdminPage />} />
@@ -40,10 +44,12 @@ function Pages() {
   );
 }
 
-export default function App() {
+export default function App({ initialGrowth }: { initialGrowth?: GrowthData }) {
   return (
-    <LocaleProvider>
-      <Pages />
+    <LocaleProvider initialLanguage={initialGrowth?.language}>
+      <GrowthProvider initial={initialGrowth}>
+        <Pages />
+      </GrowthProvider>
     </LocaleProvider>
   );
 }

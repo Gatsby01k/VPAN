@@ -15,6 +15,7 @@ import { Dialog, Eyebrow } from '../components/UI';
 import { SelectControl } from '../components/FormControls';
 import { roles, statuses, type Application, type ApplicationStatus } from '../data';
 import { useLocale } from '../locale';
+import GrowthConsole from '../components/GrowthConsole';
 
 export default function AdminPage() {
   const { language, t } = useLocale();
@@ -147,6 +148,7 @@ export default function AdminPage() {
       'experience',
       'message',
       'status',
+      'attribution',
     ];
     const cell = (value: unknown) => {
       let text = String(value ?? '');
@@ -250,6 +252,7 @@ export default function AdminPage() {
         </div>
       ) : (
         <>
+          <GrowthConsole token={token} />
           <div className="admin-stats">
             {[
               [t('Applications', 'Заявки'), items.length],
@@ -407,6 +410,10 @@ export default function AdminPage() {
                 [t('Monthly volume', 'Месячный объём'), selected.volume],
                 [t('Experience', 'Опыт'), selected.experience],
                 [t('Introduction', 'Сообщение'), selected.message],
+                [
+                  t('Acquisition source', 'Источник привлечения'),
+                  selected.attribution === '{}' ? '' : selected.attribution,
+                ],
               ].map(([label, value]) => (
                 <div key={label}>
                   <dt>{label}</dt>

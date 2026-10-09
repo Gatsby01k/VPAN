@@ -4,6 +4,7 @@ import { renderPage, pageMeta } from '../dist-server/entry-server.mjs';
 
 const root = path.resolve('dist');
 const template = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+fs.writeFileSync(path.join(root, 'shell.html'), template);
 const routes = [
   '/',
   '/affiliates',
@@ -11,6 +12,7 @@ const routes = [
   '/payment-partners',
   '/merchants',
   '/markets',
+  '/knowledge',
   '/apply',
   '/about',
   '/privacy',

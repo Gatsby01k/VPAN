@@ -220,30 +220,56 @@ export interface Application {
   experience: string;
   message: string;
   status: ApplicationStatus;
+  attribution: string;
 }
 
-export function pageMeta(path: string) {
+export function pageMeta(path: string, language: 'en' | 'ru' = 'en') {
   const market = markets.find((m) => path === `/markets/${m.slug}`);
   const role = roles.find((r) => path === r.path);
   const names: Record<string, string> = {
     '/': 'PAN — Private Affiliate Network',
     '/markets': 'Markets — PAN',
+    '/knowledge': 'Payment partner guides and checklists — PAN',
     '/apply': 'Join the network — PAN',
     '/about': 'About PAN',
     '/privacy': 'Privacy — PAN',
     '/terms': 'Terms — PAN',
     '/admin': 'Partner desk — PAN',
   };
+  const namesRu: Record<string, string> = {
+    '/': 'PAN — Частная партнёрская сеть',
+    '/markets': 'Рынки партнёрства — PAN',
+    '/knowledge': 'Руководства и чек-листы платёжных партнёров — PAN',
+    '/apply': 'Заявка на партнёрство — PAN',
+    '/about': 'О PAN',
+    '/privacy': 'Конфиденциальность — PAN',
+    '/terms': 'Условия — PAN',
+    '/admin': 'Партнёрский отдел — PAN',
+  };
+  const ru = language === 'ru';
   return {
     title: market
-      ? `${market.name} partnerships — PAN`
+      ? ru
+        ? `${market.ru}: партнёрство — PAN`
+        : `${market.name} partnerships — PAN`
       : role
-        ? `${role.title} — PAN`
-        : names[path] || 'Page not found — PAN',
+        ? `${ru ? role.ru : role.title} — PAN`
+        : (ru ? namesRu[path] : names[path]) ||
+          (ru ? 'Страница не найдена — PAN' : 'Page not found — PAN'),
     description: market
-      ? `Explore ${market.name} partner introductions: ${market.methods.join(', ')}. ${market.focus}. Availability is reviewed individually.`
+      ? ru
+        ? `${market.ru}: знакомства с партнёрами и методы ${market.methods.join(', ')}. ${market.focusRu}. Доступность рассматривается отдельно.`
+        : `Explore ${market.name} partner introductions: ${market.methods.join(', ')}. ${market.focus}. Availability is reviewed individually.`
       : role
-        ? role.description
-        : 'PAN connects affiliates, payment teams, PSPs and merchants through private business partnerships across selected markets.',
+        ? ru
+          ? role.descriptionRu
+          : role.description
+        : path === '/knowledge'
+          ? ru
+            ? 'Практические руководства и чек-листы для знакомства, оценки и подключения PSP, платёжных команд и мерчантов. Первоисточники и подготовка к разговору.'
+            : 'Practical guides and checklists for introducing, evaluating and connecting PSPs, payment teams and merchants. Primary sources and preparation for a first conversation.'
+          : ru
+            ? 'PAN объединяет аффилиатов, платёжные команды, PSP и мерчантов через частные бизнес-партнёрства на выбранных рынках.'
+            : 'PAN connects affiliates, payment teams, PSPs and merchants through private business partnerships across selected markets.',
   };
 }

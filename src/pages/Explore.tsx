@@ -4,6 +4,7 @@ import { ArrowDown, ArrowUpRight, Check, ChevronDown, Globe2, Search, X } from '
 import { Action, Eyebrow, PageHeading, Reveal, Spotlight } from '../components/UI';
 import { markets, roles, type RoleId } from '../data';
 import { useLocale } from '../locale';
+import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
 
 export function MarketsPage() {
   const { t } = useLocale();
@@ -264,6 +265,7 @@ export function CountryPage() {
           ))}
         </div>
       </section>
+      <KnowledgeTeaser market={market.slug} />
     </>
   );
 }
@@ -559,8 +561,8 @@ export function LegalPage({ type }: { type: 'privacy' | 'terms' }) {
         [
           t('Browser preferences and drafts', 'Настройки и черновики в браузере'),
           t(
-            'Your language preference is saved locally. The application draft and its request identifier are stored for the current browser session so you can return to an unfinished application. No admin credentials are stored in browser storage.',
-            'Выбор языка сохраняется локально. Черновик анкеты и идентификатор запроса хранятся в текущей сессии браузера, чтобы вы могли вернуться к незавершённой заявке. Административные пароли в хранилище браузера не сохраняются.',
+            'Your language preference is saved locally. Application drafts and campaign or referral identifiers are stored for the current browser session. The submitted application may include its landing page and source. The site counts page views by page and source without visitor IDs or stored IP addresses; Do Not Track and Global Privacy Control disable these counts. No admin credentials are stored in browser storage.',
+            'Выбор языка сохраняется локально. Черновики заявок и идентификаторы кампании или рекомендации хранятся в текущей сессии браузера. Отправленная заявка может содержать страницу входа и источник. Сайт считает просмотры по странице и источнику без идентификаторов посетителей и хранения IP-адресов; Do Not Track и Global Privacy Control отключают подсчёт. Административные пароли в браузере не сохраняются.',
           ),
         ],
         [

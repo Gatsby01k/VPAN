@@ -6,6 +6,7 @@ import { SelectControl } from '../components/FormControls';
 import { restorePartnerProfile } from '../components/partner-profile';
 import { useLocale } from '../locale';
 import { markets, roles, type RoleId } from '../data';
+import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
 
 const entries: Record<
   RoleId,
@@ -302,6 +303,7 @@ export default function Home() {
       <BriefStudio role={role} onRole={setRole} />
       <PartnershipProcess />
       <Territories />
+      <KnowledgeTeaser />
     </>
   );
 }

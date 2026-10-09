@@ -5,12 +5,21 @@ import App from './App';
 import './fonts.css';
 import './styles.css';
 import './pan.css';
+import './growth.css';
+import { emptyGrowth, type GrowthData } from './growth';
 
 const root = document.getElementById('root')!;
+let initialGrowth: GrowthData = emptyGrowth;
+try {
+  const raw = document.getElementById('pan-bootstrap')?.textContent;
+  if (raw) initialGrowth = JSON.parse(raw);
+} catch {
+  /* The API can load public content after hydration. */
+}
 const app = (
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <App initialGrowth={initialGrowth} />
     </BrowserRouter>
   </StrictMode>
 );

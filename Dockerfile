@@ -8,7 +8,11 @@ RUN npm run build
 FROM node:24-bookworm-slim
 WORKDIR /app
 COPY --from=build /app/dist ./dist
-COPY package.json server.mjs ./
+COPY --from=build /app/dist-server ./dist-server
+COPY package.json package-lock.json server.mjs ./
+COPY growth ./growth
+COPY scripts/growth.mjs ./scripts/growth.mjs
+RUN npm ci --omit=dev
 RUN mkdir -p data && chown -R node:node /app
 USER node
 ENV PORT=3000 HOST=0.0.0.0 DB_PATH=/app/data/partners.sqlite

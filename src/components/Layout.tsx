@@ -4,12 +4,19 @@ import { ArrowDownRight, ArrowUpRight, Command, Menu, Search, X } from 'lucide-r
 import { Brand, Dialog } from './UI';
 import { useLocale } from '../locale';
 import { markets, pageMeta } from '../data';
+import { useGrowth } from '../growth';
+import { recordPage } from './acquisition';
 
 function CommandMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t } = useLocale();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const items = [
+    {
+      title: t('Partner guides', 'Практика партнёрства'),
+      subtitle: t('Research and working checklists', 'Материалы и рабочие чек-листы'),
+      path: '/knowledge',
+    },
     {
       title: t('Build your partner profile', 'Собрать партнёрский профиль'),
       subtitle: t('Role, markets and payment methods', 'Роль, рынки и методы'),
@@ -148,6 +155,7 @@ export function Header() {
   const links = [
     ['/#partners', t('Partnerships', 'Партнёрство')],
     ['/markets', t('Markets', 'Рынки')],
+    ['/knowledge', t('Field notes', 'Практика')],
     ['/#forge', t('My profile', 'Мой профиль')],
     ['/about', t('About', 'О PAN')],
   ];
@@ -282,6 +290,7 @@ export function Footer() {
             <div>
               <span>{t('Explore', 'Узнать больше')}</span>
               <Link to="/markets">{t('Markets', 'Рынки')}</Link>
+              <Link to="/knowledge">{t('Partner guides', 'Практика партнёрства')}</Link>
               <Link to="/about">{t('About PAN', 'О PAN')}</Link>
               <Link to="/apply">{t('Join the network', 'Присоединиться')}</Link>
               <a href="https://t.me/PAN_Affiliate" target="_blank" rel="noopener noreferrer">
@@ -321,12 +330,47 @@ export function Footer() {
 export function RouteEffects() {
   const location = useLocation();
   const { language } = useLocale();
+  const { data } = useGrowth();
   useEffect(() => {
-    const metadata = pageMeta(location.pathname.replace(/\/$/, '') || '/');
+    const metadata = pageMeta(location.pathname.replace(/\/$/, '') || '/', language);
+    const article = data.articles.find((g) => '/knowledge/' + g.slug === location.pathname);
+    if (article) {
+      metadata.title = (language === 'ru' ? article.titleRu : article.title) + ' — PAN';
+      metadata.description = language === 'ru' ? article.summaryRu : article.summary;
+    }
     document.title = metadata.title;
     for (const selector of ['meta[name="description"]', 'meta[property="og:description"]'])
       document.querySelector(selector)?.setAttribute('content', metadata.description);
     document.querySelector('meta[property="og:title"]')?.setAttribute('content', metadata.title);
+    if (data.origin) {
+      const url = data.origin + location.pathname + (language === 'ru' ? '?lang=ru' : '');
+      document.querySelector('link[rel="canonical"]')?.setAttribute('href', url);
+      document.querySelector('meta[property="og:url"]')?.setAttribute('content', url);
+      for (const alternate of document.querySelectorAll<HTMLLinkElement>(
+        'link[rel="alternate"][hreflang]',
+      ))
+        alternate.href =
+          data.origin + location.pathname + (alternate.hreflang === 'ru' ? '?lang=ru' : '');
+      // Server JSON-LD belongs to the full document and must not describe a previous SPA route.
+      const structured = document.querySelector('script[type="application/ld+json"]');
+      if (structured)
+        structured.textContent = JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': article ? 'Article' : 'WebPage',
+          name: metadata.title,
+          description: metadata.description,
+          url,
+          inLanguage: language,
+          ...(article
+            ? {
+                headline: language === 'ru' ? article.titleRu : article.title,
+                datePublished: article.publishedAt,
+                dateModified: article.updatedAt,
+                author: { '@type': 'Organization', name: article.author },
+              }
+            : {}),
+        });
+    }
     document.querySelector('meta[name="robots"]')?.remove();
     if (location.pathname === '/admin') {
       const meta = document.createElement('meta');
@@ -334,7 +378,11 @@ export function RouteEffects() {
       meta.content = 'noindex, nofollow';
       document.head.appendChild(meta);
     }
-  }, [location.pathname, language]);
+  }, [location.pathname, language, data]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => recordPage(location.pathname), 100);
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
   useEffect(() => {
     const scroll = () => {
       if (location.hash)

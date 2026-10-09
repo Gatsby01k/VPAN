@@ -15,6 +15,7 @@ import { Action, Eyebrow } from '../components/UI';
 import { CategoryPicker } from '../components/FormControls';
 import { markets, roles, type RoleId } from '../data';
 import { useLocale } from '../locale';
+import { acquisition } from '../components/acquisition';
 
 const DRAFT_KEY = 'pan-application-v2';
 interface Draft {
@@ -218,6 +219,7 @@ export default function ApplyPage() {
           name: draft.name.trim(),
           email: draft.email.trim(),
           markets: selectedMarkets,
+          attribution: acquisition(),
         }),
       });
       const result = await response.json();
