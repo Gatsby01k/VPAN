@@ -4,17 +4,20 @@ The PAN website for affiliates, payment teams, PSPs, merchants and regional part
 
 ## Interface
 
-React 19 + TypeScript, Vite 8, React Router 7 and Motion 14. PAN’s crowned mascot, cracked black stone, liquid gold and magenta define the identity. Self-hosted Oswald, Manrope and Inter cover English and Russian. The mascot responds to mouse movement; the route trace draws when markets change, with reduced-motion support.
+React 19 + TypeScript, Vite 8 and React Router 7. The public site recruits partners into PAN’s own project. Its propositions distinguish referrals, local payment operations, PSP infrastructure and merchant requirements.
 
-All 22 pages are prerendered, with route-specific metadata and an actual 404 response. Public navigation works with direct URLs. The interactive interface adds:
+PAN’s supplied crowned mascot, fractured black stone, gold and magenta define the visual system. Self-hosted Oswald and Inter cover English and Russian. The cover places the character between the network proposition and a role-specific entry. Selecting a role changes the actual proposition and application destination.
 
-- A PAN route builder: select a role, up to three markets, local payment methods and a business category; preview a brief, copy a shareable route link, and carry the choices into the application.
-- Animated route transitions, scroll reveals, a responsive mascot and magnetic buttons.
-- Searchable quick navigation with Cmd/Ctrl+K, a native mobile dialog and EN/RU switching.
-- Search and regional filters for ten country pages.
-- Role and market preselection in the application flow, a session draft, stable retry IDs and a saved application reference.
-- A private partner desk with actual counts, full application details, search, status filters and CSV export.
-- Responsive layouts, keyboard focus states and reduced-motion support. The mascot and material backgrounds render without WebGL.
+All 22 pages are prerendered, with route-specific metadata and an actual 404 response. Public navigation works with direct URLs. The interface includes:
+
+- A partner profile: choose a role, up to three markets, local payment methods and a business category; preview a profile and the topics for a first conversation. Save a text brief, copy a link or carry the choices into an application.
+- A session profile that survives navigation and reloads. Shared URLs restore allowlisted choices and contain no contact data. Removing a market removes unavailable method selections.
+- Five distinct partnership entries, direct contact and an explicit review → conversation → terms sequence.
+- Searchable quick navigation with Cmd/Ctrl+K, native mobile dialogs and EN/RU switching.
+- Search and region filters for ten country pages.
+- Application preselection, a session draft, stable retry IDs and a saved application reference.
+- A private partner desk with actual counts, complete application details, search, status filters and CSV export.
+- Responsive layouts, keyboard focus and reduced-motion support. Artwork renders without WebGL. Pages and form steps update immediately; restrained opacity feedback applies to the changed cover content.
 
 ## Run locally
 
@@ -56,7 +59,7 @@ npm start
 
 Deploy as a persistent Node service or with `docker compose up --build -d`. The multi-stage image builds the frontend and runs as the `node` user. Mount and back up the SQLite volume. Configure `ADMIN_TOKEN`, `DB_PATH` and the production `ALLOWED_ORIGIN`. Enable `TRUST_PROXY=1` only behind a trusted reverse proxy.
 
-The partner desk uses one operations key, held only in browser memory. Applications and audit history are stored on the server; the session draft contains application fields and is cleared on successful submission. Language preference is stored locally. For a larger operations team, the next system work is individual staff identity and permissions.
+The partner desk uses one operations key, held only in browser memory. Applications and audit history are stored on the server; the session draft contains application fields and is cleared on successful submission. The partner profile is held in session storage without contacts. Language preference is stored locally. For a larger operations team, the next system work is individual staff identity and permissions.
 
 This release implements the website and partner intake. Referral tracking, commissions, a partner portal and payment processing are separate product work. Market methods describe local infrastructure; availability and commercial terms are reviewed individually. Confirm operator details, contact destinations and commercial notices before launch.
 
@@ -69,4 +72,4 @@ npm test
 
 `npm test` builds both client and prerendered pages, then checks every public route, missing assets, 404/HEAD behavior, validation, merchant fields, origin restrictions, retries, multibyte names across HTTP chunks, admin access, audit rollback and migration from the previous database schema.
 
-Original artwork remains in `public/assets`. See `BRAND_ASSETS.md` for the supplied references and the transparent mascot preparation. Fonts are distributed under OFL-1.1 by Fontsource. No external font service is required.
+The supplied artwork remains in `public/assets`. See `BRAND_ASSETS.md` for the supplied references and the transparent mascot preparation. Fonts are distributed under OFL-1.1 by Fontsource. No external font service is required.

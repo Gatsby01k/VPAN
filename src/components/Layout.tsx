@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { motion, useMotionValueEvent, useScroll } from 'motion/react';
 import { ArrowDownRight, ArrowUpRight, Command, Menu, Search, X } from 'lucide-react';
 import { Brand, Dialog } from './UI';
 import { useLocale } from '../locale';
@@ -12,7 +11,7 @@ function CommandMenu({ open, onClose }: { open: boolean; onClose: () => void }) 
   const [query, setQuery] = useState('');
   const items = [
     {
-      title: t('Build your route', 'Собрать маршрут'),
+      title: t('Build your partner profile', 'Собрать партнёрский профиль'),
       subtitle: t('Role, markets and payment methods', 'Роль, рынки и методы'),
       path: '/#forge',
     },
@@ -126,8 +125,12 @@ export function Header() {
   const [menu, setMenu] = useState(false);
   const [command, setCommand] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { scrollY, scrollYProgress } = useScroll();
-  useMotionValueEvent(scrollY, 'change', (value) => setScrolled(value > 24));
+  useEffect(() => {
+    const update = () => setScrolled(window.scrollY > 24);
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    return () => window.removeEventListener('scroll', update);
+  }, []);
   useEffect(() => {
     setMenu(false);
   }, [location.pathname, location.hash]);
@@ -143,9 +146,9 @@ export function Header() {
     return () => window.removeEventListener('keydown', key);
   }, []);
   const links = [
-    ['/#partners', t('Network', 'Сеть')],
+    ['/#partners', t('Partnerships', 'Партнёрство')],
     ['/markets', t('Markets', 'Рынки')],
-    ['/#forge', t('Route builder', 'Мой маршрут')],
+    ['/#forge', t('My profile', 'Мой профиль')],
     ['/about', t('About', 'О PAN')],
   ];
   return (
@@ -191,7 +194,7 @@ export function Header() {
               <kbd>⌘K</kbd>
             </button>
             <Link className="header-apply" to="/apply">
-              {t('Join PAN', 'Войти в PAN')}
+              {t('Partner with PAN', 'Стать партнёром')}
               <ArrowUpRight size={17} />
             </Link>
             <button
@@ -204,7 +207,6 @@ export function Header() {
             </button>
           </div>
         </div>
-        <motion.div className="scroll-progress" style={{ scaleX: scrollYProgress }} />
       </header>
       <Dialog
         open={menu}
@@ -215,18 +217,13 @@ export function Header() {
         <Brand />
         <div className="mobile-menu-links">
           {links.map(([path, label], index) => (
-            <motion.div
-              key={path}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.045 }}
-            >
+            <div key={path}>
               <Link to={path} onClick={() => setMenu(false)}>
                 <small>0{index + 1}</small>
                 {label}
                 <ArrowUpRight size={27} />
               </Link>
-            </motion.div>
+            </div>
           ))}
           <Link to="/apply" onClick={() => setMenu(false)} className="mobile-menu-apply">
             {t('Join PAN', 'Присоединиться')}
@@ -258,12 +255,12 @@ export function Footer() {
           <div>
             <div className="footer-kicker">
               <span className="signal-dot" />
-              {t('One introduction can change everything.', 'Одно знакомство может изменить всё.')}
+              {t('YOUR NEXT PARTNERSHIP STARTS HERE.', 'ЗДЕСЬ НАЧИНАЕТСЯ ТВОЁ ПАРТНЁРСТВО.')}
             </div>
             <Link to="/apply" className="footer-invite">
-              {t('Make your', 'Сделайте свой')}
+              {t('LET’S BUILD', 'РАЗВИВАЕМ')}
               <br />
-              <span className="display-accent">{t('next move.', 'следующий шаг.')}</span>
+              <span className="display-accent">{t('PAN TOGETHER.', 'PAN ВМЕСТЕ.')}</span>
               <ArrowUpRight aria-hidden="true" />
             </Link>
           </div>
@@ -306,7 +303,7 @@ export function Footer() {
           <div>
             <Link to="/privacy">{t('Privacy', 'Конфиденциальность')}</Link>
             <Link to="/terms">{t('Terms', 'Условия')}</Link>
-            <span>{t('Built for the connected.', 'Для тех, кто знает людей.')}</span>
+            <span>{t('PRIVATE BY NATURE.', 'PRIVATE BY NATURE.')}</span>
           </div>
         </div>
       </div>
@@ -341,11 +338,6 @@ export function RouteEffects() {
         });
       else window.scrollTo({ top: 0, behavior: 'instant' });
     };
-    // A cross-page anchor waits for the outgoing page transition to finish.
-    if (location.hash) {
-      const timer = window.setTimeout(scroll, 320);
-      return () => clearTimeout(timer);
-    }
     const frame = requestAnimationFrame(scroll);
     return () => cancelAnimationFrame(frame);
   }, [location.pathname, location.hash, location.key]);

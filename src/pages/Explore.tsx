@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { AnimatePresence, motion } from 'motion/react';
 import { ArrowDown, ArrowUpRight, Check, ChevronDown, Globe2, Search, X } from 'lucide-react';
 import { Action, Eyebrow, PageHeading, Reveal, Spotlight } from '../components/UI';
 import { markets, roles, type RoleId } from '../data';
@@ -41,13 +40,7 @@ export function MarketsPage() {
           >
             {['All', 'Africa', 'LATAM', 'Asia'].map((r) => (
               <button key={r} aria-pressed={r === region} onClick={() => setRegion(r)}>
-                {r === region && (
-                  <motion.span
-                    className="filter-active"
-                    layoutId="market-region"
-                    transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                  />
-                )}
+                {r === region && <span className="filter-active" />}
                 <span>
                   {r === 'All'
                     ? t('All markets', 'Все рынки')
@@ -88,17 +81,10 @@ export function MarketsPage() {
             {t('Exploring partnerships', 'Развиваем партнёрства')}
           </span>
         </div>
-        <motion.div className="market-grid" layout>
-          <AnimatePresence mode="popLayout">
+        <div className="market-grid">
+          <>
             {filtered.map((m) => (
-              <motion.article
-                key={m.slug}
-                layout
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                transition={{ duration: 0.3 }}
-              >
+              <article key={m.slug}>
                 <Spotlight className="market-card">
                   <Link to={`/markets/${m.slug}`}>
                     <div className="market-card-meta">
@@ -124,10 +110,10 @@ export function MarketsPage() {
                     </div>
                   </Link>
                 </Spotlight>
-              </motion.article>
+              </article>
             ))}
-          </AnimatePresence>
-        </motion.div>
+          </>
+        </div>
         {!filtered.length && (
           <div className="empty-state">
             <Globe2 size={38} strokeWidth={1} />
@@ -329,102 +315,98 @@ const qualifications: Record<RoleId, [string, string][]> = {
 export function PartnerPage({ roleId }: { roleId: RoleId }) {
   const { t } = useLocale();
   const role = roles.find((r) => r.id === roleId)!;
-  const headlines: Record<RoleId, [string, string, string, string]> = {
-    affiliate: ['YOUR PEOPLE.', 'Your next advantage.', 'ВАШИ ЛЮДИ.', 'Ваш следующий плюс.'],
-    team: ['LOCAL EXPERTISE.', 'A wider network.', 'ЛОКАЛЬНЫЙ ОПЫТ.', 'Больше нужных связей.'],
-    provider: ['YOUR SOLUTION.', 'The right connection.', 'ВАШЕ РЕШЕНИЕ.', 'Нужный партнёр.'],
-    merchant: [
-      'YOUR NEXT MARKET.',
-      'The right partners.',
-      'ВАШ СЛЕДУЮЩИЙ РЫНОК.',
-      'Подходящие партнёры.',
-    ],
-    regional: ['KNOW THE MARKET.', 'Meet the network.', 'ЗНАЙТЕ РЫНОК.', 'Знакомьтесь с сетью.'],
-  };
-  const h = headlines[roleId];
+  const index = roles.findIndex((r) => r.id === roleId) + 1;
   return (
     <>
-      <PageHeading
-        eyebrow={`${t('For', 'Для')} / ${t(role.title, role.ru)}`}
-        title={t(h[0], h[2])}
-        accent={t(h[1], h[3])}
-        description={t(role.description, role.descriptionRu)}
-      />
-      <section className="partner-detail wrap">
-        <Reveal className="partner-detail-visual">
-          <img
-            src={`/assets/${role.art}`}
-            alt={t('Original PAN brand artwork', 'Оригинальная графика PAN')}
-          />
-          <div className="partner-art-overlay">
-            <span>PAN / BLACK LABEL</span>
-            <span>{t(role.title, role.ru)}</span>
+      <section className="partner-cover wrap">
+        <div className="partner-cover-top">
+          <Eyebrow>{t('YOUR PLACE IN PAN', 'ВАШЕ МЕСТО В PAN')}</Eyebrow>
+          <span>0{index} / 05</span>
+        </div>
+        <div className="partner-cover-grid">
+          <div>
+            <span className="partner-role-name">{t(role.title, role.ru)}</span>
+            <h1>{t(role.label, role.labelRu)}</h1>
+            <p>{t(role.description, role.descriptionRu)}</p>
+            <Action to={`/?role=${roleId}#forge`}>
+              {t('Build my partner profile', 'Собрать свой профиль')}
+            </Action>
           </div>
-        </Reveal>
-        <div className="partner-detail-copy">
-          <Eyebrow number="01">{t('Experience matters', 'Опыт имеет значение')}</Eyebrow>
-          <h2 className="section-title">{t(role.label, role.labelRu)}</h2>
-          <p>
-            {t(
-              'We start with a useful conversation. Tell us what you bring and what a good partnership looks like for you.',
-              'Начинаем с полезного разговора. Расскажите, что вы предлагаете и какое партнёрство считаете подходящим.',
-            )}
-          </p>
-          <div className="qualification-list">
-            {qualifications[roleId].map(([en, ru], i) => (
-              <Reveal key={en} delay={i * 0.06}>
-                <span className="qualification-check">
-                  <Check size={14} />
-                </span>
-                <span>{t(en, ru)}</span>
-              </Reveal>
-            ))}
+          <div className="partner-cover-object">
+            <img
+              src="/assets/pan-mascot.webp"
+              width="1254"
+              height="1254"
+              alt={t('The crowned PAN character', 'Персонаж PAN с короной')}
+            />
+            <span aria-hidden="true">0{index}</span>
           </div>
-          <Action to={`/apply?role=${roleId}`}>
-            {t('Discuss a partnership', 'Обсудить партнёрство')}
-          </Action>
-          <span className="partner-detail-note">
-            {t(
-              'No banking credentials or financial documents are needed in the first form.',
-              'Для первой анкеты не нужны банковские пароли или финансовые документы.',
-            )}
-          </span>
+        </div>
+        <div className="partner-cover-foot">
+          <span>PRIVATE AFFILIATE NETWORK</span>
+          <Link to="/#partners">
+            {t('All partnership roles', 'Все направления')}
+            <ArrowUpRight size={15} />
+          </Link>
         </div>
       </section>
-      <section className="partner-promises section">
+      <section className="partner-field-notes">
         <div className="wrap">
-          <Eyebrow number="02">{t('Our approach', 'Наш подход')}</Eyebrow>
-          <div className="promise-grid">
-            {[
-              [
-                t('Clear scope.', 'Понятная сфера работы.'),
-                t(
-                  'Markets, methods and responsibilities discussed up front.',
-                  'Рынки, методы и ответственность обсуждаются заранее.',
-                ),
-              ],
-              [
-                t('Individual terms.', 'Индивидуальные условия.'),
-                t(
-                  'Commercial arrangements agreed for the specific relationship.',
-                  'Коммерческие условия согласовываются для конкретного партнёрства.',
-                ),
-              ],
-              [
-                t('Useful introductions.', 'Полезные знакомства.'),
-                t(
-                  'Relevant experience and direct decision-makers come first.',
-                  'В приоритете подходящий опыт и прямые контакты.',
-                ),
-              ],
-            ].map(([title, text], i) => (
-              <Reveal key={title} delay={i * 0.06}>
-                <span>0{i + 1}</span>
-                <h3>{title}</h3>
-                <p>{text}</p>
-              </Reveal>
-            ))}
+          <div className="chapter-line">
+            <span>01 / PARTNERSHIP FIELD NOTES</span>
+            <span>
+              {t('What makes an introduction useful.', 'Что делает знакомство полезным.')}
+            </span>
           </div>
+          <div className="partner-field-grid">
+            <div>
+              <h2>
+                {t('Bring something', 'Привносите то,')}
+                <br />
+                <em>{t('that matters.', 'что важно.')}</em>
+              </h2>
+              <p>
+                {t(
+                  'Experience is specific. Tell us where you work, who you can introduce and what the next partnership should achieve.',
+                  'Опыт конкретен. Расскажите, где вы работаете, кого можете представить и к чему должно привести следующее партнёрство.',
+                )}
+              </p>
+            </div>
+            <div className="partner-evidence">
+              {qualifications[roleId].map(([en, ru], i) => (
+                <div key={en}>
+                  <small>0{i + 1}</small>
+                  <p>{t(en, ru)}</p>
+                  <Check size={16} />
+                </div>
+              ))}
+              <p className="partner-field-note">
+                {t(
+                  'The first conversation defines fit. Attribution, scope and commercial terms are agreed before collaboration.',
+                  'В первом разговоре определяем совместимость. Авторство рекомендаций, сферу работы и коммерческие условия согласуем до сотрудничества.',
+                )}
+              </p>
+              <Action to={`/apply?role=${roleId}`}>
+                {t('Introduce yourself', 'Представиться')}
+              </Action>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="partner-next wrap">
+        <span className="field-label">02 / {t('THE NEXT QUESTION', 'СЛЕДУЮЩИЙ ВОПРОС')}</span>
+        <div>
+          <h2>{t('Where do we meet?', 'На каком рынке встретимся?')}</h2>
+          <p>
+            {t(
+              'Different GEOs mean different methods and requirements. Explore the local context before making your introduction.',
+              'Разные GEO — разные методы и требования. Изучите местный контекст, прежде чем представить себя.',
+            )}
+          </p>
+          <Link className="text-link" to="/markets">
+            {t('Explore local markets', 'Изучить рынки')}
+            <ArrowUpRight size={17} />
+          </Link>
         </div>
       </section>
     </>
@@ -464,20 +446,25 @@ export function AboutPage() {
         title={t('THE POWER', 'СИЛА')}
         accent={t('is in the people.', 'в нужных людях.')}
         description={t(
-          'PAN is a private business network for people with real relationships in local payment markets. We connect experience with opportunity.',
-          'PAN — закрытая бизнес-сеть для людей с реальными связями в местных платёжных рынках. Соединяем опыт и возможности.',
+          'PAN brings affiliates, payment teams, PSPs and merchants into its partnership program. Local expertise and relevant introductions are the starting point.',
+          'PAN привлекает аффилиатов, платёжные команды, PSP и мерчантов в свой проект. Основа сотрудничества — локальная экспертиза и подходящие рекомендации.',
         )}
       />
       <section className="about-statement wrap">
         <Reveal>
-          <span className="about-asterisk" aria-hidden="true">
-            ✳
-          </span>
+          <img
+            className="about-brand-art"
+            src="/assets/pan-gold.webp"
+            width="900"
+            height="900"
+            loading="lazy"
+            alt="PAN / Private Affiliate Network"
+          />
           <p>
-            {t('Good connections are built.', 'Хорошие связи создают.')}
+            {t('Your expertise matters.', 'Ваш опыт важен.')}
             <br />
             <span className="display-accent">
-              {t('Great ones are earned.', 'Лучшие — заслуживают.')}
+              {t('Let’s put it into context.', 'Обсудим, где он полезен.')}
             </span>
           </p>
         </Reveal>

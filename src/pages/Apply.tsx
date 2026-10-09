@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { AnimatePresence, motion } from 'motion/react';
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -351,14 +350,9 @@ export default function ApplyPage() {
         </a>
       </div>
       <div ref={panel} className="apply-panel">
-        <AnimatePresence mode="wait" initial={false}>
+        <>
           {reference ? (
-            <motion.div
-              key="success"
-              className="application-success"
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
+            <div className="application-success">
               <div className="success-mark">
                 <CheckCheck size={35} strokeWidth={1.2} />
               </div>
@@ -402,16 +396,16 @@ export default function ApplyPage() {
               <Action to="/markets" secondary>
                 {t('Explore the network', 'Посмотреть рынки')}
               </Action>
-            </motion.div>
+            </div>
           ) : (
-            <motion.form ref={form} onSubmit={advance} key="form" className="application-form">
+            <form ref={form} onSubmit={advance} key="form" className="application-form">
               {ready && params.get('source') === 'forge' && (
                 <div className="forge-arrival">
                   <Check size={15} />
                   <span>
                     {t(
-                      'Your PAN route is here. Review it and add your contact.',
-                      'Маршрут PAN перенесён. Проверьте его и добавьте контакт.',
+                      'Your PAN profile is here. Review it and add your contact.',
+                      'Профиль PAN перенесён. Проверьте его и добавьте контакт.',
                     )}
                   </span>
                 </div>
@@ -420,14 +414,8 @@ export default function ApplyPage() {
                 <span>PAN / PARTNER INTRODUCTION</span>
                 <span>{(step + 1).toString().padStart(2, '0')} — 03</span>
               </div>
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={step}
-                  initial={{ opacity: 0, x: 16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -12 }}
-                  transition={{ duration: 0.18 }}
-                >
+              <>
+                <div key={step}>
                   {step === 0 && (
                     <>
                       <h2>
@@ -470,9 +458,15 @@ export default function ApplyPage() {
                   {step === 1 && (
                     <>
                       <h2>
-                        {t('Your local', 'Ваша локальная')}
+                        {draft.role === 'merchant'
+                          ? t('Your business', 'Задачи вашего')
+                          : t('Your markets', 'Ваши рынки')}
                         <br />
-                        <span className="display-accent">{t('advantage.', 'экспертиза.')}</span>
+                        <span className="display-accent">
+                          {draft.role === 'merchant'
+                            ? t('requirements.', 'бизнеса.')
+                            : t('and experience.', 'и опыт.')}
+                        </span>
                       </h2>
                       <p className="form-description">
                         {t(
@@ -481,7 +475,7 @@ export default function ApplyPage() {
                         )}
                       </p>
                       <fieldset className="market-choice-fieldset">
-                        <legend>{t('Markets you know', 'Рынки, которые вы знаете')} *</legend>
+                        <legend>{t('Partnership markets', 'Рынки для сотрудничества')} *</legend>
                         <div className="market-choices">
                           {markets.map((m) => (
                             <label
@@ -649,8 +643,8 @@ export default function ApplyPage() {
                       </p>
                     </>
                   )}
-                </motion.div>
-              </AnimatePresence>
+                </div>
+              </>
               <div className="form-error" role={error ? 'alert' : undefined} aria-live="polite">
                 {error}
               </div>
@@ -690,9 +684,9 @@ export default function ApplyPage() {
                   )}
                 </button>
               </div>
-            </motion.form>
+            </form>
           )}
-        </AnimatePresence>
+        </>
       </div>
     </section>
   );

@@ -19,5 +19,8 @@ Task: background removal / faithful cutout, not a redesign. Use the attached PAN
 
 ## Behavior
 
-The mascot responds to mouse movement; touch input leaves the composition stable. The fracture trace redraws on market selection. Reduced-motion settings stop decorative movement. A route contains no personal data: role, up to three market slugs, allowlisted local methods, and category. Its URL restores those choices and prepopulates the application. Application edits and the current step survive a reload within the session.
+The supplied character is the visual centre of the PAN cover. Its composition stays stable while role selection updates the adjacent proposition and application link. Black stone frames the cover; gold identifies PAN and profile structure; magenta identifies the main action and the selected entry. Interactions do not rotate the mascot, follow the cursor or require WebGL.
 
+The profile contains only a role, up to three market slugs, allowlisted local method references and a category. A shared URL restores those choices and prepopulates the application. Profile choices survive navigation within the session. Application edits and the current step survive a reload and are cleared after successful submission. Reduced-motion settings disable content feedback and smooth scrolling.
+
+No abstract architectural crown is part of this implementation. The generated sculpture and procedural 3D experiment were rejected during design review and removed from the website and dependencies.

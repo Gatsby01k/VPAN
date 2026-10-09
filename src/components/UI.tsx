@@ -1,10 +1,7 @@
-import { useEffect, useRef, type ReactNode, type PointerEvent } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, useMotionValue, useReducedMotion, useSpring } from 'motion/react';
 import { ArrowUpRight, X } from 'lucide-react';
 import { useLocale } from '../locale';
-
-const MotionLink = motion.create(Link);
 
 export function Crown() {
   return (
@@ -52,58 +49,25 @@ export function Action({
   secondary?: boolean;
   className?: string;
 }) {
-  const reduced = useReducedMotion();
-  const x = useMotionValue(0),
-    y = useMotionValue(0);
-  const sx = useSpring(x, { stiffness: 240, damping: 24 }),
-    sy = useSpring(y, { stiffness: 240, damping: 24 });
-  const move = (e: PointerEvent<HTMLAnchorElement>) => {
-    if (reduced || e.pointerType !== 'mouse') return;
-    const r = e.currentTarget.getBoundingClientRect();
-    x.set((e.clientX - r.left - r.width / 2) * 0.13);
-    y.set((e.clientY - r.top - r.height / 2) * 0.18);
-  };
   return (
-    <MotionLink
-      to={to}
-      className={`action ${secondary ? 'action-secondary' : ''} ${className}`}
-      style={{ x: sx, y: sy }}
-      onPointerMove={move}
-      onPointerLeave={() => {
-        x.set(0);
-        y.set(0);
-      }}
-    >
+    <Link to={to} className={`action ${secondary ? 'action-secondary' : ''} ${className}`}>
       <span>{children}</span>
       <span className="action-icon">
         <ArrowUpRight size={19} strokeWidth={1.7} />
       </span>
-    </MotionLink>
+    </Link>
   );
 }
 
 export function Reveal({
   children,
   className = '',
-  delay = 0,
 }: {
   children: ReactNode;
   className?: string;
   delay?: number;
 }) {
-  const reduced = useReducedMotion();
-  return (
-    <motion.div
-      data-reveal
-      className={className}
-      initial={reduced ? false : { opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.12 }}
-      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </motion.div>
-  );
+  return <div className={className}>{children}</div>;
 }
 
 export function Eyebrow({ children, number }: { children: ReactNode; number?: string }) {
@@ -208,19 +172,5 @@ export function Spotlight({
   children: ReactNode;
   className?: string;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  return (
-    <div
-      ref={ref}
-      className={`spotlight ${className}`}
-      onPointerMove={(e) => {
-        if (e.pointerType !== 'mouse') return;
-        const r = e.currentTarget.getBoundingClientRect();
-        ref.current?.style.setProperty('--pointer-x', `${e.clientX - r.left}px`);
-        ref.current?.style.setProperty('--pointer-y', `${e.clientY - r.top}px`);
-      }}
-    >
-      {children}
-    </div>
-  );
+  return <div className={`spotlight ${className}`}>{children}</div>;
 }

@@ -134,11 +134,11 @@ export const roles = [
     short: 'Your connections. New possibilities.',
     shortRu: 'Ваши связи. Новые возможности.',
     description:
-      'Introduce experienced teams, PSPs and merchants. Discuss attribution and commercial terms before making introductions.',
+      'Introduce experienced teams, PSPs and merchants to PAN. Agree referral attribution and commercial terms before making introductions.',
     descriptionRu:
-      'Знакомьте PAN с опытными командами, PSP и мерчантами. Согласовывайте авторство рекомендации и условия до знакомства.',
-    label: 'Connect the right people.',
-    labelRu: 'Соединяйте нужных людей.',
+      'Приводите в PAN опытные платёжные команды, PSP и мерчантов. Авторство рекомендаций и коммерческие условия обсуждаем до знакомства.',
+    label: 'Bring the right partners to PAN.',
+    labelRu: 'Приводите партнёров в PAN.',
     art: 'network-crown.webp',
   },
   {
@@ -146,14 +146,14 @@ export const roles = [
     path: '/teams',
     title: 'Payment teams',
     ru: 'Платёжные команды',
-    short: 'Local expertise. A bigger network.',
-    shortRu: 'Локальная экспертиза. Больше связей.',
+    short: 'Local payment experience. A conversation with PAN.',
+    shortRu: 'Локальный платёжный опыт. Партнёрство с PAN.',
     description:
-      'Tell us where your team operates, which methods you understand and the opportunities you are looking for.',
+      'Introduce your payment team to PAN: operating markets, payment methods, practical experience and a responsible contact.',
     descriptionRu:
-      'Расскажите, где работает ваша команда, какие методы вы знаете и какие партнёрства вам интересны.',
-    label: 'Bring your local edge.',
-    labelRu: 'Используйте свою экспертизу.',
+      'Представьте свою платёжную команду PAN: рынки работы, методы, практический опыт и ответственный контакт.',
+    label: 'Your team. Your local expertise.',
+    labelRu: 'Ваша команда. Ваш локальный опыт.',
     art: 'server-crown.webp',
   },
   {
@@ -161,14 +161,14 @@ export const roles = [
     path: '/payment-partners',
     title: 'Payment partners',
     ru: 'Платёжные партнёры',
-    short: 'Your solution. The right counterpart.',
-    shortRu: 'Ваше решение. Нужный партнёр.',
+    short: 'Your infrastructure. Partnership with PAN.',
+    shortRu: 'Ваша инфраструктура. Партнёрство с PAN.',
     description:
-      'Connect your local payment expertise with relevant commercial relationships in the markets you actually support.',
+      'Propose your PSP or local payment solution to PAN. Discuss supported markets, business categories and integration requirements.',
     descriptionRu:
-      'Находите подходящие коммерческие связи в рынках, которые действительно поддерживает ваше платёжное решение.',
-    label: 'Open the next market.',
-    labelRu: 'Откройте следующий рынок.',
+      'Предложите PAN свой PSP или локальное платёжное решение. Обсудим поддерживаемые рынки, категории бизнеса и требования к интеграции.',
+    label: 'Bring your payment solution.',
+    labelRu: 'Предложите платёжное решение.',
     art: 'market-landscape.webp',
   },
   {
@@ -176,14 +176,14 @@ export const roles = [
     path: '/merchants',
     title: 'Merchants',
     ru: 'Мерчанты',
-    short: 'A clear brief. Relevant introductions.',
-    shortRu: 'Понятный запрос. Подходящие связи.',
+    short: 'Your business. A concrete payment brief.',
+    shortRu: 'Ваш бизнес. Конкретный платёжный запрос.',
     description:
-      'Share your business category, target markets and payment requirements. Start a focused conversation about suitable partners.',
+      'Tell PAN your business category, markets and payment requirements. We review fit and discuss possible cooperation individually.',
     descriptionRu:
-      'Опишите бизнес-категорию, рынки и платёжные требования. Начните предметный разговор о подходящих партнёрах.',
-    label: 'Find your next fit.',
-    labelRu: 'Найдите подходящее решение.',
+      'Расскажите PAN о категории бизнеса, рынках и платёжных требованиях. Совместимость и возможности сотрудничества обсуждаем индивидуально.',
+    label: 'Start with your business needs.',
+    labelRu: 'Начнём с задач вашего бизнеса.',
     art: 'access-card.webp',
   },
   {
@@ -193,10 +193,8 @@ export const roles = [
     ru: 'Региональные партнёры',
     short: 'Know the people. Know the market.',
     shortRu: 'Знайте людей. Знайте рынок.',
-    description:
-      'Bring direct local relationships and practical market knowledge to a private business network.',
-    descriptionRu:
-      'Привносите прямые местные связи и практическое знание рынка в закрытую бизнес-сеть.',
+    description: 'Introduce your local relationships and practical market knowledge to PAN.',
+    descriptionRu: 'Представьте PAN свои локальные связи и практический опыт работы на рынке.',
     label: 'Make local knowledge count.',
     labelRu: 'Превратите знания в возможности.',
     art: 'pan-gold.webp',
