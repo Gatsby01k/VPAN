@@ -348,6 +348,6 @@ export function RouteEffects() {
     }
     const frame = requestAnimationFrame(scroll);
     return () => cancelAnimationFrame(frame);
-  }, [location.pathname, location.hash]);
+  }, [location.pathname, location.hash, location.key]);
   return null;
 }
