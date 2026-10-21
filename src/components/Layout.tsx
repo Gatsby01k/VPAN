@@ -155,7 +155,7 @@ export function Header() {
   const links = [
     ['/#partners', t('Partnerships', 'Сотрудничество')],
     ['/markets', t('Markets', 'Рынки')],
-    ['/knowledge', t('Field notes', 'Практика')],
+    ['/knowledge', t('Partner guides', 'Материалы')],
     ['/about', t('About', 'О PAN')],
   ];
   return (
@@ -271,12 +271,12 @@ export function Footer() {
           <div>
             <div className="footer-kicker">
               <span className="signal-dot" />
-              {t('GOOD PEOPLE. A COMMON DIRECTION.', 'НУЖНЫЕ ЛЮДИ. ОБЩЕЕ НАПРАВЛЕНИЕ.')}
+              PAN / {t('PARTNERSHIPS', 'СОТРУДНИЧЕСТВО')}
             </div>
             <Link to="/apply" className="footer-invite">
-              {t('LET’S START', 'НАЧНЁМ')}
+              {t('LET’S DISCUSS', 'ОБСУДИМ')}
               <br />
-              <span className="display-accent">{t('A CONVERSATION.', 'С РАЗГОВОРА.')}</span>
+              <span className="display-accent">{t('YOUR NEXT MARKET.', 'ВАШ НОВЫЙ РЫНОК.')}</span>
               <ArrowUpRight aria-hidden="true" />
             </Link>
           </div>

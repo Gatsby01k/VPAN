@@ -1,12 +1,12 @@
 # VlaDDoS signature beside PAN
 
-Source: `/Users/mac/Downloads/logo VlaDDoS.png`. The owner's lettering, drips, underline and detached dot remain the reference. Built-in ImageGen prepared a transparent white wordmark in two passes; CSS supplies the pink colour, reveal and moving highlight.
+Source: `/Users/mac/Downloads/logo VlaDDoS.png`. The owner's lettering, drips, underline and detached dot remain the reference. Built-in ImageGen prepared a transparent white wordmark in two passes; CSS supplies its pink colour. The original entrance, moving highlight and hover rotation have since been removed at the owner's request.
 
 ## Saved assets
 
 - `research/artwork/vladdos-signature-v2.png` — selected ImageGen output, 1846 × 852, RGBA, alpha range 0–255.
 - `public/assets/vladdos-signature-v2.webp` — optimized web version, alpha preserved.
-- `src/brand-motion.css` — pink mask overlay, initial ink reveal, periodic sheen and hover/focus lighting. Motion is disabled with `prefers-reduced-motion: reduce`.
+- `src/brand-motion.css` — static pink mask overlay, responsive sizing and hover/focus lighting.
 
 The original source is unchanged. Python/Pillow was used only to inspect metadata and encode WebP.
 

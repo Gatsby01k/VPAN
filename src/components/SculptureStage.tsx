@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import { useLocale } from '../locale';
+import { LiquidSculpture } from './LiquidSculpture';
 
 /** The owner's cutout is grounded by a shared floor, reflections and native light paths. */
 export function SculptureStage() {
@@ -8,9 +9,6 @@ export function SculptureStage() {
   return (
     <div className="sculpture-stage">
       <div className="sculpture-aura" aria-hidden="true" />
-      <div className="sculpture-monogram" aria-hidden="true">
-        PAN
-      </div>
       <svg className="sculpture-floor" viewBox="0 0 600 520" fill="none" aria-hidden="true">
         <defs>
           <linearGradient
@@ -49,42 +47,12 @@ export function SculptureStage() {
         />
       </svg>
       <div className="sculpture-reflection" aria-hidden="true" />
-      <div className="sculpture-object-layer">
-        <img
-          className="deck-hero-object"
-          src="/assets/pan-core-cutout-v2.webp"
-          width="1089"
-          height="1445"
-          fetchPriority="high"
-          alt={t(
-            'PAN’s crowned network, with pink connections between black stone servers',
-            'Сеть PAN с короной и розовыми связями между серверами из чёрного камня',
-          )}
-        />
-      </div>
-      <svg className="sculpture-traces" viewBox="0 0 600 520" fill="none" aria-hidden="true">
-        <path d="M166 247h-34l-24 25H55M433 283h31l25-26h55" />
-        <circle cx="166" cy="247" r="2.5" />
-        <circle cx="433" cy="283" r="2.5" />
-        <path
-          className="sculpture-trace-energy"
-          pathLength="100"
-          d="M55 272h53l24-25h34M544 257h-55l-25 26h-31"
-        />
-      </svg>
-      <div className="sculpture-callout sculpture-callout-left" aria-hidden="true">
-        <span>01 / PAN</span>
-        <strong>{t('One network.', 'Одна сеть.')}</strong>
-      </div>
-      <div className="sculpture-callout sculpture-callout-right" aria-hidden="true">
-        <span>03 / GEO</span>
-        <strong>
-          AFRICA
-          <br />
-          LATAM / ASIA
-        </strong>
-      </div>
-      <div className="sculpture-scan" aria-hidden="true" />
+      <LiquidSculpture
+        alt={t(
+          'PAN’s crowned network, with pink connections between black stone servers',
+          'Сеть PAN с короной и розовыми связями между серверами из чёрного камня',
+        )}
+      />
     </div>
   );
 }

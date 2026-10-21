@@ -11,46 +11,52 @@ import { markets, type RoleId } from '../data';
 const directions = [
   {
     id: 'affiliate',
-    label: ['I have connections', 'У меня есть контакты'],
+    label: ['I introduce partners', 'Рекомендую партнёров'],
     caption: ['Affiliates & introducers', 'Аффилиаты и рекомендации'],
-    title: ['A good introduction goes a long way.', 'Знакомьте с теми, кого знаете.'],
+    title: ['A clear agreement behind every introduction.', 'Рекомендация с понятными условиями.'],
     description: [
-      'Introduce payment teams, PSPs or merchants to PAN. Tell us who you work with and where your connections can help.',
-      'Рекомендуйте PAN платёжные команды, PSP или мерчантов. Расскажите, с кем работаете и на каких рынках можете быть полезны.',
+      'Know a payment team, PSP or business that could work with PAN? Tell us about the connection. We discuss referral ownership, the qualifying result and commercial terms before an introduction.',
+      'Знаете платёжную команду, PSP или бизнес, которому может быть полезен PAN? Расскажите о контакте. До знакомства обсудим авторство рекомендации, ожидаемый результат и коммерческие условия.',
     ],
     discussion: [
-      'Referral ownership, a qualifying introduction and your commercial terms.',
-      'Авторство рекомендации, результат знакомства и ваше вознаграждение.',
+      'Who you want to introduce, their markets and the terms of your participation.',
+      'Кого вы рекомендуете, на каких рынках он работает и на каких условиях участвуете вы.',
     ],
     action: ['Discuss an introduction', 'Обсудить рекомендацию'],
   },
   {
     id: 'provider',
-    label: ['I offer payment solutions', 'У меня платёжное решение'],
+    label: ['I offer payment solutions', 'Предлагаю платёжное решение'],
     caption: ['PSPs & payment teams', 'PSP и платёжные команды'],
-    title: ['Bring your payment expertise.', 'Предложите свою инфраструктуру.'],
+    title: [
+      'Your local infrastructure. A new partnership.',
+      'Ваша инфраструктура. Новое партнёрство.',
+    ],
     description: [
-      'Present your PSP, local payment solution or operating team to PAN. Start with the markets and methods you actually support.',
-      'Представьте PAN свой PSP, локальное решение или команду. Начните с рынков и методов, с которыми действительно работаете.',
+      'Bring a PSP, local payment method or operating team to PAN. Show us the markets you cover, the businesses you support and how your operations work.',
+      'Предложите PAN свой PSP, локальный метод или платёжную команду. Расскажите о рынках, подходящих категориях бизнеса и том, как устроена ваша работа.',
     ],
     discussion: [
-      'Business categories, integration, operations and responsibilities.',
-      'Категории бизнеса, интеграция, операции и ответственность сторон.',
+      'Supported methods, integration, payment reconciliation and each side’s responsibilities.',
+      'Поддерживаемые методы, интеграцию, сверку платежей и ответственность сторон.',
     ],
     action: ['Present my solution', 'Представить решение'],
   },
   {
     id: 'merchant',
-    label: ['I have a business request', 'У меня задача для бизнеса'],
+    label: ['I need payment partners', 'Ищу платёжных партнёров'],
     caption: ['Merchants & businesses', 'Мерчанты и бизнес'],
-    title: ['Start with what your business needs.', 'Расскажите, что нужно бизнесу.'],
+    title: [
+      'Start with the payment flow your business needs.',
+      'Начнём с платежей вашего бизнеса.',
+    ],
     description: [
-      'Describe your business, markets and payment requirements. We will review whether your request fits PAN’s current direction.',
-      'Опишите бизнес, рынки и требования к платежам. Рассмотрим, соответствует ли запрос текущим направлениям PAN.',
+      'Which markets are you entering? How do your customers pay? Describe your business and payment flow so we can assess a relevant partnership.',
+      'На какие рынки вы выходите? Как платят ваши клиенты? Опишите бизнес и платёжный сценарий — по этим деталям оценим возможности сотрудничества.',
     ],
     discussion: [
-      'Your business category, payment flow, markets and onboarding requirements.',
-      'Ваша категория, платёжный сценарий, рынки и требования к подключению.',
+      'Business category, target markets, payment methods and onboarding requirements.',
+      'Категорию бизнеса, целевые рынки, нужные методы и требования к подключению.',
     ],
     action: ['Discuss my requirements', 'Обсудить задачу'],
   },
@@ -58,10 +64,10 @@ const directions = [
     id: 'regional',
     label: ['Local expertise', 'Локальная экспертиза'],
     caption: ['Regional partners', 'Региональные партнёры'],
-    title: ['You know the people on the ground.', 'Знаете людей и местный рынок.'],
+    title: ['Local knowledge comes from working there.', 'Локальный опыт начинается с практики.'],
     description: [
-      'Introduce your regional contacts and practical payment experience to PAN. Tell us where you work and how you can contribute.',
-      'Представьте PAN свои региональные связи и практический платёжный опыт. Расскажите, где работаете и чем можете быть полезны.',
+      'You know the providers, payment habits and people in your market. Tell PAN where you work and which relationships you can bring to a partnership.',
+      'Вы знаете провайдеров, платёжные привычки и людей своего рынка. Расскажите PAN, где работаете и какие связи можете привнести в партнёрство.',
     ],
     discussion: [
       'Your market experience, contacts and scope of cooperation.',
@@ -88,15 +94,15 @@ function PartnershipDirections({ role, onRole }: { role: RoleId; onRole: (role: 
       <div className="wrap">
         <div className="signal-section-heading">
           <div>
-            <p className="signal-overline">
-              01 / {t('YOUR WAY INTO PAN', 'ВАШЕ НАПРАВЛЕНИЕ В PAN')}
-            </p>
-            <h2 id="directions-heading">{t('What brings you here?', 'С чем вы к PAN?')}</h2>
+            <p className="signal-overline">01 / {t('WORK WITH PAN', 'СОТРУДНИЧЕСТВО С PAN')}</p>
+            <h2 id="directions-heading">
+              {t('Where do you fit in?', 'Как вы можете работать с PAN?')}
+            </h2>
           </div>
           <p>
             {t(
-              'Choose what you want to discuss. We will take it from there.',
-              'Выберите, что хотите обсудить. Дальше — предметный разговор.',
+              'Bring a connection, a payment solution or a business requirement. Each starts a different conversation.',
+              'Рекомендация, платёжное решение или задача бизнеса — выберите, с чего начнём разговор.',
             )}
           </p>
         </div>
@@ -169,8 +175,8 @@ function PartnershipDirections({ role, onRole }: { role: RoleId; onRole: (role: 
             </Link>
             <span className="signal-detail-note">
               {t(
-                'Terms are agreed individually, before cooperation.',
-                'Условия согласуем индивидуально, до начала работы.',
+                'Scope and commercial terms are agreed before cooperation begins.',
+                'Формат работы и коммерческие условия согласуем до старта.',
               )}
             </span>
           </div>
@@ -188,15 +194,15 @@ function Territories() {
         <div>
           <p className="signal-overline">02 / {t('LOCAL EXPERTISE', 'ЛОКАЛЬНАЯ ЭКСПЕРТИЗА')}</p>
           <h2 id="territories-heading">
-            {t('Know the market.', 'Знать рынок.')}
+            {t('Every market', 'У каждого рынка')}
             <br />
-            <span>{t('Know the people.', 'Знать людей.')}</span>
+            <span>{t('works differently.', 'свои правила.')}</span>
           </h2>
         </div>
         <p>
           {t(
-            'We want to meet people who understand payments on the ground. These are markets for partnership discussions.',
-            'Ищем людей, которые понимают местные платежи. Эти рынки открыты для обсуждения партнёрства.',
+            'Local methods, customer habits and operating experience matter. We want to meet people who work with these markets first-hand.',
+            'Важны местные методы, привычки клиентов и опыт команды. Ищем партнёров, которые знают эти рынки по своей ежедневной работе.',
           )}
         </p>
       </div>
@@ -230,8 +236,8 @@ function Territories() {
       <div className="signal-market-foot">
         <p>
           {t(
-            'Payment availability and business fit are confirmed individually.',
-            'Доступность методов и совместимость бизнеса подтверждаем отдельно.',
+            'Markets shown are open for partnership discussions. Method availability and business eligibility are reviewed for each request.',
+            'Это рынки для обсуждения партнёрства. Доступность методов и возможность работы с вашим бизнесом проверяем по запросу.',
           )}
         </p>
         <Link className="signal-direct" to="/markets">
@@ -249,26 +255,31 @@ function PartnershipProcess() {
     <section className="signal-process wrap" aria-labelledby="process-heading">
       <div>
         <p className="signal-overline">03 / {t('THE NEXT STEP', 'СЛЕДУЮЩИЙ ШАГ')}</p>
-        <h2 id="process-heading">{t('A conversation first.', 'Сначала — разговор.')}</h2>
+        <h2 id="process-heading">
+          {t('From a first contact to clear terms.', 'От знакомства — к понятным условиям.')}
+        </h2>
       </div>
       <ol>
         {[
           [
-            t('Introduce yourself', 'Расскажите о себе'),
-            t('Your role, markets and a work contact.', 'Ваша роль, рынки и рабочий контакт.'),
-          ],
-          [
-            t('Discuss the fit', 'Обсудим возможности'),
+            t('Give us the context', 'Дайте контекст'),
             t(
-              'We review your experience and business request.',
-              'Рассмотрим опыт и ваш бизнес-запрос.',
+              'Your role, markets and a contact we can reach directly.',
+              'Ваша роль, рынки и контакт для прямой связи.',
             ),
           ],
           [
-            t('Agree before starting', 'Согласуем условия'),
+            t('Discuss the practical fit', 'Разберём задачу'),
             t(
-              'Scope, responsibilities and commercial terms.',
-              'Задачи, ответственность и коммерческие условия.',
+              'We review the request and clarify the experience, methods and responsibilities it needs.',
+              'Уточним запрос, опыт, методы и необходимые роли сторон.',
+            ),
+          ],
+          [
+            t('Put the terms first', 'Согласуем до старта'),
+            t(
+              'Scope, responsibilities and commercial terms come before introductions or integration.',
+              'Задачи, ответственность и коммерческие условия — до рекомендаций или интеграции.',
             ),
           ],
         ].map(([title, text], index) => (
@@ -310,11 +321,11 @@ export default function Home() {
           <summary>
             <Plus size={19} />
             <span>
-              <strong>{t('Already have the details?', 'Уже знаете все детали?')}</strong>
+              <strong>{t('Have a specific proposal?', 'Есть конкретное предложение?')}</strong>
               <small>
                 {t(
-                  'Build, save or share a full partner brief.',
-                  'Соберите, сохраните или передайте подробный партнёрский бриф.',
+                  'Put your role, markets and payment methods into one brief.',
+                  'Соберите роль, рынки и платёжные методы в одном брифе.',
                 )}
               </small>
             </span>

@@ -50,11 +50,6 @@ export function NetworkOrbit({ role }: { role: RoleId }) {
         {nodes.map((node, index) => (
           <g className={`orbit-route ${role === node.id ? 'is-selected' : ''}`} key={node.id}>
             <path className="orbit-wire" d={`M250 135 Q${node.x} 145 ${node.x} ${node.y}`} />
-            <path
-              className="orbit-flow"
-              pathLength="100"
-              d={`M250 135 Q${node.x} 145 ${node.x} ${node.y}`}
-            />
             <circle className="orbit-node-aura" cx={node.x} cy={node.y} r="15" />
             <circle className="orbit-node-rim" cx={node.x} cy={node.y} r="7" />
             <circle className="orbit-node" cx={node.x} cy={node.y} r="2.6" />

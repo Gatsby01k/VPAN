@@ -131,8 +131,8 @@ export const roles = [
     path: '/affiliates',
     title: 'Affiliates',
     ru: 'Аффилиаты',
-    short: 'Your connections. New possibilities.',
-    shortRu: 'Ваши связи. Новые возможности.',
+    short: 'Introduce teams and businesses to PAN. Agree referral terms before the introduction.',
+    shortRu: 'Знакомьте PAN с командами и бизнесом. Условия рекомендации согласуем заранее.',
     description:
       'Introduce experienced teams, PSPs and merchants to PAN. Agree referral attribution and commercial terms before making introductions.',
     descriptionRu:
@@ -146,8 +146,8 @@ export const roles = [
     path: '/teams',
     title: 'Payment teams',
     ru: 'Платёжные команды',
-    short: 'Local payment experience. A conversation with PAN.',
-    shortRu: 'Локальный платёжный опыт. Партнёрство с PAN.',
+    short: 'Bring the markets, methods and operating experience your team knows first-hand.',
+    shortRu: 'Ваши рынки, методы и операционный опыт — основа разговора о партнёрстве.',
     description:
       'Introduce your payment team to PAN: operating markets, payment methods, practical experience and a responsible contact.',
     descriptionRu:
@@ -161,8 +161,8 @@ export const roles = [
     path: '/payment-partners',
     title: 'Payment partners',
     ru: 'Платёжные партнёры',
-    short: 'Your infrastructure. Partnership with PAN.',
-    shortRu: 'Ваша инфраструктура. Партнёрство с PAN.',
+    short: 'Present your PSP or local payment method. Let’s discuss markets and integration.',
+    shortRu: 'Предложите свой PSP или локальный метод. Обсудим рынки и подключение.',
     description:
       'Propose your PSP or local payment solution to PAN. Discuss supported markets, business categories and integration requirements.',
     descriptionRu:
@@ -176,8 +176,8 @@ export const roles = [
     path: '/merchants',
     title: 'Merchants',
     ru: 'Мерчанты',
-    short: 'Your business. A concrete payment brief.',
-    shortRu: 'Ваш бизнес. Конкретный платёжный запрос.',
+    short: 'Tell us where and how your business needs to accept payments.',
+    shortRu: 'Расскажите, где и как вашему бизнесу нужно принимать платежи.',
     description:
       'Tell PAN your business category, markets and payment requirements. We review fit and discuss possible cooperation individually.',
     descriptionRu:
@@ -191,8 +191,8 @@ export const roles = [
     path: '/apply?role=regional',
     title: 'Regional partners',
     ru: 'Региональные партнёры',
-    short: 'Know the people. Know the market.',
-    shortRu: 'Знайте людей. Знайте рынок.',
+    short: 'Bring local relationships and payment experience from the markets you work in.',
+    shortRu: 'Локальные связи и знание платёжного рынка — ваш вклад в PAN.',
     description: 'Introduce your local relationships and practical market knowledge to PAN.',
     descriptionRu: 'Представьте PAN свои локальные связи и практический опыт работы на рынке.',
     label: 'Make local knowledge count.',

@@ -1,10 +1,6 @@
 /* One quiet material palette. Pink belongs to the network's light, not every surface. */
 @layer scene {
   .pan-workbench {
-    --scene-x: 0px;
-    --scene-y: 0px;
-    --light-x: 35%;
-    --light-y: 35%;
     background:
       radial-gradient(ellipse at 24% 52%, #24202c55, transparent 46%),
       linear-gradient(115deg, #0b0d13, #11141e 65%, #0c0f17);
@@ -21,19 +17,6 @@
     width: 1px;
     left: 48.2%;
     background: linear-gradient(transparent, #c2cce61c, #c2cce606, transparent);
-  }
-  .pan-workbench::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 8;
-    border-radius: inherit;
-    pointer-events: none;
-    background: radial-gradient(
-      ellipse 400px 260px at var(--light-x) var(--light-y),
-      #dce5ff04,
-      transparent
-    );
   }
   .deck-scene {
     overflow: hidden;
@@ -52,7 +35,20 @@
   }
   .deck-scene-heading h1 {
     font-size: clamp(21px, 1.9vw, 28px);
+    font-weight: 450;
+    line-height: 1.18;
     letter-spacing: -0.055em;
+  }
+  .deck-scene-heading {
+    align-items: flex-start;
+  }
+  .deck-scene-heading > div > p {
+    margin-top: 11px;
+    max-width: 350px;
+    color: #a4a5b4;
+    font-size: 11px;
+    line-height: 1.65;
+    text-wrap: pretty;
   }
   .deck-scene-heading > div > span {
     color: #8f92a3;
@@ -61,7 +57,7 @@
   }
   .sculpture-stage {
     position: absolute;
-    inset: 91px -8px 232px;
+    inset: 138px -8px 250px;
     z-index: 2;
     pointer-events: none;
     mask-image: linear-gradient(#000 85%, transparent 100%);
@@ -72,21 +68,8 @@
     background:
       radial-gradient(ellipse at 49% 77%, #ff007726, transparent 46%),
       radial-gradient(ellipse at 45% 27%, #8e9db015, transparent 48%);
-    transform: translate3d(calc(var(--scene-x) * -2), calc(var(--scene-y) * -2), 0);
-    transition: transform 800ms ease-out;
   }
-  .sculpture-monogram {
-    position: absolute;
-    top: 1%;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #d9e2f0;
-    opacity: 0.025;
-    font: 500 clamp(130px, 15vw, 240px)/1 var(--display);
-    letter-spacing: -0.05em;
-  }
-  .sculpture-floor,
-  .sculpture-traces {
+  .sculpture-floor {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -105,28 +88,26 @@
   }
   .sculpture-object-layer {
     position: absolute;
-    inset: -6% 7% -3%;
-    transform: translate3d(var(--scene-x), var(--scene-y), 0);
-    transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+    inset: 0 7%;
   }
-  .sculpture-object-layer .deck-hero-object {
+  .sculpture-object-layer .deck-hero-object,
+  .sculpture-liquid {
+    position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: contain;
-    filter: saturate(0.72) brightness(0.82) contrast(1.02) drop-shadow(0 15px 14px #0009);
+    filter: saturate(0.84) brightness(0.87) contrast(1.02) drop-shadow(0 15px 14px #0009);
   }
-  .sculpture-object-layer::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 3;
-    mask: url('/assets/pan-core-cutout-v2.webp') center / contain no-repeat;
-    background: linear-gradient(110deg, transparent 42%, #cdd6f4 50%, transparent 58%);
-    background-size: 350% 100%;
-    background-position: 100% 0;
-    mix-blend-mode: screen;
-    opacity: 0.12;
+  .sculpture-liquid {
+    z-index: 2;
+    opacity: 0;
+  }
+  .sculpture-object-layer[data-flow='live'] .sculpture-liquid {
+    opacity: 1;
+  }
+  .sculpture-object-layer[data-flow='live'] .deck-hero-object {
+    opacity: 0;
   }
   .sculpture-reflection {
     position: absolute;
@@ -139,78 +120,6 @@
     filter: blur(9px) saturate(0.7);
     opacity: 0.14;
     mask-image: linear-gradient(transparent, #000);
-  }
-  .sculpture-traces {
-    z-index: 4;
-    stroke: #e3dbed36;
-    stroke-width: 0.8;
-  }
-  .sculpture-traces circle {
-    fill: #ffe0ed;
-    stroke: #ff63a9;
-    stroke-width: 3;
-    paint-order: stroke;
-  }
-  .sculpture-trace-energy {
-    stroke: #ff69ae;
-    stroke-dasharray: 5 95;
-    opacity: 0.7;
-  }
-  .sculpture-callout {
-    position: absolute;
-    z-index: 5;
-    top: 47%;
-    color: #a2a0b2;
-    font-size: 7px;
-    line-height: 1.5;
-    letter-spacing: 0.04em;
-  }
-  .sculpture-callout span {
-    display: block;
-    margin-bottom: 6px;
-    color: #e7c0d1;
-    font-size: 6px;
-    letter-spacing: 0.13em;
-  }
-  .sculpture-callout strong {
-    font-weight: 400;
-  }
-  .sculpture-callout-left {
-    left: 7%;
-  }
-  .sculpture-callout-right {
-    right: 6%;
-    text-align: right;
-    top: 43%;
-  }
-  .sculpture-scan {
-    position: absolute;
-    bottom: 6%;
-    left: 15%;
-    right: 15%;
-    height: 35px;
-    background: radial-gradient(ellipse, #ff007719, transparent 65%);
-    filter: blur(8px);
-  }
-  .deck-scene-categories {
-    top: auto;
-    bottom: 269px;
-    gap: 15px;
-  }
-  .deck-scene-categories span {
-    padding: 0;
-    border: 0;
-    background: none;
-    box-shadow: none;
-    backdrop-filter: none;
-    color: #94919f;
-    font-size: 8px;
-    letter-spacing: 0.02em;
-  }
-  .deck-scene-categories span + span::before {
-    content: '/';
-    color: #545465;
-    margin-right: 15px;
   }
   .deck-entry-card,
   .deck-primary,
@@ -453,92 +362,12 @@
     opacity: 0.62;
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    .sculpture-object-layer .deck-hero-object {
-      animation: sculpture-reveal 1400ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
-    }
-    .sculpture-object-layer::after {
-      animation: sculpture-material-light 12s 2s ease-in-out infinite;
-    }
-    .sculpture-trace-energy {
-      animation: network-current 6s linear infinite;
-    }
-    .orbit-route.is-selected .orbit-flow {
-      animation: network-current 3.6s linear infinite;
-    }
-    .orbit-core-light {
-      animation: network-breathe 5s ease-in-out infinite;
-    }
-    .orbit-calibration {
-      animation: orbit-calibrate 24s linear infinite;
-    }
-  }
-  @keyframes sculpture-reveal {
-    from {
-      opacity: 0;
-      transform: translateY(14px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-  @keyframes sculpture-material-light {
-    0%,
-    15% {
-      background-position: 100% 0;
-    }
-    42%,
-    100% {
-      background-position: 0 0;
-    }
-  }
-  @keyframes network-current {
-    to {
-      stroke-dashoffset: -100;
-    }
-  }
-  @keyframes network-breathe {
-    0%,
-    100% {
-      opacity: 0.5;
-    }
-    50% {
-      opacity: 1;
-    }
-  }
-  @keyframes orbit-calibrate {
-    to {
-      stroke-dashoffset: 80;
-    }
-  }
-
   @media (max-width: 1180px) {
     .sculpture-stage {
-      inset: 84px -15px 225px;
-    }
-    .sculpture-callout {
-      font-size: 6px;
-    }
-    .sculpture-callout span {
-      font-size: 5px;
-    }
-    .deck-scene-categories {
-      bottom: 256px;
-      gap: 10px;
-    }
-    .deck-scene-categories span {
-      font-size: 7px;
-    }
-    .deck-scene-categories span + span::before {
-      margin-right: 10px;
+      inset: 138px -15px 250px;
     }
   }
   @media (max-width: 1000px) {
-    .sculpture-callout,
-    .sculpture-traces {
-      display: none;
-    }
     .sculpture-object-layer {
       inset-inline: 1%;
     }
@@ -548,6 +377,14 @@
     }
   }
   @media (max-width: 720px) {
+    .deck-scene {
+      height: 620px;
+    }
+    .deck-scene-heading > div > p {
+      font-size: 9px;
+      line-height: 1.6;
+      margin-top: 9px;
+    }
     .pan-workbench {
       border-radius: 32px;
     }
@@ -574,19 +411,10 @@
       min-height: 32px;
     }
     .sculpture-stage {
-      inset: 72px -10px 165px;
-    }
-    .sculpture-monogram {
-      font-size: 140px;
+      inset: 132px -10px 228px;
     }
     .sculpture-object-layer {
-      inset: -7% -2% -5%;
-    }
-    .deck-scene-categories {
-      bottom: 245px;
-    }
-    .deck-scene-categories span {
-      font-size: 7px;
+      inset: 0;
     }
     .deck-entry-card {
       border-radius: 23px;
@@ -603,18 +431,14 @@
       left: -2%;
       width: 104%;
     }
-    .deck-scene-categories {
-      bottom: 230px;
-      gap: 8px;
-    }
-    .deck-scene-categories span {
-      font-size: 6px;
-    }
-    .deck-scene-categories span + span::before {
-      margin-right: 8px;
-    }
   }
   @media (prefers-reduced-motion: reduce) {
+    .sculpture-liquid {
+      display: none;
+    }
+    .sculpture-object-layer[data-flow='live'] .deck-hero-object {
+      opacity: 1;
+    }
     .sculpture-object-layer,
     .sculpture-aura {
       transform: none;

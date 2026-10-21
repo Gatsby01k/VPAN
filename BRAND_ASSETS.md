@@ -11,7 +11,7 @@ The PAN artwork direction uses the owner's black fractured stone, pink fissures,
 
 Both v2 layers were produced with the built-in ImageGen tool. The cutout is 1089 × 1445 RGBA with verified transparent pixels and alpha spanning 0–255; the atmosphere is 1774 × 887 RGB. Full-resolution PNG outputs are preserved in `research/artwork`; optimized WebP files are used by the interface. Exact prompts and processing details are recorded in `research/PAN_IMAGE_PROCESSING.md`. Responsive visual checks are recorded there after browser verification.
 
-The object, atmosphere, HTML glass surfaces and CSS lighting are separate layers. The home cover uses one crowned server object, grounded with a vector floor, reflection, trace lines and a restrained surface highlight. Its atmosphere is strongly dimmed so the stone texture does not compete with the controls. The adjacent overview uses `NetworkOrbit`, a native SVG instrument, instead of repeating the same picture. Selecting a role illuminates its matching node and connection. Partner covers reuse the transparent object against the shared environment rather than cropping the source portrait into a card. The numerical modules retain clear space around their readings.
+The object, atmosphere, HTML glass surfaces and lighting are separate layers. The home cover uses one stationary crowned server object, a quiet floor and reflection. `LiquidSculpture` progressively enhances the original texture with a hue-masked liquid shader: pink currents move inside the four existing conduits while the stone, crown and silhouette remain still. Pointer parallax, sweeping highlights, floating callouts and decorative route animations were removed at the owner's request. The adjacent overview uses `NetworkOrbit`, a native SVG instrument, instead of repeating the same picture. Selecting a role illuminates its matching node and connection. Partner covers reuse the transparent object against the shared environment rather than cropping the source portrait into a card.
 
 ## Preserved source versions
 
@@ -24,7 +24,7 @@ The object, atmosphere, HTML glass surfaces and CSS lighting are separate layers
 | `public/assets/dark-plate.webp` | Existing optimized artwork matching supplied `pan background #3.PNG`. |
 | `public/assets/hero-landscape.webp` | Existing optimized artwork matching supplied `pan background #5.PNG`. |
 
-The owner's source files and these prepared versions are preserved. WebP encoding alone is format preparation; the v2 workflow explicitly calls for subject extraction, retouching, relighting and environmental compositing. No stock imagery is part of this treatment. The material artwork renders without WebGL. The navigation crown remains a small vector mark, with PAN text kept legible at navigation size.
+The owner's source files and these prepared versions are preserved. WebP encoding alone is format preparation; the v2 workflow explicitly calls for subject extraction, retouching, relighting and environmental compositing. No stock imagery is part of this treatment. The original artwork remains visible without WebGL; only the optional liquid enhancement uses it. The navigation crown remains a small vector mark, with PAN text kept legible at navigation size.
 
 ## Archived mascot provenance
 
@@ -34,7 +34,7 @@ The earlier preparation removed the white background while preserving the suppli
 
 ## Behavior
 
-The composed stone environment and crowned server object anchor the PAN cover while role selection updates the proposition, application link and adjacent vector instrument. Pink identifies the main action and selected connection; gold comes from the supplied artwork and crown motif. Fine-pointer motion adds at most 6 px horizontal and 4 px vertical depth to the artwork. Updates are batched with requestAnimationFrame without React state updates. Reduced-motion preferences disable pointer depth and animated light paths. No WebGL or animation library is required.
+Role selection updates the proposition, role-specific application action and adjacent vector instrument. Pink identifies the main action and selected connection; gold comes from the supplied artwork and crown motif. Liquid flow is capped at 30 fps and pauses outside the viewport or in a background tab. Reduced-motion preferences retain the original static image. GPU resources and observers are released on teardown. No external animation library is required. Implementation and numerical shader checks are recorded in `research/PAN_LIQUID_MOTION.md`.
 
 The profile contains only a role, up to three market slugs, allowlisted local method references and a category. A shared URL restores those choices and prepopulates the application. Profile choices survive navigation within the session. Application edits and the current step survive a reload and are cleared after successful submission. Reduced-motion settings disable content feedback and smooth scrolling.
 

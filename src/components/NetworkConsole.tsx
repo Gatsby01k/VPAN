@@ -12,7 +12,6 @@ import { Crown } from './UI';
 import { Link } from 'react-router-dom';
 import { markets, roles, type RoleId } from '../data';
 import { useLocale } from '../locale';
-import { useEffect, useRef, type PointerEvent } from 'react';
 import { NetworkOrbit } from './NetworkOrbit';
 import { SculptureStage } from './SculptureStage';
 
@@ -65,85 +64,62 @@ export function DotNumber({ value }: { value: number }) {
 
 export function NetworkConsole({ role, onRole }: { role: RoleId; onRole: (role: RoleId) => void }) {
   const { t } = useLocale();
-  const workbench = useRef<HTMLDivElement>(null);
-  const pointerFrame = useRef<number | null>(null);
-  useEffect(
-    () => () => {
-      if (pointerFrame.current !== null) cancelAnimationFrame(pointerFrame.current);
-    },
-    [],
-  );
-  const moveLight = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType !== 'mouse' || matchMedia('(prefers-reduced-motion: reduce)').matches)
-      return;
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
-    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-    if (pointerFrame.current !== null) cancelAnimationFrame(pointerFrame.current);
-    pointerFrame.current = requestAnimationFrame(() => {
-      workbench.current?.style.setProperty('--scene-x', `${x * 12}px`);
-      workbench.current?.style.setProperty('--scene-y', `${y * 8}px`);
-      workbench.current?.style.setProperty('--light-x', `${(x + 0.5) * 100}%`);
-      workbench.current?.style.setProperty('--light-y', `${(y + 0.5) * 100}%`);
-      pointerFrame.current = null;
-    });
-  };
-  const resetLight = () => {
-    if (pointerFrame.current !== null) cancelAnimationFrame(pointerFrame.current);
-    pointerFrame.current = null;
-    workbench.current?.style.setProperty('--scene-x', '0px');
-    workbench.current?.style.setProperty('--scene-y', '0px');
-  };
   const selected = role === 'team' ? 'provider' : role;
   const currentIndex = roles.findIndex((entry) => entry.id === role);
   const current = roles[currentIndex];
+  const actions: Record<RoleId, [string, string]> = {
+    affiliate: ['Introduce a partner', 'Предложить партнёра'],
+    provider: ['Present a solution', 'Предложить решение'],
+    team: ['Introduce your team', 'Представить команду'],
+    merchant: ['Discuss your payments', 'Обсудить платежи'],
+    regional: ['Discuss a partnership', 'Обсудить сотрудничество'],
+  };
   const entries = [
     { id: 'affiliate', label: t('Affiliates', 'Аффилиаты') },
     { id: 'provider', label: t('Payments', 'Платежи') },
     { id: 'merchant', label: t('Business', 'Бизнес') },
   ] as const;
   return (
-    <div
-      className="pan-workbench"
-      ref={workbench}
-      onPointerMove={moveLight}
-      onPointerLeave={resetLight}
-      data-direction={role}
-    >
+    <div className="pan-workbench" data-direction={role}>
       <div className="deck-scene">
         <div className="deck-scene-heading">
           <div>
             <span>PRIVATE AFFILIATE NETWORK</span>
-            <h1 id="pan-heading">{t('Private Affiliate Network', 'Частная партнёрская сеть')}</h1>
+            <h1 id="pan-heading">
+              {t('The right partners. New markets.', 'Нужные партнёры. Новые рынки.')}
+            </h1>
+            <p>
+              {t(
+                'PAN connects payment teams, PSPs and businesses across Africa, LATAM and Asia.',
+                'PAN объединяет платёжные команды, PSP и бизнес в Африке, LATAM и Азии.',
+              )}
+            </p>
           </div>
           <Link className="deck-round" to="/about" aria-label={t('About PAN', 'О PAN')}>
             <ArrowUpRight size={21} />
           </Link>
         </div>
         <SculptureStage />
-        <div className="deck-scene-categories">
-          <span>iGaming</span>
-          <span>e-commerce</span>
-          <span>High-risk</span>
-        </div>
         <div className="deck-entry-card" aria-live="polite">
           <div className="deck-entry-heading">
             <span className="deck-entry-icon">
               <UsersRound size={24} strokeWidth={1.3} />
             </span>
             <div>
-              <span>{t('Your partnership direction', 'Ваше направление')}</span>
+              <span>{t('Your role in PAN', 'Ваша роль в PAN')}</span>
               <h2>{t(current.title, current.ru)}</h2>
             </div>
           </div>
           <p>{t(current.short, current.shortRu)}</p>
           <Link className="deck-entry-action" to={`/apply?role=${role}`}>
-            <span>{t('Start a conversation', 'Обсудить партнёрство')}</span>
+            <span>{t(...actions[role])}</span>
             <span>
               <ArrowUpRight size={22} />
             </span>
           </Link>
-          <small>{t('Terms are agreed individually.', 'Условия согласуем индивидуально.')}</small>
+          <small>
+            {t('Agree the terms before the work begins.', 'Условия — до начала работы.')}
+          </small>
         </div>
         <div className="deck-scene-signature">
           <span>PAN / PARTNER NETWORK</span>
@@ -154,8 +130,8 @@ export function NetworkConsole({ role, onRole }: { role: RoleId; onRole: (role: 
         <section className="deck-primary" aria-label={t('Network overview', 'Обзор сети')}>
           <div className="deck-widget-heading">
             <div>
-              <h2>{t('Your network.', 'Ваша сеть.')}</h2>
-              <p>{t('Find your partnership direction', 'Найдите своё направление')}</p>
+              <h2>{t('Built on connections.', 'Сеть партнёров.')}</h2>
+              <p>{t('Five ways to work with PAN', 'Пять форматов сотрудничества с PAN')}</p>
             </div>
             <Link
               className="deck-round"
@@ -168,7 +144,7 @@ export function NetworkConsole({ role, onRole }: { role: RoleId; onRole: (role: 
           <NetworkOrbit role={role} />
           <div className="deck-reading deck-reading-left">
             <DotNumber value={markets.length} />
-            <span>{t('Markets', 'Рынков')}</span>
+            <span>{t('Markets in focus', 'Рынков в фокусе')}</span>
           </div>
           <div className="deck-reading deck-reading-right">
             <DotNumber value={roles.length} />
@@ -226,8 +202,8 @@ export function NetworkConsole({ role, onRole }: { role: RoleId; onRole: (role: 
                 <FileText size={23} strokeWidth={1.2} />
               </span>
               <span>
-                <strong>{t('Your profile', 'Ваш профиль')}</strong>
-                <small>{t('Ready for a conversation', 'Основа для знакомства')}</small>
+                <strong>{t('Your role', 'Ваша роль')}</strong>
+                <small>{t('The starting point', 'С чего начнём')}</small>
               </span>
             </span>
             <span className="deck-stat-number">
@@ -247,7 +223,7 @@ export function NetworkConsole({ role, onRole }: { role: RoleId; onRole: (role: 
           <div className="deck-geography-heading">
             <span>
               <span className="deck-pink-dot" />
-              {t('Connections without borders', 'Связи без границ')}
+              {t('Local methods. Direct connections.', 'Локальные методы. Прямые связи.')}
             </span>
             <Link to="/markets" aria-label={t('All markets', 'Все рынки')}>
               <ArrowUpRight size={17} />

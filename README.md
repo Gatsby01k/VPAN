@@ -19,7 +19,7 @@ All 23 static routes are prerendered, with route-specific metadata and an actual
 - A private partner desk with actual counts, complete application details, search, status filters and CSV export.
 - A partner knowledge library with source references, downloadable working checklists and relevant application entries. Published guides appear without rebuilding the frontend.
 - An acquisition console with publication previews, source availability, durable run history, source-to-application outcomes and optional Search Console query metrics.
-- Responsive layouts, keyboard focus and reduced-motion support. Artwork renders without WebGL. Pages and form steps update immediately; restrained opacity feedback applies to the changed cover content.
+- Responsive layouts, keyboard focus and reduced-motion support. The original artwork renders without WebGL; an optional hue-masked shader animates only its pink channels. It pauses when out of view or in a background tab. Pages and form steps update immediately.
 
 ## Run locally
 
