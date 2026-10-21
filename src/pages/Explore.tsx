@@ -5,6 +5,7 @@ import { Action, Eyebrow, PageHeading, Reveal, Spotlight } from '../components/U
 import { markets, roles, type RoleId } from '../data';
 import { useLocale } from '../locale';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
+import { PanCoreArtwork } from '../components/PanCoreArtwork';
 
 export function MarketsPage() {
   const { t } = useLocale();
@@ -340,13 +341,10 @@ export function PartnerPage({ roleId }: { roleId: RoleId }) {
             </Action>
           </div>
           <div className="partner-cover-object">
-            <img
-              src="/assets/pan-core-cutout-v2.webp"
-              width="1089"
-              height="1445"
-              alt={t(
-                'PAN’s crowned server structure in black stone, pink and gold',
-                'Серверная структура PAN с короной: чёрный камень, розовый и золото',
+            <PanCoreArtwork
+              label={t(
+                'PAN’s partner network with a crowned core and flowing pink channels',
+                'Партнёрская сеть PAN: ядро с короной и розовыми потоками',
               )}
             />
             <span aria-hidden="true">0{index}</span>

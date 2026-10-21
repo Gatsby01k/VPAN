@@ -1,5 +1,7 @@
 # PAN — liquid channels and copy refinement
 
+Historical prototype: the raster shader described below has been removed and replaced by the original native SVG scene documented in `PAN_NATIVE_ART.md`.
+
 ## Current motion
 
 Removed cursor parallax, artwork entrance, sweeping specular highlight, floating labels, oversized background monogram, animated vector dashes, calibration rotation and logo reveal/sheen. The sculpture is stationary and its crown is no longer clipped by negative top positioning.

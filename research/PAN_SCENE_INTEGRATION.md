@@ -1,5 +1,7 @@
 # PAN — coherent scene integration
 
+Historical iteration: the current authored SVG scene is documented in `PAN_NATIVE_ART.md`.
+
 The owner's feedback was that the composition still looked like pasted photographs. This revision retains the folded dashboard arrangement and original artwork while changing how the layers relate.
 
 - One main server sculpture, instead of duplicate server pictures in the hero and overview.
