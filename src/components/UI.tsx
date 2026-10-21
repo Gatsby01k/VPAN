@@ -22,16 +22,17 @@ export function Crown() {
 
 export function Brand({ compact = false }: { compact?: boolean }) {
   return (
-    <Link to="/" className="brand" aria-label="PAN home">
+    <Link to="/" className="brand" aria-label={compact ? 'PAN home' : 'PAN / VlaDDoS — home'}>
       <Crown />
       <span className="brand-word">
         PAN<span className="brand-dot">.</span>
       </span>
       {!compact && (
-        <span className="brand-caption">
-          PRIVATE AFFILIATE
-          <br />
-          NETWORK
+        <span className="brand-endorsement">
+          <span className="brand-signature" aria-hidden="true">
+            <img src="/assets/vladdos-signature-v2.webp" width="1846" height="852" alt="" />
+          </span>
+          <span className="brand-caption">PRIVATE AFFILIATE NETWORK</span>
         </span>
       )}
     </Link>
