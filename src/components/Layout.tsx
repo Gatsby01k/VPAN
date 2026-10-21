@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowDownRight, ArrowUpRight, Command, Menu, Search, X } from 'lucide-react';
 import { Brand, Dialog } from './UI';
+import { MatrixNavLabel } from './MatrixNavLabel';
 import { useLocale } from '../locale';
 import { markets, pageMeta } from '../data';
 import { useGrowth } from '../growth';
@@ -184,11 +185,11 @@ export function Header() {
                       : undefined
                   }
                 >
-                  {label}
+                  <MatrixNavLabel text={label} />
                 </Link>
               ) : (
                 <NavLink key={path} to={path}>
-                  {label}
+                  <MatrixNavLabel text={label} />
                 </NavLink>
               ),
             )}

@@ -96,31 +96,72 @@
     font: 500 13px/1.3 var(--body);
     letter-spacing: 0;
     white-space: nowrap;
-    transition: color 180ms;
+    box-shadow: none;
+    text-shadow: none;
+    transition: none;
   }
 
   .site-header .desktop-nav a::after {
-    content: '';
-    display: block;
-    position: absolute;
-    inset: auto 0 3px;
-    height: 2px;
-    border-radius: 1px;
-    background: #ff278b;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 180ms ease;
+    content: none;
+    display: none;
   }
 
-  .site-header .desktop-nav a:hover,
+  .site-header .desktop-nav a:hover {
+    background: none;
+    box-shadow: none;
+    text-shadow: none;
+  }
+
   .site-header .desktop-nav a[aria-current] {
     color: #f8f8fc;
     background: none;
   }
 
-  .site-header .desktop-nav a:hover::after,
-  .site-header .desktop-nav a[aria-current]::after {
-    transform: scaleX(1);
+  .site-header .nav-label {
+    display: grid;
+    align-items: center;
+    justify-items: center;
+  }
+
+  .site-header .nav-label-text,
+  .site-header .nav-matrix {
+    grid-area: 1 / 1;
+  }
+
+  .site-header .nav-matrix {
+    opacity: 0;
+    pointer-events: none;
+    color: #ede9ef;
+    transform: translateY(-1px);
+  }
+
+  .site-header .desktop-nav a:focus-visible .nav-label-text {
+    opacity: 0;
+  }
+
+  .site-header .desktop-nav a:focus-visible .nav-matrix {
+    opacity: 1;
+    animation: nav-matrix-type var(--matrix-duration) steps(var(--matrix-steps), end) both;
+  }
+
+  @media (hover: hover) {
+    .site-header .desktop-nav a:hover .nav-label-text {
+      opacity: 0;
+    }
+
+    .site-header .desktop-nav a:hover .nav-matrix {
+      opacity: 1;
+      animation: nav-matrix-type var(--matrix-duration) steps(var(--matrix-steps), end) both;
+    }
+  }
+
+  @keyframes nav-matrix-type {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0);
+    }
   }
 
   .site-header .header-tools {
@@ -307,6 +348,10 @@
     .site-header .command-trigger,
     .site-header .mobile-toggle {
       transition: none;
+    }
+
+    .site-header .desktop-nav a:is(:hover, :focus-visible) .nav-matrix {
+      animation: none;
     }
   }
 }
