@@ -1,6 +1,6 @@
 # PAN — material nexus
 
-The owner rejected the flat server diagram and the crown appearing as a sticker on it. The replacement is a connected low sculpture of graphite, smoked glass and hot-pink liquid. It retains the dark dashboard and brand palette while eliminating towers, crown stickers and wireframe decoration. The supplied crown logo remains in the shared brand, rail and favicon.
+The owner rejected the flat server diagram and the crown appearing as a sticker on it. The replacement is a connected low sculpture of graphite, smoked glass and hot-pink liquid. It retains the dark dashboard and brand palette while eliminating towers, crown stickers and wireframe decoration. The shared brand, rail and favicon now use the separate crown/A vector mark described in `PAN_EMBLEM.md`; no logo is applied to the sculpture.
 
 ## Files and provenance
 

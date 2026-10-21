@@ -1,4 +1,6 @@
-# PAN owner logo and wordmark
+# PAN — historical supplied logo integration
+
+The owner's subsequent request to replace the photographic crown with a refined iGaming-style logo supersedes this crown integration. The current native vector emblem is documented in `PAN_EMBLEM.md`. The supplied source files described below remain unchanged in the archive; the custom PAN wordmark remains active.
 
 Source supplied by the owner: `Дизайн без названия-19.png`, 1200 × 1200 RGBA. Its background was already transparent; the nonzero alpha bounds are `(264, 204, 938, 1007)`. The full source is preserved unchanged in `research/artwork/pan-owner-logo.png`.
 

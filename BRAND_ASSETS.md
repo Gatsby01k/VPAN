@@ -1,12 +1,15 @@
 # PAN artwork and identity
 
-The current hero is a bespoke render of a low graphite and smoked-glass nexus with pink liquid channels. It replaces the flat isometric server drawing at the owner's request. No crown, server tower or character appears in the illustration. The owner's crown remains part of the shared brand, navigation rail and favicon.
+The current hero is a bespoke render of a low graphite and smoked-glass nexus with pink liquid channels. It replaces the flat isometric server drawing at the owner's request. No crown, server tower or character appears in the illustration. A custom crown/A monogram appears in the shared brand, navigation rail and favicon.
 
 ## Current production assets
 
-- `PanLogo.tsx`: the owner's transparent crown artwork, framed by an SVG viewport. Used in the shared brand and navigation rail. `public/assets/pan-owner-logo.webp` preserves its original full canvas; `research/artwork/pan-owner-logo.png` preserves the source.
+- `PanLogo.tsx`: code-authored crown/A monogram. A bold three-point silhouette, an A cutout, graphite lower edge, platinum faces, a restrained champagne rim and a pink keystone match the custom PAN lettering. No raster image, dripping paint, cracks, orb tips or animation are used.
+- `public/assets/pan-emblem.svg` and `pan-emblem.png`: standalone 64-unit vector master and transparent 512 × 512 PNG.
+- `public/assets/pan-emblem-mono.svg`: single-colour white mark for dark backgrounds.
+- `public/assets/pan-lockup.svg` and `pan-lockup.png`: emblem and PAN wordmark as a transparent reusable logo.
 - `PanWordmark.tsx`: custom PAN vector lettering with shared angular cuts, open counters, a slight forward slant, a silver finish and a fine pink crossbar. The shared brand link supplies its accessible name.
-- `public/favicon.svg`: self-contained rendering of the same owner-supplied logo.
+- `public/favicon.svg`: the vector emblem on a rounded graphite tile, with no embedded raster data or external dependency.
 - `PanCoreArtwork.tsx`: responsive SVG compositor on the homepage and partner covers. It shares one image between the material render and a static mask selecting its actual pink pixels.
 - `public/assets/pan-nexus-render-v1.webp`: 1448 × 1086 transparent production render, 308 KiB.
 - `public/assets/pan-nexus-social.webp`: 1200 × 630 social preview.
@@ -17,7 +20,7 @@ Moving SVG displacement changes the liquid's texture, and caustics follow the th
 
 `console.css` keeps the heading, illustration and entry card in three separate grid rows. The illustration has its own minimum height and contained SVG viewport; the card participates in normal flow. Manrope is self-hosted for English and Russian headings, with Inter for body copy and controls. The first-screen copy uses a two-line headline, a readable explanation and a compact role entry.
 
-The current render was generated with the built-in ImageGen tool and a transparent background. Its alpha is preserved; Sharp only encodes production formats and renders the SVG compositor for inspection. The exact prompt, visual intent, motion geometry and checks are recorded in `research/PAN_NEXUS_ART.md`. The supplied owner logo is preserved separately and is not baked onto the sculpture.
+The current hero render was generated with the built-in ImageGen tool and a transparent background. Its alpha is preserved; Sharp only encodes production formats and renders the SVG compositor for inspection. The exact prompt, visual intent, motion geometry and checks are recorded in `research/PAN_NEXUS_ART.md`. The crown/A mark is native vector artwork, redrawn after the owner rejected the earlier photographic crown in the header; see `research/PAN_EMBLEM.md`. The supplied owner logo remains preserved separately and is not baked onto the sculpture.
 
 ## Preserved earlier sources
 
@@ -25,6 +28,7 @@ Earlier imagery is retained for provenance and recovery, not used as the current
 
 | Asset | Provenance |
 | --- | --- |
+| `pan-owner-logo.webp`, `research/artwork/pan-owner-logo.png` | Original supplied gold crown and its optimized version, superseded in the brand by the crown/A monogram at the owner's request. |
 | `pan-native-core.svg`, `pan-native-core.webp` | Superseded code-authored server diagram. See historical `research/PAN_NATIVE_ART.md`. |
 | `pan-core-cutout-v2.webp` | Earlier ImageGen extraction of supplied `king traffic.PNG`. |
 | `pan-atmosphere-v2.webp` | Earlier ImageGen composition from supplied `pan background #4.PNG` and `pan background #5.PNG`. |
