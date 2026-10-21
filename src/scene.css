@@ -1,0 +1,628 @@
+/* One quiet material palette. Pink belongs to the network's light, not every surface. */
+@layer scene {
+  .pan-workbench {
+    --scene-x: 0px;
+    --scene-y: 0px;
+    --light-x: 35%;
+    --light-y: 35%;
+    background:
+      radial-gradient(ellipse at 24% 52%, #24202c55, transparent 46%),
+      linear-gradient(115deg, #0b0d13, #11141e 65%, #0c0f17);
+    border-color: #9ba7c245;
+    border-radius: 38px;
+    box-shadow:
+      inset 0 1px 1px #d6e2ff32,
+      inset 0 -1px 1px #000,
+      0 0 0 4px #080a0f,
+      0 0 0 5px #a8b1c024,
+      0 24px 65px #0006;
+  }
+  .pan-workbench::before {
+    width: 1px;
+    left: 48.2%;
+    background: linear-gradient(transparent, #c2cce61c, #c2cce606, transparent);
+  }
+  .pan-workbench::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 8;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse 400px 260px at var(--light-x) var(--light-y),
+      #dce5ff04,
+      transparent
+    );
+  }
+  .deck-scene {
+    overflow: hidden;
+  }
+  .deck-scene::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('/assets/pan-atmosphere-v2.webp') 35% 100% / auto 80% no-repeat;
+    opacity: 0.1;
+    mask-image: linear-gradient(transparent 15%, #000 65%, transparent);
+    pointer-events: none;
+  }
+  .deck-scene::after {
+    background: linear-gradient(180deg, transparent 45%, #0e101723 68%, #0e1017a3);
+  }
+  .deck-scene-heading h1 {
+    font-size: clamp(21px, 1.9vw, 28px);
+    letter-spacing: -0.055em;
+  }
+  .deck-scene-heading > div > span {
+    color: #8f92a3;
+    font-size: 7px;
+    letter-spacing: 0.2em;
+  }
+  .sculpture-stage {
+    position: absolute;
+    inset: 91px -8px 232px;
+    z-index: 2;
+    pointer-events: none;
+    mask-image: linear-gradient(#000 85%, transparent 100%);
+  }
+  .sculpture-aura {
+    position: absolute;
+    inset: 0 -10%;
+    background:
+      radial-gradient(ellipse at 49% 77%, #ff007726, transparent 46%),
+      radial-gradient(ellipse at 45% 27%, #8e9db015, transparent 48%);
+    transform: translate3d(calc(var(--scene-x) * -2), calc(var(--scene-y) * -2), 0);
+    transition: transform 800ms ease-out;
+  }
+  .sculpture-monogram {
+    position: absolute;
+    top: 1%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #d9e2f0;
+    opacity: 0.025;
+    font: 500 clamp(130px, 15vw, 240px)/1 var(--display);
+    letter-spacing: -0.05em;
+  }
+  .sculpture-floor,
+  .sculpture-traces {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .sculpture-floor {
+    transform: translateY(9%);
+  }
+  .sculpture-grid {
+    stroke: #c2cad7;
+    stroke-width: 0.55;
+    opacity: 0.08;
+  }
+  .sculpture-floor-light {
+    stroke-width: 1.3;
+  }
+  .sculpture-object-layer {
+    position: absolute;
+    inset: -6% 7% -3%;
+    transform: translate3d(var(--scene-x), var(--scene-y), 0);
+    transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .sculpture-object-layer .deck-hero-object {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: saturate(0.72) brightness(0.82) contrast(1.02) drop-shadow(0 15px 14px #0009);
+  }
+  .sculpture-object-layer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    mask: url('/assets/pan-core-cutout-v2.webp') center / contain no-repeat;
+    background: linear-gradient(110deg, transparent 42%, #cdd6f4 50%, transparent 58%);
+    background-size: 350% 100%;
+    background-position: 100% 0;
+    mix-blend-mode: screen;
+    opacity: 0.12;
+  }
+  .sculpture-reflection {
+    position: absolute;
+    top: 85%;
+    left: 15%;
+    width: 70%;
+    height: 55%;
+    background: url('/assets/pan-core-cutout-v2.webp') center bottom / contain no-repeat;
+    transform: scaleY(-1);
+    filter: blur(9px) saturate(0.7);
+    opacity: 0.14;
+    mask-image: linear-gradient(transparent, #000);
+  }
+  .sculpture-traces {
+    z-index: 4;
+    stroke: #e3dbed36;
+    stroke-width: 0.8;
+  }
+  .sculpture-traces circle {
+    fill: #ffe0ed;
+    stroke: #ff63a9;
+    stroke-width: 3;
+    paint-order: stroke;
+  }
+  .sculpture-trace-energy {
+    stroke: #ff69ae;
+    stroke-dasharray: 5 95;
+    opacity: 0.7;
+  }
+  .sculpture-callout {
+    position: absolute;
+    z-index: 5;
+    top: 47%;
+    color: #a2a0b2;
+    font-size: 7px;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+  }
+  .sculpture-callout span {
+    display: block;
+    margin-bottom: 6px;
+    color: #e7c0d1;
+    font-size: 6px;
+    letter-spacing: 0.13em;
+  }
+  .sculpture-callout strong {
+    font-weight: 400;
+  }
+  .sculpture-callout-left {
+    left: 7%;
+  }
+  .sculpture-callout-right {
+    right: 6%;
+    text-align: right;
+    top: 43%;
+  }
+  .sculpture-scan {
+    position: absolute;
+    bottom: 6%;
+    left: 15%;
+    right: 15%;
+    height: 35px;
+    background: radial-gradient(ellipse, #ff007719, transparent 65%);
+    filter: blur(8px);
+  }
+  .deck-scene-categories {
+    top: auto;
+    bottom: 269px;
+    gap: 15px;
+  }
+  .deck-scene-categories span {
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    color: #94919f;
+    font-size: 8px;
+    letter-spacing: 0.02em;
+  }
+  .deck-scene-categories span + span::before {
+    content: '/';
+    color: #545465;
+    margin-right: 15px;
+  }
+  .deck-entry-card,
+  .deck-primary,
+  .deck-stat,
+  .deck-stat-profile,
+  .deck-geography {
+    border-color: #abb7d12e;
+    border-top-color: #cbd5ea47;
+    background:
+      radial-gradient(ellipse at 10% 0, #afbdd913, transparent 65%),
+      linear-gradient(130deg, #262936a3, #161923ed);
+    box-shadow:
+      inset 0 1px 1px #f1f4ff0d,
+      0 10px 25px #0003;
+    backdrop-filter: blur(30px);
+  }
+  .deck-entry-card {
+    background:
+      radial-gradient(ellipse at 42% 0, #ff00770d, transparent 72%),
+      linear-gradient(135deg, #292833cc, #171a24ed);
+    border-radius: 26px;
+  }
+  .deck-entry-icon,
+  .deck-stat-icon {
+    border-color: #c1cadd38;
+    border-bottom-color: #ff5b9d88;
+    box-shadow: inset 0 1px 2px #fff1;
+  }
+  .deck-entry-action {
+    background: linear-gradient(110deg, #ed0874, #d00061);
+    border-color: #ff5ca16b;
+    box-shadow:
+      inset 0 1px 0 #ffc1dc38,
+      0 5px 18px #ef00751c;
+    transition:
+      box-shadow 350ms,
+      border-color 350ms;
+  }
+  .deck-entry-action:hover {
+    background: linear-gradient(110deg, #f71983, #df0c70);
+    box-shadow:
+      inset 0 1px 0 #ffc1dc55,
+      0 6px 25px #ef00753d;
+    border-color: #ffa5cd88;
+  }
+  .deck-entry-action > span:last-child {
+    background: transparent;
+    border-color: #ffdce945;
+  }
+  .deck-round {
+    background: #c7d2ef05;
+    border-color: #c6d3ed26;
+    box-shadow: inset 0 1px 1px #fff1;
+  }
+  .deck-primary {
+    background:
+      radial-gradient(ellipse at 50% 98%, #ff00771b, transparent 65%),
+      linear-gradient(135deg, #292c37a8, #10131ded 74%);
+    border-radius: 31px;
+  }
+  .deck-primary::after {
+    background: linear-gradient(125deg, #dae4ff07, transparent 35%, transparent 85%, #ff007706);
+  }
+  .network-orbit {
+    position: absolute;
+    top: 52px;
+    bottom: 65px;
+    left: 11%;
+    width: 78%;
+  }
+  .network-orbit > svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .orbit-rings {
+    stroke: #b6c4df;
+    stroke-width: 0.7;
+    opacity: 0.15;
+  }
+  .orbit-calibration {
+    stroke-dasharray: 1 7;
+    stroke-width: 3;
+    opacity: 0.6;
+  }
+  .orbit-wire {
+    stroke: #afbad4;
+    stroke-width: 0.7;
+    opacity: 0.16;
+    transition:
+      stroke 500ms,
+      opacity 500ms;
+  }
+  .orbit-flow {
+    stroke: #ff5ca6;
+    stroke-width: 1.3;
+    stroke-dasharray: 4 96;
+    opacity: 0;
+  }
+  .orbit-node-aura {
+    fill: #ff0077;
+    opacity: 0;
+    transition: opacity 600ms;
+  }
+  .orbit-node-rim {
+    fill: #1c2230;
+    stroke: #9cabc95e;
+    stroke-width: 0.8;
+  }
+  .orbit-node {
+    fill: #b6c2dc;
+    opacity: 0.55;
+  }
+  .orbit-route text {
+    fill: #b4acc2;
+    font: 7px var(--body);
+    letter-spacing: 0.08em;
+    opacity: 0.45;
+  }
+  .orbit-route.is-selected .orbit-wire {
+    stroke: #ff439a;
+    opacity: 0.7;
+  }
+  .orbit-route.is-selected .orbit-node-aura {
+    opacity: 0.08;
+  }
+  .orbit-route.is-selected .orbit-node-rim {
+    stroke: #ffa5d3;
+  }
+  .orbit-route.is-selected .orbit-node {
+    fill: #ff519e;
+    opacity: 1;
+    filter: drop-shadow(0 0 5px #ff0077);
+  }
+  .orbit-route.is-selected .orbit-flow {
+    opacity: 0.85;
+  }
+  .orbit-crown {
+    color: #d7c39d;
+  }
+  .orbit-core-light {
+    filter: drop-shadow(0 0 5px #ff0077);
+  }
+  .deck-reading {
+    top: 43%;
+  }
+  .deck-reading .dot-number {
+    fill: #ebeaf0;
+  }
+  .deck-reading > span {
+    color: #b5acbc;
+    border-color: #df5d9c;
+  }
+  .deck-signal {
+    opacity: 0.7;
+    bottom: 61px;
+    height: 62px;
+  }
+  .deck-signal path {
+    stroke-width: 1.1;
+  }
+  .deck-signal .deck-signal-shadow {
+    opacity: 0.18;
+  }
+  .deck-signal circle {
+    r: 2.5px;
+  }
+  .deck-scale {
+    opacity: 0.12;
+    height: 5px;
+  }
+  .deck-segments {
+    background: #090b1333;
+    border-radius: 99px;
+    padding: 3px;
+    gap: 2px;
+    bottom: 13px;
+    border: 1px solid #a2aec617;
+  }
+  .deck-segments button {
+    background: transparent;
+    box-shadow: none;
+    border-color: transparent;
+    color: #bdb6c6;
+    min-height: 34px;
+  }
+  .deck-segments button[aria-pressed='true'] {
+    background: #eae6ed;
+    color: #1d1c25;
+    border-color: #ffffff69;
+    box-shadow: 0 2px 8px #0003;
+  }
+  .deck-stat {
+    border-radius: 27px;
+  }
+  .deck-stat-heading strong {
+    letter-spacing: -0.035em;
+  }
+  .deck-stat-heading small,
+  .deck-stat-label {
+    color: #9396a9;
+  }
+  .deck-geography {
+    border-radius: 27px;
+  }
+  .deck-route-visual path {
+    stroke: #b5a4c24f;
+  }
+  .deck-route-visual path:nth-child(2) {
+    stroke: #acb3d41f;
+  }
+  .deck-market-pills a {
+    background: #171a2466;
+    border-color: #b4bfd822;
+  }
+  .deck-rail nav {
+    border-color: #c9d3eb16;
+    background: #c4cffb03;
+    box-shadow: none;
+  }
+  .deck-rail nav > a {
+    background: #c9d7ff04;
+    border-color: transparent;
+  }
+  .deck-rail nav > .is-active {
+    background: radial-gradient(circle at 45% 30%, #ef3b8f, #bb0659);
+    box-shadow:
+      inset 0 1px 2px #ffc2df5e,
+      0 0 15px #ff00771f;
+    border-color: #ffb5d852;
+  }
+  .deck-rail nav > .deck-rail-star {
+    background: radial-gradient(circle, #ffafd0, #e50a71 67%, #b30051);
+    box-shadow:
+      inset 0 1px 2px #ffd8ec4a,
+      0 0 15px #ff00772e;
+    border-color: #ffb5d852;
+  }
+  .brand-signature::before {
+    opacity: 0.62;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .sculpture-object-layer .deck-hero-object {
+      animation: sculpture-reveal 1400ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    }
+    .sculpture-object-layer::after {
+      animation: sculpture-material-light 12s 2s ease-in-out infinite;
+    }
+    .sculpture-trace-energy {
+      animation: network-current 6s linear infinite;
+    }
+    .orbit-route.is-selected .orbit-flow {
+      animation: network-current 3.6s linear infinite;
+    }
+    .orbit-core-light {
+      animation: network-breathe 5s ease-in-out infinite;
+    }
+    .orbit-calibration {
+      animation: orbit-calibrate 24s linear infinite;
+    }
+  }
+  @keyframes sculpture-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes sculpture-material-light {
+    0%,
+    15% {
+      background-position: 100% 0;
+    }
+    42%,
+    100% {
+      background-position: 0 0;
+    }
+  }
+  @keyframes network-current {
+    to {
+      stroke-dashoffset: -100;
+    }
+  }
+  @keyframes network-breathe {
+    0%,
+    100% {
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+  @keyframes orbit-calibrate {
+    to {
+      stroke-dashoffset: 80;
+    }
+  }
+
+  @media (max-width: 1180px) {
+    .sculpture-stage {
+      inset: 84px -15px 225px;
+    }
+    .sculpture-callout {
+      font-size: 6px;
+    }
+    .sculpture-callout span {
+      font-size: 5px;
+    }
+    .deck-scene-categories {
+      bottom: 256px;
+      gap: 10px;
+    }
+    .deck-scene-categories span {
+      font-size: 7px;
+    }
+    .deck-scene-categories span + span::before {
+      margin-right: 10px;
+    }
+  }
+  @media (max-width: 1000px) {
+    .sculpture-callout,
+    .sculpture-traces {
+      display: none;
+    }
+    .sculpture-object-layer {
+      inset-inline: 1%;
+    }
+    .network-orbit {
+      left: 7%;
+      width: 86%;
+    }
+  }
+  @media (max-width: 720px) {
+    .pan-workbench {
+      border-radius: 32px;
+    }
+    .deck-primary {
+      border-radius: 28px;
+    }
+    .network-orbit {
+      top: 69px;
+      bottom: 78px;
+      left: 1%;
+      width: 98%;
+    }
+    .deck-signal {
+      height: 60px;
+      bottom: 60px;
+    }
+    .deck-reading {
+      top: 44%;
+    }
+    .deck-segments {
+      bottom: 12px;
+    }
+    .deck-segments button {
+      min-height: 32px;
+    }
+    .sculpture-stage {
+      inset: 72px -10px 165px;
+    }
+    .sculpture-monogram {
+      font-size: 140px;
+    }
+    .sculpture-object-layer {
+      inset: -7% -2% -5%;
+    }
+    .deck-scene-categories {
+      bottom: 245px;
+    }
+    .deck-scene-categories span {
+      font-size: 7px;
+    }
+    .deck-entry-card {
+      border-radius: 23px;
+    }
+  }
+  @media (max-width: 440px) {
+    .deck-scene-heading h1 {
+      font-size: 18px;
+    }
+    .deck-stat {
+      border-radius: 23px;
+    }
+    .network-orbit {
+      left: -2%;
+      width: 104%;
+    }
+    .deck-scene-categories {
+      bottom: 230px;
+      gap: 8px;
+    }
+    .deck-scene-categories span {
+      font-size: 6px;
+    }
+    .deck-scene-categories span + span::before {
+      margin-right: 8px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sculpture-object-layer,
+    .sculpture-aura {
+      transform: none;
+      transition: none;
+    }
+    .orbit-wire,
+    .orbit-node-aura {
+      transition: none;
+    }
+  }
+}

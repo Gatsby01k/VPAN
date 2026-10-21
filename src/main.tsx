@@ -10,6 +10,7 @@ import './experience.css';
 import './glass.css';
 import './deck.css';
 import './brand-motion.css';
+import './scene.css';
 import { emptyGrowth, type GrowthData } from './growth';
 
 const root = document.getElementById('root')!;

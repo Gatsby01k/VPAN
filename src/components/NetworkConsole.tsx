@@ -12,6 +12,9 @@ import { Crown } from './UI';
 import { Link } from 'react-router-dom';
 import { markets, roles, type RoleId } from '../data';
 import { useLocale } from '../locale';
+import { useEffect, useRef, type PointerEvent } from 'react';
+import { NetworkOrbit } from './NetworkOrbit';
+import { SculptureStage } from './SculptureStage';
 
 const glyphs: Record<string, string[]> = {
   '0': ['01110', '11011', '11011', '11011', '11011', '11011', '01110'],
@@ -62,6 +65,35 @@ export function DotNumber({ value }: { value: number }) {
 
 export function NetworkConsole({ role, onRole }: { role: RoleId; onRole: (role: RoleId) => void }) {
   const { t } = useLocale();
+  const workbench = useRef<HTMLDivElement>(null);
+  const pointerFrame = useRef<number | null>(null);
+  useEffect(
+    () => () => {
+      if (pointerFrame.current !== null) cancelAnimationFrame(pointerFrame.current);
+    },
+    [],
+  );
+  const moveLight = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse' || matchMedia('(prefers-reduced-motion: reduce)').matches)
+      return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+    if (pointerFrame.current !== null) cancelAnimationFrame(pointerFrame.current);
+    pointerFrame.current = requestAnimationFrame(() => {
+      workbench.current?.style.setProperty('--scene-x', `${x * 12}px`);
+      workbench.current?.style.setProperty('--scene-y', `${y * 8}px`);
+      workbench.current?.style.setProperty('--light-x', `${(x + 0.5) * 100}%`);
+      workbench.current?.style.setProperty('--light-y', `${(y + 0.5) * 100}%`);
+      pointerFrame.current = null;
+    });
+  };
+  const resetLight = () => {
+    if (pointerFrame.current !== null) cancelAnimationFrame(pointerFrame.current);
+    pointerFrame.current = null;
+    workbench.current?.style.setProperty('--scene-x', '0px');
+    workbench.current?.style.setProperty('--scene-y', '0px');
+  };
   const selected = role === 'team' ? 'provider' : role;
   const currentIndex = roles.findIndex((entry) => entry.id === role);
   const current = roles[currentIndex];
@@ -71,7 +103,13 @@ export function NetworkConsole({ role, onRole }: { role: RoleId; onRole: (role: 
     { id: 'merchant', label: t('Business', 'Бизнес') },
   ] as const;
   return (
-    <div className="pan-workbench">
+    <div
+      className="pan-workbench"
+      ref={workbench}
+      onPointerMove={moveLight}
+      onPointerLeave={resetLight}
+      data-direction={role}
+    >
       <div className="deck-scene">
         <div className="deck-scene-heading">
           <div>
@@ -82,18 +120,7 @@ export function NetworkConsole({ role, onRole }: { role: RoleId; onRole: (role: 
             <ArrowUpRight size={21} />
           </Link>
         </div>
-        <div className="deck-scene-light" aria-hidden="true" />
-        <img
-          className="deck-hero-object"
-          src="/assets/pan-core-cutout-v2.webp"
-          width="1089"
-          height="1445"
-          fetchPriority="high"
-          alt={t(
-            'PAN’s crowned server network, sculpted in basalt with pink conduits and gold seams',
-            'Серверная сеть PAN с короной: базальт, розовые потоки и золотые прожилки',
-          )}
-        />
+        <SculptureStage />
         <div className="deck-scene-categories">
           <span>iGaming</span>
           <span>e-commerce</span>
@@ -138,13 +165,7 @@ export function NetworkConsole({ role, onRole }: { role: RoleId; onRole: (role: 
               <ArrowUpRight size={20} />
             </Link>
           </div>
-          <img
-            className="deck-core"
-            src="/assets/pan-core-cutout-v2.webp"
-            width="1089"
-            height="1445"
-            alt=""
-          />
+          <NetworkOrbit role={role} />
           <div className="deck-reading deck-reading-left">
             <DotNumber value={markets.length} />
             <span>{t('Markets', 'Рынков')}</span>

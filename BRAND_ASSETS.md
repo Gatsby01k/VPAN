@@ -11,7 +11,7 @@ The PAN artwork direction uses the owner's black fractured stone, pink fissures,
 
 Both v2 layers were produced with the built-in ImageGen tool. The cutout is 1089 × 1445 RGBA with verified transparent pixels and alpha spanning 0–255; the atmosphere is 1774 × 887 RGB. Full-resolution PNG outputs are preserved in `research/artwork`; optimized WebP files are used by the interface. Exact prompts and processing details are recorded in `research/PAN_IMAGE_PROCESSING.md`. Responsive visual checks are recorded there after browser verification.
 
-The object, atmosphere, HTML glass surfaces and CSS lighting are separate layers. Shared light direction and restrained reflections tie them together; the atmosphere does not carry baked-in interface panels, charts or buttons. Partner covers reuse the transparent object against the shared environment rather than cropping the source portrait into a card. The numerical modules retain clear space around their readings.
+The object, atmosphere, HTML glass surfaces and CSS lighting are separate layers. The home cover uses one crowned server object, grounded with a vector floor, reflection, trace lines and a restrained surface highlight. Its atmosphere is strongly dimmed so the stone texture does not compete with the controls. The adjacent overview uses `NetworkOrbit`, a native SVG instrument, instead of repeating the same picture. Selecting a role illuminates its matching node and connection. Partner covers reuse the transparent object against the shared environment rather than cropping the source portrait into a card. The numerical modules retain clear space around their readings.
 
 ## Preserved source versions
 
@@ -34,7 +34,7 @@ The earlier preparation removed the white background while preserving the suppli
 
 ## Behavior
 
-The composed stone environment and crowned server object anchor the PAN cover while role selection updates the adjacent proposition and application link. Pink identifies the main action and selected entry; gold comes from the supplied artwork and crown motif. Artwork does not follow the cursor or require WebGL.
+The composed stone environment and crowned server object anchor the PAN cover while role selection updates the proposition, application link and adjacent vector instrument. Pink identifies the main action and selected connection; gold comes from the supplied artwork and crown motif. Fine-pointer motion adds at most 6 px horizontal and 4 px vertical depth to the artwork. Updates are batched with requestAnimationFrame without React state updates. Reduced-motion preferences disable pointer depth and animated light paths. No WebGL or animation library is required.
 
 The profile contains only a role, up to three market slugs, allowlisted local method references and a category. A shared URL restores those choices and prepopulates the application. Profile choices survive navigation within the session. Application edits and the current step survive a reload and are cleared after successful submission. Reduced-motion settings disable content feedback and smooth scrolling.
 
