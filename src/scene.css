@@ -51,7 +51,7 @@
   }
   .sculpture-stage {
     position: absolute;
-    inset: 138px -8px 250px;
+    inset: 142px -26px 218px;
     z-index: 2;
     pointer-events: none;
     mask-image: none;
@@ -62,20 +62,20 @@
     height: 100%;
     overflow: visible;
   }
-  .sculpture-stage-native {
-    inset: 122px -18px 219px;
-  }
   .partner-cover-object .pan-core-artwork {
     position: relative;
     z-index: 1;
     width: 100%;
     max-width: none;
     height: auto;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 1448 / 930;
     flex: none;
   }
   .partner-cover-object::before {
     display: none;
+  }
+  .deck-scene-light {
+    background: radial-gradient(ellipse at 49% 58%, #ff007716, transparent 57%);
   }
   .deck-entry-card,
   .deck-primary,
@@ -213,9 +213,6 @@
   .orbit-route.is-selected .orbit-flow {
     opacity: 0.85;
   }
-  .orbit-crown {
-    color: #d7c39d;
-  }
   .orbit-core-light {
     filter: drop-shadow(0 0 5px #ff0077);
   }
@@ -318,9 +315,15 @@
     opacity: 0.62;
   }
 
-  @media (max-width: 1180px) {
+  @media (min-width: 721px) and (max-width: 1180px) {
+    .deck-scene {
+      height: 540px;
+    }
+    .deck-scene-heading > div {
+      max-width: 44%;
+    }
     .sculpture-stage {
-      inset: 126px -20px 223px;
+      inset: 52px -14px 190px 35%;
     }
   }
   @media (max-width: 1000px) {
@@ -364,7 +367,7 @@
       min-height: 32px;
     }
     .sculpture-stage {
-      inset: 132px -22px 205px;
+      inset: 150px -26px 205px;
     }
     .deck-entry-card {
       border-radius: 23px;

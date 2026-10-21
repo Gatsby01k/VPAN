@@ -1,6 +1,5 @@
 import { useId } from 'react';
 import type { RoleId } from '../data';
-import { PanLogo } from './PanLogo';
 
 const nodes = [
   { id: 'affiliate', x: 108, y: 109 },
@@ -17,6 +16,13 @@ export function NetworkOrbit({ role }: { role: RoleId }) {
     <div className="network-orbit" aria-hidden="true">
       <svg viewBox="0 0 500 260" fill="none">
         <defs>
+          <radialGradient id={`${id}-lens`} cx=".42" cy=".35" r=".65">
+            <stop stopColor="#ff6cae" />
+            <stop offset=".3" stopColor="#b90056" />
+            <stop offset=".56" stopColor="#35182d" />
+            <stop offset=".76" stopColor="#0b0e17" />
+            <stop offset="1" stopColor="#9ba8c3" stopOpacity=".4" />
+          </radialGradient>
           <radialGradient id={`${id}-halo`}>
             <stop stopColor="#ff0077" stopOpacity=".23" />
             <stop offset="1" stopColor="#ff0077" stopOpacity="0" />
@@ -73,7 +79,21 @@ export function NetworkOrbit({ role }: { role: RoleId }) {
           strokeOpacity=".35"
           strokeLinecap="round"
         />
-        <PanLogo x="232" y="106" width="36" height="44" />
+        <circle
+          cx="250"
+          cy="129"
+          r="21"
+          fill={`url(#${id}-lens)`}
+          stroke="#c7d1e9"
+          strokeOpacity=".2"
+        />
+        <circle cx="250" cy="129" r="13" stroke="#ff87bc" strokeOpacity=".32" />
+        <path
+          d="M236 120a17 17 0 0 1 20-7"
+          stroke="#f4dfef"
+          strokeOpacity=".5"
+          strokeLinecap="round"
+        />
         <path
           className="orbit-core-light"
           d="m222 157 28 16 28-16"

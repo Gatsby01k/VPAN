@@ -1,4 +1,6 @@
-# PAN — native artwork redraw
+# PAN — historical native artwork redraw
+
+Superseded by the rendered nexus described in `PAN_NEXUS_ART.md`. This records the former server drawing, preserved in Git and in the exported `pan-native-core` assets; it no longer describes `PanCoreArtwork.tsx` in production.
 
 The owner asked for a new original graphic that belongs to the interface, with clearly visible pink flow. `PanCoreArtwork.tsx` is an authored SVG drawing, not a generated bitmap or a filter on the previous photograph.
 

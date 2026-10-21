@@ -1,20 +1,21 @@
 # PAN artwork and identity
 
-The current main artwork is an original, code-authored SVG in `src/components/PanCoreArtwork.tsx`. It shares the graphite, smoked glass, owner's gold-and-pink crown logo and hot pink (#ff0077) of the interface. Its isometric hub, four partner nodes, plinth and conduits use one perspective. No humanoid character appears.
+The current hero is a bespoke render of a low graphite and smoked-glass nexus with pink liquid channels. It replaces the flat isometric server drawing at the owner's request. No crown, server tower or character appears in the illustration. The owner's crown remains part of the shared brand, navigation rail and favicon.
 
 ## Current production assets
 
-- `PanLogo.tsx`: the owner's exact transparent crown artwork, framed by an SVG viewport. Used in the shared brand, navigation rail, network instrument and core artwork. `public/assets/pan-owner-logo.webp` preserves its original full canvas; `research/artwork/pan-owner-logo.png` preserves the source. No generated substitute or outline crown is used.
+- `PanLogo.tsx`: the owner's transparent crown artwork, framed by an SVG viewport. Used in the shared brand and navigation rail. `public/assets/pan-owner-logo.webp` preserves its original full canvas; `research/artwork/pan-owner-logo.png` preserves the source.
 - `PanWordmark.tsx`: custom PAN vector lettering with shared angular cuts, open counters, a slight forward slant, a silver finish and a fine pink crossbar. The shared brand link supplies its accessible name.
 - `public/favicon.svg`: self-contained rendering of the same owner-supplied logo.
-- `PanCoreArtwork.tsx`: inline responsive SVG on the homepage and partner covers. The geometry itself contains the channels; no raster extraction or WebGL is used.
-- `public/assets/pan-native-core.svg`: standalone animated export for inspection.
-- `public/assets/pan-native-core.webp`: static 1200 × 630 rendering for social previews.
-- `research/artwork/pan-native-core.svg`: preserved source export.
+- `PanCoreArtwork.tsx`: responsive SVG compositor on the homepage and partner covers. It shares one image between the material render and a static mask selecting its actual pink pixels.
+- `public/assets/pan-nexus-render-v1.webp`: 1448 × 1086 transparent production render, 308 KiB.
+- `public/assets/pan-nexus-social.webp`: 1200 × 630 social preview.
+- `research/artwork/pan-nexus-original.png`: original output of the built-in ImageGen tool.
+- `research/artwork/pan-nexus-motion.svg`: portable animated asset export for inspection.
 
-Native SVG gradients and two filament layers per channel create visible pink flow. Production motion starts only after hydration, while the artwork is in view and the document is visible. Reduced-motion preferences retain the stationary drawing. Observer and media-query listeners are cleaned up on teardown. Artwork geometry remains stationary.
+Moving SVG caustics follow the three physical channels and the central liquid well. A colour-derived mask clips them to the existing pink liquid and reflections; the metal and silhouette stay stationary. Production motion starts only after hydration, while the artwork is in view and the document is visible. Reduced-motion preferences retain the complete material render. Observer and media-query listeners are cleaned up on teardown. No animation runs on the whole sculpture.
 
-The original user artwork suggested the palette and crowned-network theme. At the owner's explicit request, the current graphic was redrawn to belong to the interface. No ImageGen or raster editing was used for this redraw. The subsequently supplied official logo replaces the former generic crown glyph, retaining its cracks, black emblem and pink drips. Sharp rendered the standalone vector previews; see `research/PAN_NATIVE_ART.md` and `research/PAN_BRAND_IDENTITY.md`.
+The current render was generated with the built-in ImageGen tool and a transparent background. Its alpha is preserved; Sharp only encodes production formats and renders the SVG compositor for inspection. The exact prompt, visual intent, motion geometry and checks are recorded in `research/PAN_NEXUS_ART.md`. The supplied owner logo is preserved separately and is not baked onto the sculpture.
 
 ## Preserved earlier sources
 
@@ -22,6 +23,7 @@ Earlier imagery is retained for provenance and recovery, not used as the current
 
 | Asset | Provenance |
 | --- | --- |
+| `pan-native-core.svg`, `pan-native-core.webp` | Superseded code-authored server diagram. See historical `research/PAN_NATIVE_ART.md`. |
 | `pan-core-cutout-v2.webp` | Earlier ImageGen extraction of supplied `king traffic.PNG`. |
 | `pan-atmosphere-v2.webp` | Earlier ImageGen composition from supplied `pan background #4.PNG` and `pan background #5.PNG`. |
 | `pan-network-core.webp` | Prepared version of supplied `king traffic.PNG`. |

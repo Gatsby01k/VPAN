@@ -4,7 +4,7 @@ Source supplied by the owner: `Дизайн без названия-19.png`, 1
 
 `public/assets/pan-owner-logo.webp` encodes the full canvas at quality 95 with alpha quality 100. No background removal, recolouring, generated reconstruction or destructive crop was needed. `PanLogo` uses the viewport `240 180 722 851` to frame the existing transparent margins consistently. The gold crown, cracks, black emblem and pink liquid remain the supplied artwork.
 
-The shared brand, rail, network instrument, hub face and favicon use this mark. Partner pages and social artwork inherit the hub component. The favicon embeds its image data so it does not depend on an external image reference.
+The shared brand, rail and favicon use this mark. After the owner's subsequent visual feedback, crowns were removed from the network instrument, hub illustration and its social previews; the owner logo remains in the brand identity. The favicon embeds its image data so it does not depend on an external image reference.
 
 `PanWordmark` is original code-authored SVG lettering, rather than a font approximation: three dense forms, matching angular cuts, open counters, a five-degree forward slant and a narrow pink A crossbar. Its silver fill keeps PAN distinct beside the detailed gold logo and pink VlaDDoS signature. It has no repeating shine or movement. Shared brand links retain a readable accessible name.
 

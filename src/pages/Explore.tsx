@@ -343,8 +343,8 @@ export function PartnerPage({ roleId }: { roleId: RoleId }) {
           <div className="partner-cover-object">
             <PanCoreArtwork
               label={t(
-                'PAN’s partner network with a crowned core and flowing pink channels',
-                'Партнёрская сеть PAN: ядро с короной и розовыми потоками',
+                'PAN’s partner network: a graphite and glass nexus with flowing pink channels',
+                'Партнёрская сеть PAN: графитовое ядро со стеклом и розовыми потоками',
               )}
             />
             <span aria-hidden="true">0{index}</span>

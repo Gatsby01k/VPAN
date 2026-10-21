@@ -4,11 +4,11 @@ import { PanCoreArtwork } from './PanCoreArtwork';
 export function SculptureStage() {
   const { t } = useLocale();
   return (
-    <div className="sculpture-stage sculpture-stage-native">
+    <div className="sculpture-stage sculpture-stage-nexus">
       <PanCoreArtwork
         label={t(
-          'PAN core: four partner nodes connected to a crowned obsidian hub by flowing pink channels',
-          'Ядро PAN: четыре партнёрских узла и обсидиановый центр с короной, соединённые розовыми потоками',
+          'PAN nexus: a graphite and smoked-glass core joined to partner nodes by flowing pink liquid',
+          'Ядро PAN из графита и дымчатого стекла, соединённое с партнёрскими узлами розовыми потоками',
         )}
       />
     </div>
