@@ -10,6 +10,7 @@ The current hero is a bespoke render of a low graphite and smoked-glass nexus wi
 - `public/assets/pan-lockup.svg` and `pan-lockup.png`: emblem and PAN wordmark as a transparent reusable logo.
 - `PanWordmark.tsx`: custom PAN vector lettering with shared angular cuts, open counters, a slight forward slant, a silver finish and a fine pink crossbar. The shared brand link supplies its accessible name.
 - `public/favicon.svg`: the vector emblem on a rounded graphite tile, with no embedded raster data or external dependency.
+- `public/icons/pan-v2.*`, `pan-v2-32.png`, `pan-v2-192.png`, `pan-v2-apple-180.png`: versioned SVG, multi-size ICO, PNG browser fallback and mobile bookmark icons linked from every page. Distinct URLs replace the browser's cached old favicon. `public/favicon.ico` supplies the conventional fallback URL; the mobile PNGs have an opaque graphite background.
 - `PanCoreArtwork.tsx`: responsive SVG compositor on the homepage and partner covers. It shares one image between the material render and a static mask selecting its actual pink pixels.
 - `public/assets/pan-nexus-render-v1.webp`: 1448 × 1086 transparent production render, 308 KiB.
 - `public/assets/pan-nexus-social.webp`: 1200 × 630 social preview.
