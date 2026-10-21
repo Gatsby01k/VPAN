@@ -13,6 +13,7 @@ import './brand-motion.css';
 import './scene.css';
 import './brand-identity.css';
 import './console.css';
+import './header.css';
 import { emptyGrowth, type GrowthData } from './growth';
 
 const root = document.getElementById('root')!;

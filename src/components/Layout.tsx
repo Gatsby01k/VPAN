@@ -153,9 +153,9 @@ export function Header() {
     return () => window.removeEventListener('keydown', key);
   }, []);
   const links = [
-    ['/#partners', t('Partnerships', 'Сотрудничество')],
+    ['/#partners', t('Partnerships', 'Партнёрство')],
     ['/markets', t('Markets', 'Рынки')],
-    ['/knowledge', t('Partner guides', 'Материалы')],
+    ['/knowledge', t('Guides', 'Материалы')],
     ['/about', t('About', 'О PAN')],
   ];
   return (
@@ -175,7 +175,15 @@ export function Header() {
           <nav className="desktop-nav" aria-label={t('Main navigation', 'Основная навигация')}>
             {links.map(([path, label]) =>
               path.includes('#') ? (
-                <Link key={path} to={path}>
+                <Link
+                  key={path}
+                  to={path}
+                  aria-current={
+                    location.pathname === '/' && location.hash === '#partners'
+                      ? 'location'
+                      : undefined
+                  }
+                >
                   {label}
                 </Link>
               ) : (
@@ -192,12 +200,12 @@ export function Header() {
               aria-label={t('Switch to Russian', 'Переключить на английский')}
             >
               {language.toUpperCase()}
-              <span>↗</span>
             </button>
             <button
               className="icon-button command-trigger"
               onClick={() => setCommand(true)}
               aria-label={t('Open quick navigation', 'Открыть быструю навигацию')}
+              aria-keyshortcuts="Meta+K Control+K"
             >
               <Search size={18} />
               <kbd>⌘K</kbd>

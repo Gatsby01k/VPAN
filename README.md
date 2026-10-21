@@ -10,6 +10,8 @@ The first screen retains the folded dashboard layout. Its left pane uses three n
 
 The shared brand, navigation rail and favicon use a bespoke vector crown/A monogram with platinum faces, a subtle champagne rim and one pink accent. The illustration and network instrument contain no decorative crowns. PAN is custom vector lettering with matching angular cuts and a silver finish; VlaDDoS remains beside it as the owner signature. The earlier supplied photographic crown is archived. Reusable SVG and transparent PNG logo files are available under `public/assets/pan-emblem*` and `pan-lockup*`.
 
+The header uses one stable glass panel with aligned branding, text navigation and a single partnership action. Its content is constrained to the panel height in both initial and scrolled states. The compact brand omits the unreadable caption beneath VlaDDoS; the full signature remains in the mobile menu. At tablet widths the navigation moves into the existing dialog, retaining language, search and application access. See `research/PAN_HEADER.md`.
+
 All 23 static routes are prerendered, with route-specific metadata and an actual 404 response. The production Node server also renders published research directly from SQLite in EN/RU. Public navigation works with direct URLs. The interface includes:
 
 - A partner profile: choose a role, up to three markets, local payment methods and a business category; preview a profile and the topics for a first conversation. Save a text brief, copy a link or carry the choices into an application.
