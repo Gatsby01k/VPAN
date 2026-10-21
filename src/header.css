@@ -1,81 +1,72 @@
-/* One stable header geometry for the home, inner pages and scrolled state. */
+/* The identity and navigation belong to the same composition as the console. */
 @layer header {
-  .site-header,
-  .site-header.is-deck-home,
-  .site-header.is-scrolled,
-  .site-header.is-deck-home.is-scrolled {
+  .site-header {
     position: fixed;
-    inset: 12px auto auto 50%;
-    transform: translateX(-50%);
-    width: min(1320px, calc(100% - 48px));
-    height: 72px;
-    padding: 0 24px;
-    border: 1px solid #c0cce325;
-    border-top-color: #e0e8fa38;
-    border-radius: 18px;
-    background: linear-gradient(110deg, #222630f7, #12151ef5 65%);
-    box-shadow:
-      inset 0 1px 0 #ffffff07,
-      0 12px 36px #00000029;
-    backdrop-filter: blur(24px);
-    transition:
-      background-color 180ms,
-      border-color 180ms,
-      box-shadow 180ms;
+    inset: 0 0 auto;
+    transform: none;
+    width: 100%;
+    height: 80px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    transition: background-color 180ms;
   }
 
-  .site-header.is-scrolled,
-  .site-header.is-deck-home.is-scrolled {
-    border-color: #c0cce332;
-    box-shadow:
-      inset 0 1px 0 #ffffff09,
-      0 12px 36px #00000047;
+  .site-header:not(.is-deck-home),
+  .site-header.is-scrolled {
+    background: #10131ded;
+    box-shadow: 0 1px 0 #cad7ee14;
+    backdrop-filter: blur(22px);
   }
 
   .site-header .header-inner {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
-    width: 100%;
+    width: min(1480px, calc(100% - 48px));
     height: 100%;
     min-height: 0;
-    margin: 0;
-    gap: 24px;
+    margin: 0 auto;
+    padding: 0 36px;
+    gap: 32px;
   }
 
   .site-header .brand {
-    gap: 8px;
-    height: 44px;
+    gap: 10px;
+    height: 48px;
     align-items: center;
   }
 
   .site-header .brand .pan-logo {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
   }
 
   .site-header .brand-wordmark {
-    width: 80px;
-    height: 28px;
+    width: 88px;
+    height: 31px;
   }
 
   .site-header .brand-endorsement {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 110px;
-    height: 44px;
-    padding-left: 14px;
+    width: 120px;
+    height: 48px;
+    padding-left: 16px;
   }
 
   .site-header .brand-endorsement::before {
-    height: 24px;
+    height: 26px;
     background: #d8dfef26;
   }
 
   .site-header .brand-signature {
-    width: 96px;
-    height: 44px;
+    width: 104px;
+    height: 48px;
     filter: none;
   }
 
@@ -86,20 +77,23 @@
   .site-header .desktop-nav {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     margin: 0;
     min-width: 0;
-    gap: 26px;
+    gap: clamp(22px, 2.4vw, 36px);
   }
 
   .site-header .desktop-nav a {
     position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     padding: 10px 0;
     border: 0;
     border-radius: 0;
     background: none;
     color: #b9c0ce;
-    font: 500 12px/1.3 var(--body);
+    font: 500 13px/1.3 var(--body);
     letter-spacing: 0;
     white-space: nowrap;
     transition: color 180ms;
@@ -109,7 +103,7 @@
     content: '';
     display: block;
     position: absolute;
-    inset: auto 0 2px;
+    inset: auto 0 3px;
     height: 2px;
     border-radius: 1px;
     background: #ff278b;
@@ -134,79 +128,41 @@
     align-items: center;
     justify-self: end;
     margin: 0;
-    gap: 8px;
+    padding-left: 18px;
+    gap: 6px;
+    border-left: 1px solid #cad7ee1a;
   }
 
-  .site-header .language-button {
+  .site-header .language-button,
+  .site-header .command-trigger,
+  .site-header .mobile-toggle {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    min-height: 40px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
     padding: 0;
-    border-radius: 10px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
     color: #bac2d2;
+    transition: color 180ms;
+  }
+
+  .site-header .language-button {
     font: 550 11px/1 var(--body);
     letter-spacing: 0.04em;
   }
 
-  .site-header .command-trigger,
-  .site-header .mobile-toggle {
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
-    min-height: 40px;
-    padding: 0;
-    border: 1px solid #cad7ee1a;
-    border-radius: 10px;
-    background: #cbd7ee05;
-    color: #bdc6d9;
+  .site-header .command-trigger:hover,
+  .site-header .language-button:hover,
+  .site-header .mobile-toggle:hover {
+    background: transparent;
+    color: #fff2f8;
   }
 
-  .site-header .command-trigger {
-    display: inline-flex;
-  }
-
-  .site-header .command-trigger kbd {
-    display: none;
-  }
-
-  .site-header .header-apply {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: none;
-    height: 40px;
-    padding: 0 15px;
-    gap: 13px;
-    border: 1px solid #ff8cbd66;
-    border-radius: 11px;
-    background: #eb0875;
-    color: #fff7fb;
-    box-shadow:
-      inset 0 1px 0 #ffffff26,
-      0 4px 14px #f0007015;
-    font: 600 12px/1.2 var(--body);
-    letter-spacing: 0;
-    transition:
-      background-color 180ms,
-      border-color 180ms;
-  }
-
-  .site-header .header-apply:hover {
-    background: #fa2187;
-    border-color: #ffb0d3aa;
-    color: #fff;
-  }
-
-  .site-header .header-apply-full {
-    display: inline;
-  }
-
-  .site-header .header-apply-short,
   .site-header .mobile-toggle {
     display: none;
   }
@@ -217,7 +173,23 @@
   }
 
   .pan-deck {
-    padding-top: 104px;
+    padding-top: 88px;
+  }
+
+  @media (max-width: 1180px) {
+    .site-header {
+      height: 76px;
+    }
+
+    .site-header .header-inner {
+      width: calc(100% - 40px);
+      padding-inline: 24px;
+      gap: 24px;
+    }
+
+    .pan-deck {
+      padding-top: 84px;
+    }
   }
 
   @media (max-width: 1024px) {
@@ -232,30 +204,16 @@
     .site-header .mobile-toggle {
       display: inline-flex;
     }
-
-    .site-header .language-button,
-    .site-header .command-trigger,
-    .site-header .mobile-toggle {
-      width: 44px;
-      height: 44px;
-      min-width: 44px;
-      min-height: 44px;
-    }
   }
 
   @media (max-width: 720px) {
-    .site-header,
-    .site-header.is-deck-home,
-    .site-header.is-scrolled,
-    .site-header.is-deck-home.is-scrolled {
-      top: 10px;
-      width: calc(100% - 24px);
-      height: 64px;
-      padding-inline: 12px;
-      border-radius: 15px;
+    .site-header {
+      height: 68px;
     }
 
     .site-header .header-inner {
+      width: calc(100% - 28px);
+      padding-inline: 12px;
       gap: 12px;
     }
 
@@ -285,34 +243,34 @@
       height: 35px;
     }
 
+    .site-header .header-tools {
+      padding-left: 0;
+      border-left: 0;
+    }
+
     .pan-deck {
-      padding-top: 90px;
+      padding-top: 76px;
     }
   }
 
   @media (max-width: 600px) {
-    .site-header .header-apply,
     .site-header .command-trigger {
       display: none;
-    }
-
-    .site-header .header-tools {
-      gap: 4px;
     }
   }
 
   @media (max-width: 440px) {
-    .site-header,
-    .site-header.is-deck-home,
-    .site-header.is-scrolled,
-    .site-header.is-deck-home.is-scrolled {
-      top: 8px;
-      height: 60px;
-      padding-inline: 10px;
+    .site-header {
+      height: 64px;
+    }
+
+    .site-header .header-inner {
+      width: calc(100% - 32px);
+      padding-inline: 0;
     }
 
     .pan-deck {
-      padding-top: 82px;
+      padding-top: 72px;
     }
   }
 
@@ -343,12 +301,11 @@
 
   @media (prefers-reduced-motion: reduce) {
     .site-header,
-    .site-header.is-deck-home,
-    .site-header.is-scrolled,
-    .site-header.is-deck-home.is-scrolled,
     .site-header .desktop-nav a,
     .site-header .desktop-nav a::after,
-    .site-header .header-apply {
+    .site-header .language-button,
+    .site-header .command-trigger,
+    .site-header .mobile-toggle {
       transition: none;
     }
   }

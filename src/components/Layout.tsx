@@ -207,20 +207,8 @@ export function Header() {
               aria-label={t('Open quick navigation', 'Открыть быструю навигацию')}
               aria-keyshortcuts="Meta+K Control+K"
             >
-              <Search size={18} />
-              <kbd>⌘K</kbd>
+              <Search size={20} strokeWidth={1.6} />
             </button>
-            <Link
-              className="header-apply"
-              to="/apply"
-              aria-label={t('Partner with PAN', 'Стать партнёром')}
-            >
-              <span className="header-apply-full">{t('Partner with PAN', 'Стать партнёром')}</span>
-              <span className="header-apply-short" aria-hidden="true">
-                {t('Join PAN', 'Заявка')}
-              </span>
-              <ArrowUpRight size={17} />
-            </Link>
             <button
               className="icon-button mobile-toggle"
               onClick={() => setMenu(true)}
