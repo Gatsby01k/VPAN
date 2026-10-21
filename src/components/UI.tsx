@@ -2,31 +2,14 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, X } from 'lucide-react';
 import { useLocale } from '../locale';
-
-export function Crown() {
-  return (
-    <svg className="pan-crown" viewBox="0 0 44 36" fill="none" aria-hidden="true">
-      <path
-        d="m5 13 8 7 8-16 8 16 10-7-5 18H10L5 13Z"
-        stroke="currentColor"
-        strokeWidth="2.6"
-        strokeLinejoin="round"
-      />
-      <path d="M11 35h22" stroke="currentColor" strokeWidth="2.6" />
-      <circle cx="4" cy="10" r="2" fill="currentColor" />
-      <circle cx="21" cy="3" r="2" fill="currentColor" />
-      <circle cx="40" cy="10" r="2" fill="currentColor" />
-    </svg>
-  );
-}
+import { PanLogo } from './PanLogo';
+import { PanWordmark } from './PanWordmark';
 
 export function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <Link to="/" className="brand" aria-label={compact ? 'PAN home' : 'PAN / VlaDDoS — home'}>
-      <Crown />
-      <span className="brand-word">
-        PAN<span className="brand-dot">.</span>
-      </span>
+      <PanLogo />
+      <PanWordmark />
       {!compact && (
         <span className="brand-endorsement">
           <span className="brand-signature" aria-hidden="true">

@@ -8,7 +8,7 @@ import {
   Send,
   UsersRound,
 } from 'lucide-react';
-import { Crown } from './UI';
+import { PanLogo } from './PanLogo';
 import { Link } from 'react-router-dom';
 import { markets, roles, type RoleId } from '../data';
 import { useLocale } from '../locale';
@@ -254,7 +254,7 @@ export function NetworkConsole({ role, onRole }: { role: RoleId; onRole: (role: 
       </div>
       <aside className="deck-rail">
         <Link className="deck-rail-brand" to="/about" aria-label={t('About PAN', 'О PAN')}>
-          <Crown />
+          <PanLogo />
         </Link>
         <nav aria-label={t('Network navigation', 'Навигация по сети')}>
           <Link className="is-active" to="/" aria-label={t('Home', 'Главная')} aria-current="page">

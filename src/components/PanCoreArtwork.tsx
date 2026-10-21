@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import { PanLogo } from './PanLogo';
 
 const channels = [
   {
@@ -453,17 +454,8 @@ export function PanCoreArtwork({
           opacity=".45"
           filter={ref('glow')}
         />
-        <g
-          transform="matrix(.78 -.38 0 .78 334 161)"
-          stroke={ref('gold')}
-          strokeWidth="2"
-          strokeLinejoin="round"
-        >
-          <path d="m5 13 8 7 8-16 8 16 10-7-5 18H10L5 13Z" />
-          <path d="M11 35h22" />
-          <circle cx="4" cy="10" r="1.5" fill={ref('gold')} stroke="none" />
-          <circle cx="21" cy="3" r="1.5" fill={ref('gold')} stroke="none" />
-          <circle cx="40" cy="10" r="1.5" fill={ref('gold')} stroke="none" />
+        <g transform="matrix(.78 -.38 0 .78 334 155)">
+          <PanLogo width="44" height="52" />
         </g>
         <path d="m338 210 25-12" stroke="#818ca8" strokeOpacity=".4" />
         <path d="m338 216 15-7" stroke="#ff54a3" strokeWidth="2" strokeLinecap="round" />

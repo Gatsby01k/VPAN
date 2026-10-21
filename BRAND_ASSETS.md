@@ -1,9 +1,12 @@
 # PAN artwork and identity
 
-The current main artwork is an original, code-authored SVG in `src/components/PanCoreArtwork.tsx`. It shares the graphite, smoked glass, small champagne-gold crown and hot pink (#ff0077) of the interface. Its isometric hub, four partner nodes, plinth and conduits use one perspective. No humanoid character appears.
+The current main artwork is an original, code-authored SVG in `src/components/PanCoreArtwork.tsx`. It shares the graphite, smoked glass, owner's gold-and-pink crown logo and hot pink (#ff0077) of the interface. Its isometric hub, four partner nodes, plinth and conduits use one perspective. No humanoid character appears.
 
 ## Current production assets
 
+- `PanLogo.tsx`: the owner's exact transparent crown artwork, framed by an SVG viewport. Used in the shared brand, navigation rail, network instrument and core artwork. `public/assets/pan-owner-logo.webp` preserves its original full canvas; `research/artwork/pan-owner-logo.png` preserves the source. No generated substitute or outline crown is used.
+- `PanWordmark.tsx`: custom PAN vector lettering with shared angular cuts, open counters, a slight forward slant, a silver finish and a fine pink crossbar. The shared brand link supplies its accessible name.
+- `public/favicon.svg`: self-contained rendering of the same owner-supplied logo.
 - `PanCoreArtwork.tsx`: inline responsive SVG on the homepage and partner covers. The geometry itself contains the channels; no raster extraction or WebGL is used.
 - `public/assets/pan-native-core.svg`: standalone animated export for inspection.
 - `public/assets/pan-native-core.webp`: static 1200 × 630 rendering for social previews.
@@ -11,7 +14,7 @@ The current main artwork is an original, code-authored SVG in `src/components/Pa
 
 Native SVG gradients and two filament layers per channel create visible pink flow. Production motion starts only after hydration, while the artwork is in view and the document is visible. Reduced-motion preferences retain the stationary drawing. Observer and media-query listeners are cleaned up on teardown. Artwork geometry remains stationary.
 
-The original user artwork suggested the palette and crowned-network theme. At the owner's explicit request, the current graphic was redrawn to belong to the interface. No ImageGen or raster editing was used for this redraw. Sharp rendered the standalone vector previews; see `research/PAN_NATIVE_ART.md`.
+The original user artwork suggested the palette and crowned-network theme. At the owner's explicit request, the current graphic was redrawn to belong to the interface. No ImageGen or raster editing was used for this redraw. The subsequently supplied official logo replaces the former generic crown glyph, retaining its cracks, black emblem and pink drips. Sharp rendered the standalone vector previews; see `research/PAN_NATIVE_ART.md` and `research/PAN_BRAND_IDENTITY.md`.
 
 ## Preserved earlier sources
 

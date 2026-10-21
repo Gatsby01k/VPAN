@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import type { RoleId } from '../data';
+import { PanLogo } from './PanLogo';
 
 const nodes = [
   { id: 'affiliate', x: 108, y: 109 },
@@ -72,18 +73,7 @@ export function NetworkOrbit({ role }: { role: RoleId }) {
           strokeOpacity=".35"
           strokeLinecap="round"
         />
-        <g className="orbit-crown" transform="translate(231 113) scale(.86)">
-          <path
-            d="m5 13 8 7 8-16 8 16 10-7-5 18H10L5 13Z"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinejoin="round"
-          />
-          <path d="M11 35h22" stroke="currentColor" strokeWidth="1.8" />
-          <circle cx="4" cy="10" r="1.6" fill="currentColor" />
-          <circle cx="21" cy="3" r="1.6" fill="currentColor" />
-          <circle cx="40" cy="10" r="1.6" fill="currentColor" />
-        </g>
+        <PanLogo x="232" y="106" width="36" height="44" />
         <path
           className="orbit-core-light"
           d="m222 157 28 16 28-16"

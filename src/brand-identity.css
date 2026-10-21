@@ -1,0 +1,90 @@
+/* One owner-supplied mark and one custom wordmark across every surface. */
+@layer brand-identity {
+  .brand {
+    gap: 9px;
+  }
+
+  .brand .pan-logo {
+    display: block;
+    flex: none;
+    width: 40px;
+    height: 47px;
+    filter: drop-shadow(0 3px 7px #ff00771c);
+  }
+
+  .brand-wordmark {
+    display: block;
+    flex: none;
+    width: 88px;
+    height: 31px;
+    overflow: visible;
+  }
+
+  .deck-rail-brand .pan-logo {
+    display: block;
+    width: 32px;
+    height: 39px;
+  }
+
+  @media (max-width: 1180px) {
+    .brand .pan-logo {
+      width: 36px;
+      height: 43px;
+    }
+
+    .brand-wordmark {
+      width: 76px;
+      height: 27px;
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .site-header .header-apply {
+      display: none;
+    }
+  }
+
+  @media (max-width: 800px) {
+    .brand {
+      gap: 8px;
+    }
+
+    .brand .pan-logo {
+      width: 30px;
+      height: 39px;
+    }
+
+    .brand-wordmark {
+      width: 66px;
+      height: 24px;
+    }
+
+    .deck-rail-brand .pan-logo {
+      width: 25px;
+      height: 31px;
+    }
+  }
+
+  @media (max-width: 440px) {
+    .deck-rail-brand .pan-logo {
+      width: 22px;
+      height: 27px;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .brand {
+      gap: 7px;
+    }
+
+    .brand .pan-logo {
+      width: 26px;
+      height: 35px;
+    }
+
+    .brand-wordmark {
+      width: 54px;
+      height: 20px;
+    }
+  }
+}
