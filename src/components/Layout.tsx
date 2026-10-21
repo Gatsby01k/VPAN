@@ -23,7 +23,7 @@ function CommandMenu({ open, onClose }: { open: boolean; onClose: () => void }) 
       path: '/#forge',
     },
     {
-      title: t('The network', 'Партнёрская сеть'),
+      title: t('Partnership directions', 'Направления сотрудничества'),
       subtitle: t('Find your place', 'Найдите своё направление'),
       path: '/#partners',
     },
@@ -153,10 +153,9 @@ export function Header() {
     return () => window.removeEventListener('keydown', key);
   }, []);
   const links = [
-    ['/#partners', t('Partnerships', 'Партнёрство')],
+    ['/#partners', t('Partnerships', 'Сотрудничество')],
     ['/markets', t('Markets', 'Рынки')],
     ['/knowledge', t('Field notes', 'Практика')],
-    ['/#forge', t('My profile', 'Мой профиль')],
     ['/about', t('About', 'О PAN')],
   ];
   return (
@@ -168,7 +167,9 @@ export function Header() {
       >
         {t('Skip to content', 'Перейти к содержимому')}
       </a>
-      <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
+      <header
+        className={`site-header ${location.pathname === '/' ? 'is-deck-home' : ''} ${scrolled ? 'is-scrolled' : ''}`}
+      >
         <div className="header-inner wrap">
           <Brand />
           <nav className="desktop-nav" aria-label={t('Main navigation', 'Основная навигация')}>
@@ -270,12 +271,12 @@ export function Footer() {
           <div>
             <div className="footer-kicker">
               <span className="signal-dot" />
-              {t('YOUR NEXT PARTNERSHIP STARTS HERE.', 'ЗДЕСЬ НАЧИНАЕТСЯ ТВОЁ ПАРТНЁРСТВО.')}
+              {t('GOOD PEOPLE. A COMMON DIRECTION.', 'НУЖНЫЕ ЛЮДИ. ОБЩЕЕ НАПРАВЛЕНИЕ.')}
             </div>
             <Link to="/apply" className="footer-invite">
-              {t('LET’S BUILD', 'РАЗВИВАЕМ')}
+              {t('LET’S START', 'НАЧНЁМ')}
               <br />
-              <span className="display-accent">{t('PAN TOGETHER.', 'PAN ВМЕСТЕ.')}</span>
+              <span className="display-accent">{t('A CONVERSATION.', 'С РАЗГОВОРА.')}</span>
               <ArrowUpRight aria-hidden="true" />
             </Link>
           </div>

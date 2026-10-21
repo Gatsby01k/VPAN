@@ -26,7 +26,7 @@ export function renderHead(
   let tags = noindex ? '<meta name="robots" content="noindex, follow" />' : '';
   if (origin) {
     const canonical = origin + pathname + (language === 'ru' ? '?lang=ru' : '');
-    tags += `<link rel="canonical" href="${escapeHtml(canonical)}"/><link rel="alternate" hreflang="en" href="${escapeHtml(origin + pathname)}"/><link rel="alternate" hreflang="ru" href="${escapeHtml(origin + pathname + '?lang=ru')}"/><link rel="alternate" hreflang="x-default" href="${escapeHtml(origin + pathname)}"/><meta property="og:url" content="${escapeHtml(canonical)}"/><meta property="og:image" content="${escapeHtml(origin + '/assets/pan-mascot.webp')}"/>`;
+    tags += `<link rel="canonical" href="${escapeHtml(canonical)}"/><link rel="alternate" hreflang="en" href="${escapeHtml(origin + pathname)}"/><link rel="alternate" hreflang="ru" href="${escapeHtml(origin + pathname + '?lang=ru')}"/><link rel="alternate" hreflang="x-default" href="${escapeHtml(origin + pathname)}"/><meta property="og:url" content="${escapeHtml(canonical)}"/><meta property="og:image" content="${escapeHtml(origin + '/assets/pan-atmosphere-v2.webp')}"/>`;
     const graph = [
       {
         '@type': 'Organization',

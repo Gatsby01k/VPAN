@@ -22,6 +22,11 @@ export function LocaleProvider({
     const explicit = new URLSearchParams(location.search).get('lang');
     if (explicit === 'ru' || explicit === 'en') {
       setLanguage(explicit);
+      try {
+        localStorage.setItem('pan-language', explicit);
+      } catch {
+        /* The explicit URL still determines this page's language. */
+      }
       return;
     }
     try {

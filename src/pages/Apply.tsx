@@ -5,6 +5,7 @@ import {
   ArrowUpRight,
   Check,
   CheckCheck,
+  ChevronDown,
   Copy,
   LoaderCircle,
   LockKeyhole,
@@ -56,8 +57,8 @@ export default function ApplyPage() {
   const [params] = useSearchParams();
   const roleQuery = params.get('role');
   const initialRole = roles.find((r) => r.id === roleQuery)?.id || 'affiliate';
-  const [draft, setDraft] = useState<Draft>(() => freshDraft());
-  const [step, setStep] = useState(0);
+  const [draft, setDraft] = useState<Draft>(() => freshDraft(initialRole));
+  const [step, setStep] = useState(() => (roles.some((r) => r.id === roleQuery) ? 1 : 0));
   const [ready, setReady] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
@@ -101,7 +102,7 @@ export default function ApplyPage() {
       /* Continue with a clean draft if browser storage is unavailable. */
     }
     if (!sameEntry && roleQuery && roles.some((r) => r.id === roleQuery)) {
-      if (next.role !== initialRole) savedStep = 0;
+      savedStep = 1;
       next.role = initialRole;
     }
     const market = markets.find((m) => m.slug === params.get('market'));
@@ -310,14 +311,14 @@ export default function ApplyPage() {
       <div className="apply-intro">
         <Eyebrow>{t('A good connection starts here', 'Хорошие связи начинаются здесь')}</Eyebrow>
         <h1>
-          {t('LET’S', 'ДАВАЙТЕ')}
+          {t('Let’s discuss', 'Обсудим')}
           <br />
-          <span className="display-accent accent">{t('connect.', 'знакомиться.')}</span>
+          <span className="display-accent accent">{t('partnership.', 'партнёрство.')}</span>
         </h1>
         <p>
           {t(
-            'A few useful details. A real conversation. A potential new partnership.',
-            'Несколько полезных деталей. Предметный разговор. Возможность нового партнёрства.',
+            'Your markets and a work contact are enough to start. Add the details you already know.',
+            'Рынки и рабочий контакт — основа первого разговора. Дополните деталями, которые уже знаете.',
           )}
         </p>
         <ol className="apply-progress">
@@ -415,7 +416,15 @@ export default function ApplyPage() {
                 </div>
               )}
               <div className="form-topline">
-                <span>PAN / PARTNER INTRODUCTION</span>
+                <span>
+                  PAN /{' '}
+                  {step > 0
+                    ? t(
+                        roles.find((role) => role.id === draft.role)!.title,
+                        roles.find((role) => role.id === draft.role)!.ru,
+                      )
+                    : t('PARTNERSHIP', 'ПАРТНЁРСТВО')}
+                </span>
                 <span>{(step + 1).toString().padStart(2, '0')} — 03</span>
               </div>
               <>
@@ -525,32 +534,47 @@ export default function ApplyPage() {
                         label={t('Business category', 'Бизнес-категория')}
                         optional
                       />
-                      <div className="field-grid">
-                        {field(
-                          'methods',
-                          t('Payment methods', 'Платёжные методы'),
-                          'UPI, Mobile Money…',
-                        )}
-                        {field(
-                          'size',
-                          draft.role === 'team'
-                            ? t('Team size', 'Размер команды')
-                            : t('Company / network size', 'Размер компании / сети'),
-                          t('Optional', 'Необязательно'),
-                        )}
-                      </div>
-                      <div className="field-grid">
-                        {field(
-                          'experience',
-                          t('Experience', 'Опыт'),
-                          t('e.g. 3 years', 'Например, 3 года'),
-                        )}
-                        {field(
-                          'volume',
-                          t('Monthly volume, if relevant', 'Месячный объём, если применимо'),
-                          t('Optional', 'Необязательно'),
-                        )}
-                      </div>
+                      <details className="application-extra">
+                        <summary>
+                          {t(
+                            'Add experience & payment details',
+                            'Добавить опыт и платёжные детали',
+                          )}
+                          <ChevronDown size={16} />
+                        </summary>
+                        <p>
+                          {t(
+                            'Optional. You can discuss these with PAN later.',
+                            'Необязательно. Это можно обсудить с PAN позже.',
+                          )}
+                        </p>
+                        <div className="field-grid">
+                          {field(
+                            'methods',
+                            t('Payment methods', 'Платёжные методы'),
+                            'UPI, Mobile Money…',
+                          )}
+                          {field(
+                            'size',
+                            draft.role === 'team'
+                              ? t('Team size', 'Размер команды')
+                              : t('Company / network size', 'Размер компании / сети'),
+                            t('Optional', 'Необязательно'),
+                          )}
+                        </div>
+                        <div className="field-grid">
+                          {field(
+                            'experience',
+                            t('Experience', 'Опыт'),
+                            t('e.g. 3 years', 'Например, 3 года'),
+                          )}
+                          {field(
+                            'volume',
+                            t('Monthly volume, if relevant', 'Месячный объём, если применимо'),
+                            t('Optional', 'Необязательно'),
+                          )}
+                        </div>
+                      </details>
                     </>
                   )}
                   {step === 2 && (

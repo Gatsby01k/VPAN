@@ -138,7 +138,7 @@ export function BriefStudio({ role, onRole }: { role: RoleId; onRole: (id: RoleI
     }
   };
   return (
-    <section className="partner-studio" id="forge">
+    <section className="partner-studio" id="partner-brief">
       <div className="wrap">
         <div className="chapter-line">
           <span>01 / {t('YOUR PARTNER PROFILE', 'ТВОЙ ПАРТНЁРСКИЙ ПРОФИЛЬ')}</span>
@@ -146,14 +146,14 @@ export function BriefStudio({ role, onRole }: { role: RoleId; onRole: (id: RoleI
         </div>
         <div className="profile-heading">
           <h2>
-            {t('YOUR EXPERTISE.', 'ТВОЯ ЭКСПЕРТИЗА.')}
+            {t('Your partner', 'Партнёрский')}
             <br />
-            <span>{t('YOUR WAY IN.', 'ТВОЙ ВХОД В PAN.')}</span>
+            <span>{t('brief.', 'бриф.')}</span>
           </h2>
           <p>
             {t(
-              'Choose your role and markets. Your profile updates as you go. Take it into the application or save it for a conversation.',
-              'Выбери роль и рынки. Профиль собирается по ходу выбора. Перенеси его в заявку или сохрани для разговора.',
+              'Collect the details for a conversation. Save your brief, share a link or carry your choices into an application.',
+              'Соберите детали для разговора. Бриф можно сохранить, передать ссылкой или перенести в заявку.',
             )}
           </p>
         </div>

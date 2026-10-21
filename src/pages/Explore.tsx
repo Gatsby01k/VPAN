@@ -341,10 +341,13 @@ export function PartnerPage({ roleId }: { roleId: RoleId }) {
           </div>
           <div className="partner-cover-object">
             <img
-              src="/assets/pan-mascot.webp"
-              width="1254"
-              height="1254"
-              alt={t('The crowned PAN character', 'Персонаж PAN с короной')}
+              src="/assets/pan-core-cutout-v2.webp"
+              width="1089"
+              height="1445"
+              alt={t(
+                'PAN’s crowned server structure in black stone, pink and gold',
+                'Серверная структура PAN с короной: чёрный камень, розовый и золото',
+              )}
             />
             <span aria-hidden="true">0{index}</span>
           </div>
