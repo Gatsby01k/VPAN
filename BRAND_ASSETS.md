@@ -13,7 +13,9 @@ The current hero is a bespoke render of a low graphite and smoked-glass nexus wi
 - `research/artwork/pan-nexus-original.png`: original output of the built-in ImageGen tool.
 - `research/artwork/pan-nexus-motion.svg`: portable animated asset export for inspection.
 
-Moving SVG caustics follow the three physical channels and the central liquid well. A colour-derived mask clips them to the existing pink liquid and reflections; the metal and silhouette stay stationary. Production motion starts only after hydration, while the artwork is in view and the document is visible. Reduced-motion preferences retain the complete material render. Observer and media-query listeners are cleaned up on teardown. No animation runs on the whole sculpture.
+Moving SVG displacement changes the liquid's texture, and caustics follow the three physical channels and the central liquid well. A colour-derived mask clips both to the existing pink liquid and reflections; the metal and silhouette stay stationary. A continuous noise field avoids tile seams. Motion shares a 6.4-second cycle. Production motion starts only after hydration, while the artwork is in view and the document is visible. Reduced-motion preferences retain the complete material render. Observer and media-query listeners are cleaned up on teardown. No animation runs on the whole sculpture.
+
+`console.css` keeps the heading, illustration and entry card in three separate grid rows. The illustration has its own minimum height and contained SVG viewport; the card participates in normal flow. Manrope is self-hosted for English and Russian headings, with Inter for body copy and controls. The first-screen copy uses a two-line headline, a readable explanation and a compact role entry.
 
 The current render was generated with the built-in ImageGen tool and a transparent background. Its alpha is preserved; Sharp only encodes production formats and renders the SVG compositor for inspection. The exact prompt, visual intent, motion geometry and checks are recorded in `research/PAN_NEXUS_ART.md`. The supplied owner logo is preserved separately and is not baked onto the sculpture.
 

@@ -10,7 +10,7 @@ const channels = [
     y: 525,
     dx: -120,
     dy: 64,
-    duration: '4.2s',
+    duration: '3.2s',
     delay: '-1.8s',
   },
   {
@@ -19,7 +19,7 @@ const channels = [
     y: 538,
     dx: 120,
     dy: 70,
-    duration: '4.8s',
+    duration: '3.2s',
     delay: '-3s',
   },
   {
@@ -28,7 +28,7 @@ const channels = [
     y: 300,
     dx: 120,
     dy: -48,
-    duration: '5.4s',
+    duration: '6.4s',
     delay: '-.9s',
   },
 ] as const;
@@ -70,7 +70,7 @@ export function PanCoreArtwork({
       ref={root}
       className="pan-core-artwork"
       viewBox="0 75 1448 930"
-      preserveAspectRatio="xMidYMin meet"
+      preserveAspectRatio="xMidYMid meet"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
@@ -110,6 +110,50 @@ export function PanCoreArtwork({
             >
               <use href={`#${id}-render`} filter={ref('liquid-pixels')} />
             </mask>
+            <filter
+              id={`${id}-liquid-current`}
+              filterUnits="userSpaceOnUse"
+              x="-260"
+              y="-260"
+              width="1968"
+              height="1606"
+              colorInterpolationFilters="sRGB"
+            >
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency=".018 .032"
+                numOctaves="2"
+                seed="8"
+                result="water"
+              />
+              <feOffset in="water" result="current">
+                <animate
+                  attributeName="dx"
+                  values="-120;120;-120"
+                  keyTimes="0;.5;1"
+                  calcMode="spline"
+                  keySplines=".45 0 .55 1;.45 0 .55 1"
+                  dur="6.4s"
+                  repeatCount="indefinite"
+                />
+                <animate
+                  attributeName="dy"
+                  values="-64;64;-64"
+                  keyTimes="0;.5;1"
+                  calcMode="spline"
+                  keySplines=".45 0 .55 1;.45 0 .55 1"
+                  dur="6.4s"
+                  repeatCount="indefinite"
+                />
+              </feOffset>
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="current"
+                scale="36"
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+            </filter>
             <filter
               id={`${id}-caustic`}
               x="-20%"
@@ -184,14 +228,15 @@ export function PanCoreArtwork({
       <use href={`#${id}-render`} />
       {animated ? (
         <g mask={ref('liquid')} className="pan-nexus-caustics">
+          <use href={`#${id}-render`} filter={ref('liquid-current')} opacity=".96" />
           {channels.map((channel, index) => (
             <path
               key={channel.path}
               d={channel.path}
               stroke={ref(`flow-${index}`)}
-              strokeWidth="96"
+              strokeWidth="112"
               strokeLinecap="round"
-              opacity=".58"
+              opacity=".8"
               filter={ref('caustic')}
             />
           ))}
@@ -201,20 +246,20 @@ export function PanCoreArtwork({
                 d="M-173-72a187 187 0 0 1 337 165"
                 stroke={ref('swirl')}
                 strokeWidth="64"
-                opacity=".48"
+                opacity=".72"
               />
               <path
                 d="M-112 74a135 135 0 0 1 225-148"
                 stroke={ref('swirl')}
                 strokeWidth="40"
-                opacity=".4"
+                opacity=".6"
               />
               <animateTransform
                 attributeName="transform"
                 type="rotate"
                 from="0"
                 to="360"
-                dur="13s"
+                dur="6.4s"
                 repeatCount="indefinite"
               />
             </g>

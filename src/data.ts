@@ -131,8 +131,8 @@ export const roles = [
     path: '/affiliates',
     title: 'Affiliates',
     ru: 'Аффилиаты',
-    short: 'Introduce teams and businesses to PAN. Agree referral terms before the introduction.',
-    shortRu: 'Знакомьте PAN с командами и бизнесом. Условия рекомендации согласуем заранее.',
+    short: 'Introduce a team or business. Agree referral terms with PAN before the introduction.',
+    shortRu: 'Познакомьте PAN с командой или бизнесом. Условия рекомендации согласуем заранее.',
     description:
       'Introduce experienced teams, PSPs and merchants to PAN. Agree referral attribution and commercial terms before making introductions.',
     descriptionRu:

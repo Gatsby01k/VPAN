@@ -1,13 +1,4 @@
-import {
-  ArrowUpRight,
-  BookOpen,
-  FileText,
-  Globe2,
-  House,
-  Network,
-  Send,
-  UsersRound,
-} from 'lucide-react';
+import { ArrowUpRight, BookOpen, FileText, Globe2, House, Network, Send } from 'lucide-react';
 import { PanLogo } from './PanLogo';
 import { Link } from 'react-router-dom';
 import { markets, roles, type RoleId } from '../data';
@@ -86,12 +77,13 @@ export function NetworkConsole({ role, onRole }: { role: RoleId; onRole: (role: 
           <div>
             <span>PRIVATE AFFILIATE NETWORK</span>
             <h1 id="pan-heading">
-              {t('The right partners. New markets.', 'Нужные партнёры. Новые рынки.')}
+              <span>{t('Partners. Payments.', 'Партнёры. Платежи.')}</span>
+              <span>{t('New markets.', 'Новые рынки.')}</span>
             </h1>
             <p>
               {t(
-                'PAN connects payment teams, PSPs and businesses across Africa, LATAM and Asia.',
-                'PAN объединяет платёжные команды, PSP и бизнес в Африке, LATAM и Азии.',
+                'A private network for payment teams, PSPs and businesses in Africa, LATAM and Asia.',
+                'Частная сеть для платёжных команд, PSP и бизнеса в Африке, LATAM и Азии.',
               )}
             </p>
           </div>
@@ -102,11 +94,8 @@ export function NetworkConsole({ role, onRole }: { role: RoleId; onRole: (role: 
         <SculptureStage />
         <div className="deck-entry-card" aria-live="polite">
           <div className="deck-entry-heading">
-            <span className="deck-entry-icon">
-              <UsersRound size={24} strokeWidth={1.3} />
-            </span>
             <div>
-              <span>{t('Your role in PAN', 'Ваша роль в PAN')}</span>
+              <span>{t('Your way into PAN', 'Ваш формат в PAN')}</span>
               <h2>{t(current.title, current.ru)}</h2>
             </div>
           </div>
@@ -117,21 +106,14 @@ export function NetworkConsole({ role, onRole }: { role: RoleId; onRole: (role: 
               <ArrowUpRight size={22} />
             </span>
           </Link>
-          <small>
-            {t('Agree the terms before the work begins.', 'Условия — до начала работы.')}
-          </small>
-        </div>
-        <div className="deck-scene-signature">
-          <span>PAN / PARTNER NETWORK</span>
-          <span>AFRICA / LATAM / ASIA</span>
         </div>
       </div>
       <div className="deck-instruments">
         <section className="deck-primary" aria-label={t('Network overview', 'Обзор сети')}>
           <div className="deck-widget-heading">
             <div>
-              <h2>{t('Built on connections.', 'Сеть партнёров.')}</h2>
-              <p>{t('Five ways to work with PAN', 'Пять форматов сотрудничества с PAN')}</p>
+              <h2>{t('One network. Your role.', 'Одна сеть. Ваша роль.')}</h2>
+              <p>{t('Choose how you work with PAN', 'Выберите свой формат сотрудничества')}</p>
             </div>
             <Link
               className="deck-round"
@@ -187,7 +169,7 @@ export function NetworkConsole({ role, onRole }: { role: RoleId; onRole: (role: 
               </span>
               <span>
                 <strong>{t('Regions', 'Регионы')}</strong>
-                <small>{t('Local expertise', 'Локальная экспертиза')}</small>
+                <small>{t('Where we connect', 'География сети')}</small>
               </span>
             </span>
             <span className="deck-stat-number">
@@ -203,7 +185,7 @@ export function NetworkConsole({ role, onRole }: { role: RoleId; onRole: (role: 
               </span>
               <span>
                 <strong>{t('Your role', 'Ваша роль')}</strong>
-                <small>{t('The starting point', 'С чего начнём')}</small>
+                <small>{t('Your partnership format', 'Формат партнёрства')}</small>
               </span>
             </span>
             <span className="deck-stat-number">
