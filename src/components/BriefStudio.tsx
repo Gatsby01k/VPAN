@@ -4,7 +4,7 @@ import { ArrowUpRight, Check, Copy, Download, Plus } from 'lucide-react';
 import { markets, roles, type RoleId } from '../data';
 import { useLocale } from '../locale';
 import { CategoryPicker } from './FormControls';
-import { restorePartnerProfile, savePartnerProfile } from './partner-profile';
+import { partnerProfileQuery, restorePartnerProfile, savePartnerProfile } from './partner-profile';
 
 const questions: Record<RoleId, [string, string][]> = {
   affiliate: [
@@ -44,8 +44,9 @@ const questions: Record<RoleId, [string, string][]> = {
 };
 
 export function BriefStudio({ role, onRole }: { role: RoleId; onRole: (id: RoleId) => void }) {
-  const { t } = useLocale();
+  const { language, t } = useLocale();
   const [params] = useSearchParams();
+  const profileQuery = partnerProfileQuery(params);
   const [selected, setSelected] = useState<string[]>([]);
   const [category, setCategory] = useState('iGaming');
   const [methods, setMethods] = useState<string[]>([]);
@@ -57,12 +58,12 @@ export function BriefStudio({ role, onRole }: { role: RoleId; onRole: (id: RoleI
   const chosen = markets.filter((m) => selected.includes(m.slug));
   const available = [...new Set(chosen.flatMap((m) => m.methods))];
   useEffect(() => {
-    const saved = restorePartnerProfile(params);
+    const saved = restorePartnerProfile(new URLSearchParams(profileQuery));
     setSelected(saved.markets);
     setCategory(saved.category);
     setMethods(saved.methods);
     setRestored(true);
-  }, [params]);
+  }, [profileQuery]);
   useEffect(() => {
     if (restored) savePartnerProfile({ role, markets: selected, category, methods });
   }, [role, selected, category, methods, restored]);
@@ -84,6 +85,7 @@ export function BriefStudio({ role, onRole }: { role: RoleId; onRole: (id: RoleI
     category,
     methods: methods.join(','),
     source: 'forge',
+    lang: language,
   });
   const copied = copiedFor === preferences.toString();
   const briefText = () =>
@@ -141,7 +143,7 @@ export function BriefStudio({ role, onRole }: { role: RoleId; onRole: (id: RoleI
     <section className="partner-studio" id="partner-brief">
       <div className="wrap">
         <div className="chapter-line">
-          <span>01 / {t('YOUR PARTNER PROFILE', 'ТВОЙ ПАРТНЁРСКИЙ ПРОФИЛЬ')}</span>
+          <span>01 / {t('YOUR PARTNER PROFILE', 'ВАШ ПАРТНЁРСКИЙ ПРОФИЛЬ')}</span>
           <span>{t('A CONCRETE STARTING POINT', 'КОНКРЕТНАЯ ОСНОВА ДЛЯ РАЗГОВОРА')}</span>
         </div>
         <div className="profile-heading">
@@ -160,7 +162,7 @@ export function BriefStudio({ role, onRole }: { role: RoleId; onRole: (id: RoleI
         <div className="profile-workspace">
           <div className="profile-inputs">
             <fieldset>
-              <legend>01 / {t('WHAT DO YOU BRING?', 'С ЧЕМ ТЫ ПРИХОДИШЬ?')}</legend>
+              <legend>01 / {t('WHAT DO YOU BRING?', 'С ЧЕМ ВЫ ПРИХОДИТЕ?')}</legend>
               <div
                 className="profile-role-picker"
                 role="group"
@@ -207,7 +209,7 @@ export function BriefStudio({ role, onRole }: { role: RoleId; onRole: (id: RoleI
               <p className="profile-help">
                 {t(
                   'Choose 1–3 markets where you have experience or a business need.',
-                  'Выбери 1–3 рынка, где у тебя есть опыт или бизнес-задача.',
+                  'Выберите 1–3 рынка, где у вас есть опыт или бизнес-задача.',
                 )}
               </p>
             </fieldset>
@@ -272,7 +274,7 @@ export function BriefStudio({ role, onRole }: { role: RoleId; onRole: (id: RoleI
                   <dd>
                     {chosen.length
                       ? chosen.map((m) => t(m.name, m.ru)).join(' / ')
-                      : t('Choose your GEO', 'Выбери свой GEO')}
+                      : t('Choose your GEO', 'Выберите рынок')}
                   </dd>
                 </div>
                 <div>
@@ -330,9 +332,9 @@ export function BriefStudio({ role, onRole }: { role: RoleId; onRole: (id: RoleI
                   : chosen.length
                     ? t(
                         'Your choices will carry over. Add your contact details in the application.',
-                        'Выбор перенесётся в заявку. Контакт добавишь на следующем шаге.',
+                        'Выбор перенесётся в заявку. Контактные данные добавите на следующем шаге.',
                       )
-                    : t('Choose a market to continue.', 'Выбери рынок, чтобы продолжить.'))}
+                    : t('Choose a market to continue.', 'Выберите рынок, чтобы продолжить.'))}
             </p>
           </div>
         </div>

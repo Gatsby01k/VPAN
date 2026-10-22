@@ -30,7 +30,16 @@ export default function AdminPage() {
   const [savingId, setSavingId] = useState('');
   const [notification, setNotification] = useState('');
   const active = useRef<AbortController | null>(null);
-  useEffect(() => () => active.current?.abort(), []);
+  const statusRequest = useRef<AbortController | null>(null);
+  useEffect(
+    () => () => {
+      active.current?.abort();
+      active.current = null;
+      statusRequest.current?.abort();
+      statusRequest.current = null;
+    },
+    [],
+  );
   const selected = items.find((i) => i.id === selectedId);
   const labels: Record<ApplicationStatus, string> = {
     new: t('New', 'Новая'),
@@ -63,6 +72,7 @@ export default function AdminPage() {
   };
 
   const load = async (access = token) => {
+    if (!access || statusRequest.current) return;
     active.current?.abort();
     const request = new AbortController();
     active.current = request;
@@ -73,7 +83,8 @@ export default function AdminPage() {
         headers: { Authorization: `Bearer ${access}` },
         signal: request.signal,
       });
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
+      if (request.signal.aborted || active.current !== request) return;
       if (!response.ok) {
         if (response.status === 401) {
           setToken('');
@@ -86,16 +97,23 @@ export default function AdminPage() {
             : t('Could not load applications.', 'Не удалось загрузить заявки.'),
         );
       }
+      if (!data || !Array.isArray(data.items))
+        throw new Error(t('Could not load applications.', 'Не удалось загрузить заявки.'));
       setToken(access);
       setKey('');
       setItems(data.items);
     } catch (cause) {
       if (!request.signal.aborted)
         setError(
-          cause instanceof Error ? cause.message : t('Connection failed.', 'Ошибка соединения.'),
+          cause instanceof Error && !(cause instanceof TypeError)
+            ? cause.message
+            : t('Connection failed. Please try again.', 'Ошибка соединения. Попробуйте снова.'),
         );
     } finally {
-      if (!request.signal.aborted) setLoading(false);
+      if (active.current === request) {
+        active.current = null;
+        setLoading(false);
+      }
     }
   };
   const login = (e: FormEvent) => {
@@ -103,6 +121,9 @@ export default function AdminPage() {
     if (key.trim()) void load(key.trim());
   };
   const updateStatus = async (id: string, status: ApplicationStatus) => {
+    if (!token || active.current || statusRequest.current) return;
+    const request = new AbortController();
+    statusRequest.current = request;
     setSavingId(id);
     setError('');
     setNotification('');
@@ -111,7 +132,9 @@ export default function AdminPage() {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
+        signal: request.signal,
       });
+      if (request.signal.aborted || statusRequest.current !== request) return;
       if (!response.ok)
         throw new Error(
           t(
@@ -122,13 +145,17 @@ export default function AdminPage() {
       setItems((previous) => previous.map((item) => (item.id === id ? { ...item, status } : item)));
       setNotification(t('Status saved.', 'Статус сохранён.'));
     } catch (cause) {
+      if (request.signal.aborted) return;
       setError(
-        cause instanceof Error
+        cause instanceof Error && !(cause instanceof TypeError)
           ? cause.message
           : t('Could not update the application.', 'Не удалось обновить заявку.'),
       );
     } finally {
-      setSavingId('');
+      if (statusRequest.current === request) {
+        statusRequest.current = null;
+        setSavingId('');
+      }
     }
   };
   const exportCsv = () => {
@@ -185,6 +212,11 @@ export default function AdminPage() {
             className="button button-outline"
             onClick={() => {
               active.current?.abort();
+              active.current = null;
+              statusRequest.current?.abort();
+              statusRequest.current = null;
+              setLoading(false);
+              setSavingId('');
               setToken('');
               setKey('');
               setItems([]);
@@ -200,7 +232,7 @@ export default function AdminPage() {
       </div>
       {!token ? (
         <div className="admin-access-grid">
-          <form className="admin-access" onSubmit={login}>
+          <form className="admin-access" onSubmit={login} aria-busy={loading}>
             <div className="access-icon">
               <KeyRound size={27} strokeWidth={1.2} />
             </div>
@@ -297,7 +329,7 @@ export default function AdminPage() {
             <button
               className="icon-button"
               onClick={() => void load()}
-              disabled={loading}
+              disabled={loading || Boolean(savingId)}
               aria-label={t('Refresh applications', 'Обновить заявки')}
             >
               <RefreshCw size={17} className={loading ? 'spin' : ''} />
@@ -324,7 +356,7 @@ export default function AdminPage() {
               )}
             </p>
           </div>
-          <div className="inbox-list">
+          <div className="inbox-list" aria-busy={loading || Boolean(savingId)}>
             <div className="inbox-list-header">
               <span>{t('Introduction / contact', 'Заявка / контакт')}</span>
               <span>{t('Role / markets', 'Роль / рынки')}</span>
@@ -349,7 +381,7 @@ export default function AdminPage() {
                   <span className={`status-dot status-${item.status}`} />
                   <SelectControl
                     value={item.status}
-                    disabled={savingId === item.id}
+                    disabled={loading || Boolean(savingId)}
                     label={`${t('Status for', 'Статус заявки')} ${item.reference}`}
                     onChange={(value) => void updateStatus(item.id, value as ApplicationStatus)}
                     options={statuses.map((status) => ({ value: status, label: labels[status] }))}
@@ -425,7 +457,7 @@ export default function AdminPage() {
               <span>{t('Application status', 'Статус заявки')}</span>
               <SelectControl
                 value={selected.status}
-                disabled={savingId === selected.id}
+                disabled={loading || Boolean(savingId)}
                 label={t('Application status', 'Статус заявки')}
                 onChange={(value) => void updateStatus(selected.id, value as ApplicationStatus)}
                 options={statuses.map((status) => ({ value: status, label: labels[status] }))}

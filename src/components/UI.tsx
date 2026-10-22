@@ -6,8 +6,17 @@ import { PanLogo } from './PanLogo';
 import { PanWordmark } from './PanWordmark';
 
 export function Brand({ compact = false }: { compact?: boolean }) {
+  const { t } = useLocale();
   return (
-    <Link to="/" className="brand" aria-label={compact ? 'PAN home' : 'PAN / VlaDDoS — home'}>
+    <Link
+      to="/"
+      className="brand"
+      aria-label={
+        compact
+          ? t('PAN home', 'PAN — на главную')
+          : t('PAN / VlaDDoS — home', 'PAN / VlaDDoS — на главную')
+      }
+    >
       <PanLogo />
       <PanWordmark />
       {!compact && (

@@ -737,7 +737,7 @@
   .action,
   .button-gold,
   .apply-panel .button-gold,
-  .profile-submit {
+  .profile-submit:not([aria-disabled='true']) {
     color: #fff3f8;
     background: linear-gradient(130deg, #ff3290, #ee006f);
     border-color: #ff9aca85;
@@ -746,7 +746,7 @@
   .action:hover,
   .button-gold:hover,
   .apply-panel .button-gold:hover,
-  .profile-submit:hover {
+  .profile-submit:not([aria-disabled='true']):hover {
     color: white;
     background: #ff459e;
     border-color: #ffc8e3;
@@ -755,6 +755,9 @@
     background: #ffffff04;
     border-color: #ffffff40;
     color: var(--ink);
+  }
+  .profile-export button:disabled {
+    color: #abb8c9;
   }
   .header-apply:hover {
     background: #ff0077;
@@ -1202,7 +1205,7 @@
     .deck-instruments {
       grid-column: 1;
       grid-row: 1;
-      grid-template-rows: 354px 171px 155px;
+      grid-template-rows: minmax(354px, auto) minmax(171px, auto) 155px;
       gap: 13px;
     }
     .deck-primary {
@@ -1305,7 +1308,7 @@
     }
     .deck-rail nav {
       position: sticky;
-      top: 22px;
+      top: 80px;
       margin-top: 155px;
       margin-bottom: 0;
       gap: 10px;
@@ -1370,7 +1373,7 @@
       border-radius: 32px;
     }
     .deck-instruments {
-      grid-template-rows: 334px 157px 151px;
+      grid-template-rows: minmax(334px, auto) minmax(157px, auto) 151px;
       gap: 11px;
     }
     .deck-primary {
@@ -1483,6 +1486,7 @@
       height: 32px;
     }
     .deck-rail nav {
+      top: 76px;
       margin-top: 152px;
       padding: 3px;
       gap: 10px;
@@ -1535,7 +1539,7 @@
       border-radius: 29px;
     }
     .deck-instruments {
-      grid-template-rows: 314px 149px 144px;
+      grid-template-rows: minmax(314px, auto) minmax(149px, auto) 144px;
       gap: 10px;
     }
     .deck-widget-heading h2 {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowDownRight, ArrowUpRight, Command, Menu, Search, X } from 'lucide-react';
 import { Brand, Dialog } from './UI';
@@ -329,6 +329,7 @@ export function RouteEffects() {
   const location = useLocation();
   const { language } = useLocale();
   const { data } = useGrowth();
+  const previousScrollLocation = useRef<typeof location | null>(null);
   useEffect(() => {
     const metadata = pageMeta(location.pathname.replace(/\/$/, '') || '/', language);
     const article = data.articles.find((g) => '/knowledge/' + g.slug === location.pathname);
@@ -382,6 +383,15 @@ export function RouteEffects() {
     return () => clearTimeout(timer);
   }, [location.pathname]);
   useEffect(() => {
+    const previous = previousScrollLocation.current;
+    previousScrollLocation.current = location;
+    if (
+      previous &&
+      previous.pathname === location.pathname &&
+      previous.hash === location.hash &&
+      previous.search !== location.search
+    )
+      return;
     const scroll = () => {
       if (location.hash)
         document.getElementById(location.hash.slice(1))?.scrollIntoView({
@@ -393,6 +403,6 @@ export function RouteEffects() {
     };
     const frame = requestAnimationFrame(scroll);
     return () => cancelAnimationFrame(frame);
-  }, [location.pathname, location.hash, location.key]);
+  }, [location.pathname, location.hash, location.search, location.key]);
   return null;
 }

@@ -2,10 +2,12 @@ import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowDown, ArrowUpRight, Check, ChevronDown, Globe2, Search, X } from 'lucide-react';
 import { Action, Eyebrow, PageHeading, Reveal, Spotlight } from '../components/UI';
-import { markets, roles, type RoleId } from '../data';
+import { markets, roles, type Region, type RoleId } from '../data';
 import { useLocale } from '../locale';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
 import { PanCoreArtwork } from '../components/PanCoreArtwork';
+
+const regionNameRu: Record<Region, string> = { Africa: 'Африка', LATAM: 'LATAM', Asia: 'Азия' };
 
 export function MarketsPage() {
   const { t } = useLocale();
@@ -16,7 +18,7 @@ export function MarketsPage() {
       markets.filter(
         (m) =>
           (region === 'All' || m.region === region) &&
-          `${m.name} ${m.ru} ${m.currency} ${m.methods.join(' ')}`
+          `${m.name} ${m.ru} ${m.code} ${m.currency} ${m.region} ${regionNameRu[m.region]} ${m.methods.join(' ')}`
             .toLowerCase()
             .includes(query.trim().toLowerCase()),
       ),
@@ -61,7 +63,7 @@ export function MarketsPage() {
             ))}
           </div>
           <div className="search-field">
-            <Search size={17} />
+            <Search size={17} aria-hidden="true" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -74,14 +76,14 @@ export function MarketsPage() {
                 onClick={() => setQuery('')}
                 aria-label={t('Clear search', 'Очистить поиск')}
               >
-                <X size={15} />
+                <X size={15} aria-hidden="true" />
               </button>
             )}
           </div>
         </div>
         <div className="market-count" aria-live="polite">
           <span>
-            {filtered.length.toString().padStart(2, '0')} {t('markets in view', 'рынков найдено')}
+            {t('Markets found', 'Найдено рынков')}: {filtered.length.toString().padStart(2, '0')}
           </span>
           <span>
             <span className="signal-dot" />
@@ -96,9 +98,9 @@ export function MarketsPage() {
                   <Link to={`/markets/${m.slug}`}>
                     <div className="market-card-meta">
                       <span>
-                        {m.region} / {m.currency}
+                        {t(m.region, regionNameRu[m.region])} / {m.currency}
                       </span>
-                      <ArrowUpRight size={20} />
+                      <ArrowUpRight size={20} aria-hidden="true" />
                     </div>
                     <div className="market-card-name">
                       <span className="market-country-code" aria-hidden="true">
@@ -123,7 +125,7 @@ export function MarketsPage() {
         </div>
         {!filtered.length && (
           <div className="empty-state">
-            <Globe2 size={38} strokeWidth={1} />
+            <Globe2 size={38} strokeWidth={1} aria-hidden="true" />
             <h2>{t('A different search?', 'Попробуем другой запрос?')}</h2>
             <p>
               {t(
@@ -160,15 +162,15 @@ export function CountryPage() {
   if (!market) return <NotFoundPage />;
   return (
     <>
-      <div className="breadcrumbs wrap">
+      <nav className="breadcrumbs wrap" aria-label={t('Breadcrumb', 'Навигационная цепочка')}>
         <Link to="/markets">{t('Markets', 'Рынки')}</Link>
-        <span>/</span>
-        <span>{t(market.name, market.ru)}</span>
-      </div>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{t(market.name, market.ru)}</span>
+      </nav>
       <section className="country-hero wrap">
         <div>
           <Eyebrow>
-            {market.region} / {market.currency}
+            {t(market.region, regionNameRu[market.region])} / {market.currency}
           </Eyebrow>
           <h1 className="display">
             <span>{t(market.name, market.ru).toUpperCase()}.</span>
@@ -260,7 +262,7 @@ export function CountryPage() {
                 <span>0{i + 1}</span>
                 <h3>{t(r.title, r.ru)}</h3>
                 <p>{t(r.short, r.shortRu)}</p>
-                <ArrowUpRight size={23} />
+                <ArrowUpRight size={23} aria-hidden="true" />
               </Link>
             </Reveal>
           ))}
@@ -354,14 +356,14 @@ export function PartnerPage({ roleId }: { roleId: RoleId }) {
           <span>PRIVATE AFFILIATE NETWORK</span>
           <Link to="/#partners">
             {t('All partnership roles', 'Все направления')}
-            <ArrowUpRight size={15} />
+            <ArrowUpRight size={15} aria-hidden="true" />
           </Link>
         </div>
       </section>
       <section className="partner-field-notes">
         <div className="wrap">
           <div className="chapter-line">
-            <span>01 / PARTNERSHIP FIELD NOTES</span>
+            <span>01 / {t('PARTNERSHIP FIELD NOTES', 'ПРАКТИКА ПАРТНЁРСТВА')}</span>
             <span>
               {t('What makes an introduction useful.', 'Что делает знакомство полезным.')}
             </span>
@@ -385,7 +387,7 @@ export function PartnerPage({ roleId }: { roleId: RoleId }) {
                 <div key={en}>
                   <small>0{i + 1}</small>
                   <p>{t(en, ru)}</p>
-                  <Check size={16} />
+                  <Check size={16} aria-hidden="true" />
                 </div>
               ))}
               <p className="partner-field-note">
@@ -413,7 +415,7 @@ export function PartnerPage({ roleId }: { roleId: RoleId }) {
           </p>
           <Link className="text-link" to="/markets">
             {t('Explore local markets', 'Изучить рынки')}
-            <ArrowUpRight size={17} />
+            <ArrowUpRight size={17} aria-hidden="true" />
           </Link>
         </div>
       </section>
@@ -501,6 +503,7 @@ export function AboutPage() {
               <div key={i} className={`accordion-item ${open === i ? 'is-open' : ''}`}>
                 <h3>
                   <button
+                    id={`principle-trigger-${i}`}
                     aria-expanded={open === i}
                     aria-controls={`principle-${i}`}
                     onClick={() => setOpen(open === i ? -1 : i)}
@@ -509,10 +512,15 @@ export function AboutPage() {
                       <small>0{i + 1}</small>
                       {title}
                     </span>
-                    <ChevronDown size={22} />
+                    <ChevronDown size={22} aria-hidden="true" />
                   </button>
                 </h3>
-                <div id={`principle-${i}`} hidden={open !== i}>
+                <div
+                  id={`principle-${i}`}
+                  role="region"
+                  aria-labelledby={`principle-trigger-${i}`}
+                  hidden={open !== i}
+                >
                   <p>{content}</p>
                 </div>
               </div>
@@ -531,7 +539,7 @@ export function AboutPage() {
             <Link to={`/markets/${m.slug}`} key={m.slug}>
               <span>{m.code}</span>
               {t(m.name, m.ru)}
-              <ArrowUpRight size={15} />
+              <ArrowUpRight size={15} aria-hidden="true" />
             </Link>
           ))}
         </div>
@@ -625,7 +633,7 @@ export function LegalPage({ type }: { type: 'privacy' | 'terms' }) {
           {content.map(([title], i) => (
             <a href={`#legal-${i}`} key={title}>
               {title}
-              <ArrowDown size={12} />
+              <ArrowDown size={12} aria-hidden="true" />
             </a>
           ))}
         </aside>

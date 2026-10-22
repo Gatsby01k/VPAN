@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowDownRight, ArrowUpRight, Check, Copy, Download, Search } from 'lucide-react';
 import { Action, Eyebrow } from '../components/UI';
@@ -18,7 +18,7 @@ function GuideCard({ guide, index }: { guide: Guide; index: number }) {
         <span>
           {market ? t(market.name, market.ru) : t('Partner operations', 'Работа с партнёрами')}
         </span>
-        <ArrowUpRight size={20} />
+        <ArrowUpRight size={20} aria-hidden="true" />
       </div>
       <h2>{t(guide.title, guide.titleRu)}</h2>
       <p>{t(guide.summary, guide.summaryRu)}</p>
@@ -31,13 +31,26 @@ function GuideCard({ guide, index }: { guide: Guide; index: number }) {
 }
 export function KnowledgePage() {
   const { t } = useLocale();
-  const { data, loaded } = useGrowth();
+  const { data, loaded, failed } = useGrowth();
   const [query, setQuery] = useState('');
-  const guides = data.articles.filter((g) =>
-    `${g.title} ${g.titleRu} ${g.summary} ${g.summaryRu}`
+  const guides = data.articles.filter((guide) => {
+    const market = markets.find((item) => item.slug === guide.market);
+    const role = roles.find((item) => item.id === guide.role);
+    return [
+      guide.title,
+      guide.titleRu,
+      guide.summary,
+      guide.summaryRu,
+      market?.name,
+      market?.ru,
+      market?.methods.join(' '),
+      role?.title,
+      role?.ru,
+    ]
+      .join(' ')
       .toLowerCase()
-      .includes(query.trim().toLowerCase()),
-  );
+      .includes(query.trim().toLowerCase());
+  });
   return (
     <section className="knowledge-page wrap">
       <div className="knowledge-heading">
@@ -50,7 +63,7 @@ export function KnowledgePage() {
           </h1>
         </div>
         <div className="knowledge-intro">
-          <ArrowDownRight size={38} strokeWidth={1} />
+          <ArrowDownRight size={38} strokeWidth={1} aria-hidden="true" />
           <p>
             {t(
               'Working guides for people who introduce, evaluate and connect payment partners. Practical preparation, primary sources and a clear next step.',
@@ -59,17 +72,17 @@ export function KnowledgePage() {
           </p>
           {data.origin && (
             <a className="text-link" href="/feed.xml">
-              RSS <ArrowUpRight size={14} />
+              RSS <ArrowUpRight size={14} aria-hidden="true" />
             </a>
           )}
         </div>
       </div>
       <div className="knowledge-tools">
-        <span>
-          {t('Working guides', 'Практических материалов')}: {data.articles.length}
+        <span role="status">
+          {t('Guides found', 'Найдено материалов')}: {guides.length}
         </span>
         <label className="knowledge-search">
-          <Search size={17} />
+          <Search size={17} aria-hidden="true" />
           <input
             type="search"
             aria-label={t('Search guides', 'Поиск материалов')}
@@ -86,12 +99,22 @@ export function KnowledgePage() {
       </div>
       {!guides.length && (
         <p className="knowledge-empty" role="status">
-          {loaded
-            ? t(
-                'No matching guides. Try a broader search.',
-                'Материалов по запросу нет. Попробуйте другой поиск.',
-              )
-            : t('Loading the library…', 'Загружаем библиотеку…')}
+          {!loaded
+            ? t('Loading the library…', 'Загружаем библиотеку…')
+            : failed && !data.articles.length
+              ? t(
+                  'The library is temporarily unavailable. Please refresh the page to try again.',
+                  'Библиотека временно недоступна. Обновите страницу, чтобы попробовать снова.',
+                )
+              : query.trim()
+                ? t(
+                    'No matching guides. Try a broader search.',
+                    'Материалов по запросу нет. Попробуйте другой поиск.',
+                  )
+                : t(
+                    'New guides are being prepared. Check back soon.',
+                    'Готовим новые материалы. Загляните чуть позже.',
+                  )}
         </p>
       )}
       <div className="knowledge-next">
@@ -113,26 +136,42 @@ export function KnowledgePage() {
 
 export function KnowledgeArticle() {
   const { slug } = useParams();
-  const { data, loaded } = useGrowth();
+  const { data, loaded, failed } = useGrowth();
   const { language, t } = useLocale();
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  useEffect(() => {
+    setCopyState('idle');
+  }, [slug, language]);
+  useEffect(() => {
+    if (copyState === 'idle') return;
+    const timeout = window.setTimeout(() => setCopyState('idle'), 4000);
+    return () => window.clearTimeout(timeout);
+  }, [copyState]);
   const guide = data.articles.find((g) => g.slug === slug);
-  if (!guide)
-    return loaded ? (
-      <NotFoundPage />
-    ) : (
-      <section className="knowledge-page wrap">
-        <p role="status">{t('Loading guide…', 'Загружаем материал…')}</p>
-      </section>
-    );
-  if (!guide.sections.length)
+  if (!guide || !guide.sections.length) {
+    if (loaded && !failed && !guide) return <NotFoundPage />;
     return (
       <section className="knowledge-page wrap">
-        <p role="status">{t('Loading guide…', 'Загружаем материал…')}</p>
+        {loaded ? (
+          <>
+            <h1>{t('Guide temporarily unavailable.', 'Материал временно недоступен.')}</h1>
+            <p role="status">
+              {t(
+                'Please refresh the page to try again, or explore another guide.',
+                'Обновите страницу, чтобы попробовать снова, или выберите другой материал.',
+              )}
+            </p>
+            <Action to="/knowledge">{t('Back to the guides', 'К материалам')}</Action>
+          </>
+        ) : (
+          <p role="status">{t('Loading guide…', 'Загружаем материал…')}</p>
+        )}
       </section>
     );
+  }
   const title = t(guide.title, guide.titleRu),
     summary = t(guide.summary, guide.summaryRu);
+  const market = markets.find((item) => item.slug === guide.market);
   const checklist = language === 'ru' ? guide.checklistRu : guide.checklist;
   const selectedSources = data.sources.filter((s) => guide.sourceIds.includes(s.id));
   const related = data.articles
@@ -145,8 +184,9 @@ export function KnowledgeArticle() {
       timeZone: 'UTC',
     }).format(new Date(value));
   const profile = '/apply?role=' + guide.role + (guide.market ? '&market=' + guide.market : '');
+  const guidePath = '/knowledge/' + guide.slug + '?lang=' + language;
   const exportBrief = () => {
-    const text = `${title}\n\n${summary}\n\n${checklist.map((s, i) => `${i + 1}. ${s}`).join('\n')}\n\n${selectedSources.map((s) => `${s.name}: ${s.url}`).join('\n')}\n\n${data.origin || window.location.origin}/knowledge/${guide.slug}`;
+    const text = `${title}\n\n${summary}\n\n${checklist.map((s, i) => `${i + 1}. ${s}`).join('\n')}\n\n${selectedSources.map((s) => `${s.name}: ${s.url}`).join('\n')}\n\n${data.origin || window.location.origin}${guidePath}`;
     const url = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
     const link = document.createElement('a');
     link.href = url;
@@ -158,13 +198,13 @@ export function KnowledgeArticle() {
     <article className="knowledge-article wrap">
       <nav className="knowledge-breadcrumb" aria-label={t('Breadcrumb', 'Навигационная цепочка')}>
         <Link to="/">PAN</Link>
-        <span>/</span>
+        <span aria-hidden="true">/</span>
         <Link to="/knowledge">{t('Field notes', 'Практика')}</Link>
       </nav>
       <header className="knowledge-article-heading">
         <Eyebrow>
           {guide.market
-            ? guide.market.toUpperCase()
+            ? t(market?.name || guide.market, market?.ru || guide.market)
             : t('Partner preparation', 'Подготовка партнёрства')}
         </Eyebrow>
         <h1>{title}</h1>
@@ -208,7 +248,7 @@ export function KnowledgeArticle() {
                 {selectedSources.map((source) => (
                   <li key={source.id}>
                     <a href={source.url} target="_blank" rel="noopener noreferrer">
-                      {source.name} <ArrowUpRight size={14} />
+                      {source.name} <ArrowUpRight size={14} aria-hidden="true" />
                     </a>
                     <small>
                       {t('Editorial source review', 'Проверка источника редакцией')}:{' '}
@@ -234,38 +274,40 @@ export function KnowledgeArticle() {
             <ol>
               {checklist.map((item) => (
                 <li key={item}>
-                  <Check size={15} />
+                  <Check size={15} aria-hidden="true" />
                   <span>{item}</span>
                 </li>
               ))}
             </ol>
             <button className="button button-outline" onClick={exportBrief}>
-              <Download size={16} />
+              <Download size={16} aria-hidden="true" />
               {t('Save checklist', 'Сохранить чек-лист')}
             </button>
             <button
               className="knowledge-share"
               onClick={async () => {
                 try {
-                  await navigator.clipboard.writeText(
-                    window.location.origin +
-                      '/knowledge/' +
-                      guide.slug +
-                      (language === 'ru' ? '?lang=ru' : ''),
-                  );
-                  setCopied(true);
+                  await navigator.clipboard.writeText(window.location.origin + guidePath);
+                  setCopyState('copied');
                 } catch {
-                  setCopied(false);
+                  setCopyState('failed');
                 }
               }}
             >
-              <Copy size={14} />
-              {copied
+              <Copy size={14} aria-hidden="true" />
+              {copyState === 'copied'
                 ? t('Link copied', 'Ссылка скопирована')
                 : t('Copy guide link', 'Скопировать ссылку')}
             </button>
-            <span role="status" className="sr-only">
-              {copied ? t('Link copied', 'Ссылка скопирована') : ''}
+            <span role="status" className={copyState === 'failed' ? '' : 'sr-only'}>
+              {copyState === 'copied'
+                ? t('Link copied', 'Ссылка скопирована')
+                : copyState === 'failed'
+                  ? t(
+                      'Copying is unavailable. Copy the link from your browser’s address bar.',
+                      'Копирование недоступно. Скопируйте ссылку из адресной строки браузера.',
+                    )
+                  : ''}
             </span>
           </div>
           <div className="knowledge-apply">
@@ -280,14 +322,16 @@ export function KnowledgeArticle() {
           </div>
         </aside>
       </div>
-      <section className="knowledge-related">
-        <Eyebrow>{t('Keep preparing', 'Продолжить подготовку')}</Eyebrow>
-        <div className="knowledge-grid">
-          {related.map((g, i) => (
-            <GuideCard key={g.slug} guide={g} index={i} />
-          ))}
-        </div>
-      </section>
+      {related.length > 0 && (
+        <section className="knowledge-related">
+          <Eyebrow>{t('Keep preparing', 'Продолжить подготовку')}</Eyebrow>
+          <div className="knowledge-grid">
+            {related.map((g, i) => (
+              <GuideCard key={g.slug} guide={g} index={i} />
+            ))}
+          </div>
+        </section>
+      )}
     </article>
   );
 }

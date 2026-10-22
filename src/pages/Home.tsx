@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { ArrowUpRight, Check, ChevronDown, Plus } from 'lucide-react';
 import { BriefStudio } from '../components/BriefStudio';
-import { restorePartnerProfile } from '../components/partner-profile';
+import { partnerProfileQuery, restorePartnerProfile } from '../components/partner-profile';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
 import { NetworkConsole } from '../components/NetworkConsole';
 import { useLocale } from '../locale';
@@ -300,11 +300,12 @@ export default function Home() {
   const { t } = useLocale();
   const [role, setRole] = useState<RoleId>('affiliate');
   const [params] = useSearchParams();
+  const profileQuery = partnerProfileQuery(params);
   const location = useLocation();
   const [briefOpen, setBriefOpen] = useState(false);
   useEffect(() => {
-    setRole(restorePartnerProfile(params).role);
-  }, [params]);
+    setRole(restorePartnerProfile(new URLSearchParams(profileQuery)).role);
+  }, [profileQuery]);
   useEffect(() => {
     if (location.hash === '#forge') setBriefOpen(true);
   }, [location.hash]);

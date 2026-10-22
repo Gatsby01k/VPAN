@@ -19,6 +19,14 @@ import { useLocale } from '../locale';
 import { acquisition } from '../components/acquisition';
 
 const DRAFT_KEY = 'pan-application-v2';
+const entryQuery = (params: URLSearchParams) => {
+  const entry = new URLSearchParams();
+  for (const key of ['role', 'market', 'source', 'markets', 'methods', 'category']) {
+    const value = params.get(key);
+    if (value !== null) entry.set(key, value);
+  }
+  return entry.toString();
+};
 interface Draft {
   requestId: string;
   role: RoleId;
@@ -65,13 +73,23 @@ export default function ApplyPage() {
   const [reference, setReference] = useState('');
   const [otherMarkets, setOtherMarkets] = useState('');
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
   const controller = useRef<AbortController | null>(null);
   const form = useRef<HTMLFormElement>(null);
   const panel = useRef<HTMLDivElement>(null);
+  const errorMessage = useRef<HTMLDivElement>(null);
   const lastView = useRef('0');
-  const query = params.toString();
+  const query = entryQuery(params);
 
   useEffect(() => {
+    const entry = new URLSearchParams(query);
+    controller.current?.abort();
+    controller.current = null;
+    setSending(false);
+    setReference('');
+    setError('');
+    setCopied(false);
+    setCopyError(false);
     let next = freshDraft(initialRole),
       savedStep = 0,
       other = '',
@@ -94,8 +112,10 @@ export default function ApplyPage() {
           else if (typeof stored.draft[key] === 'string')
             Object.assign(next, { [key]: stored.draft[key] });
         }
-        sameEntry = stored.entry === query;
-        savedStep = Math.max(0, Math.min(2, Number(stored.step) || 0));
+        sameEntry =
+          typeof stored.entry === 'string' &&
+          entryQuery(new URLSearchParams(stored.entry)) === query;
+        savedStep = Math.max(0, Math.min(2, Math.floor(Number(stored.step) || 0)));
         other = typeof stored.otherMarkets === 'string' ? stored.otherMarkets : '';
       }
     } catch {
@@ -105,12 +125,12 @@ export default function ApplyPage() {
       savedStep = 1;
       next.role = initialRole;
     }
-    const market = markets.find((m) => m.slug === params.get('market'));
+    const market = markets.find((m) => m.slug === entry.get('market'));
     if (!sameEntry && market && !next.markets.includes(market.name))
       next.markets = [...next.markets, market.name].slice(0, 10);
-    if (params.get('source') === 'forge' && !sameEntry) {
+    if (entry.get('source') === 'forge' && !sameEntry) {
       const selected = markets
-        .filter((m) => (params.get('markets') || '').split(',').includes(m.slug))
+        .filter((m) => (entry.get('markets') || '').split(',').includes(m.slug))
         .slice(0, 3);
       if (selected.length) {
         next.markets = selected.map((m) => m.name).slice(0, 3);
@@ -118,20 +138,21 @@ export default function ApplyPage() {
         const allowedMethods = new Set(selected.flatMap((m) => m.methods));
         next.methods = [
           ...new Set(
-            (params.get('methods') || '').split(',').filter((method) => allowedMethods.has(method)),
+            (entry.get('methods') || '').split(',').filter((method) => allowedMethods.has(method)),
           ),
         ].join(', ');
-        if (['iGaming', 'e-commerce', 'other'].includes(params.get('category') || ''))
-          next.category = params.get('category')!;
+        if (['iGaming', 'e-commerce', 'other'].includes(entry.get('category') || ''))
+          next.category = entry.get('category')!;
         savedStep = 1;
       }
     }
-    if (!/^[a-f0-9-]{36}$/i.test(next.requestId)) next.requestId = crypto.randomUUID();
+    if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(next.requestId))
+      next.requestId = crypto.randomUUID();
     setDraft(next);
     setStep(savedStep);
     setOtherMarkets(other);
     setReady(true);
-    // The URL is an intentional entry point; a new entry can preselect role or market.
+    // Only application entry fields restore a draft; changing language keeps the current step.
   }, [query]);
 
   useEffect(() => {
@@ -151,6 +172,7 @@ export default function ApplyPage() {
     if (lastView.current === view) return;
     lastView.current = view;
     const timer = window.setTimeout(() => {
+      if (errorMessage.current && !errorMessage.current.hidden) return;
       panel.current?.scrollIntoView({
         block: 'start',
         behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -165,6 +187,16 @@ export default function ApplyPage() {
     }, 220);
     return () => clearTimeout(timer);
   }, [step, reference]);
+  useEffect(() => {
+    if (!error) return;
+    errorMessage.current?.focus({ preventScroll: true });
+    errorMessage.current?.scrollIntoView({
+      block: 'nearest',
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'instant'
+        : 'smooth',
+    });
+  }, [error]);
 
   const update = (key: keyof Omit<Draft, 'markets'>, value: string) => {
     setDraft((previous) => ({ ...previous, [key]: value }));
@@ -190,11 +222,26 @@ export default function ApplyPage() {
   };
   const advance = async (e: FormEvent) => {
     e.preventDefault();
-    if (sending) return;
+    if (sending || !ready) return;
     setError('');
     if (!form.current?.reportValidity()) return;
-    if (step === 1 && (!selectedMarkets.length || selectedMarkets.length > 10)) {
+    if (step > 0 && (!selectedMarkets.length || selectedMarkets.length > 10)) {
+      setStep(1);
       setError(t('Choose between one and ten markets.', 'Выберите от одного до десяти рынков.'));
+      return;
+    }
+    if (
+      step > 0 &&
+      (selectedMarkets.some((market) => market.length > 60) ||
+        selectedMarkets.join('').length > 250)
+    ) {
+      setStep(1);
+      setError(
+        t(
+          'Shorten the country names in Other markets: up to 60 characters each and 250 across all markets.',
+          'Сократите названия в поле «Другие рынки»: до 60 символов на страну и 250 на весь список.',
+        ),
+      );
       return;
     }
     if (step < 2) {
@@ -223,7 +270,8 @@ export default function ApplyPage() {
           attribution: acquisition(),
         }),
       });
-      const result = await response.json();
+      const result = await response.json().catch(() => null);
+      if (active.signal.aborted) return;
       if (!response.ok)
         throw new Error(
           response.status === 429
@@ -231,13 +279,17 @@ export default function ApplyPage() {
                 'Too many attempts. Please try again later.',
                 'Слишком много попыток. Попробуйте позже.',
               )
-            : result.error ||
-                t(
+            : response.status === 422
+              ? t(
+                  'Check your markets, name and work email, then try again.',
+                  'Проверьте рынки, имя и рабочую почту и повторите отправку.',
+                )
+              : t(
                   'We could not save the application. Try again.',
                   'Не удалось сохранить заявку. Попробуйте снова.',
                 ),
         );
-      if (typeof result.reference !== 'string')
+      if (!result || typeof result.reference !== 'string' || !result.reference.trim())
         throw new Error(
           t(
             'The server did not confirm the application. Try again.',
@@ -263,6 +315,7 @@ export default function ApplyPage() {
             : t('Something went wrong. Please try again.', 'Возникла ошибка. Попробуйте снова.'),
       );
     } finally {
+      if (controller.current === active) controller.current = null;
       if (!active.signal.aborted) setSending(false);
     }
   };
@@ -296,6 +349,8 @@ export default function ApplyPage() {
                 ? 'organization'
                 : 'off'
         }
+        autoCapitalize={key === 'email' || key === 'telegram' ? 'none' : undefined}
+        spellCheck={key === 'email' || key === 'telegram' ? false : undefined}
         placeholder={placeholder}
       />
     </label>
@@ -323,7 +378,10 @@ export default function ApplyPage() {
         </p>
         <ol className="apply-progress">
           {stepNames.map((name, i) => (
-            <li key={name} className={i === step ? 'is-current' : i < step ? 'is-done' : ''}>
+            <li
+              key={name}
+              className={reference || i < step ? 'is-done' : i === step ? 'is-current' : ''}
+            >
               <button
                 type="button"
                 disabled={sending || reference !== '' || i >= step}
@@ -331,7 +389,7 @@ export default function ApplyPage() {
                   setStep(i);
                   setError('');
                 }}
-                aria-current={i === step ? 'step' : undefined}
+                aria-current={!reference && i === step ? 'step' : undefined}
               >
                 <span>{i < step || reference ? <Check size={14} /> : `0${i + 1}`}</span>
                 {name}
@@ -385,8 +443,10 @@ export default function ApplyPage() {
                     try {
                       await navigator.clipboard.writeText(reference);
                       setCopied(true);
+                      setCopyError(false);
                     } catch {
                       setCopied(false);
+                      setCopyError(true);
                     }
                   }}
                 >
@@ -396,14 +456,25 @@ export default function ApplyPage() {
               <span className="copy-status" aria-live="polite">
                 {copied
                   ? t('Reference copied.', 'Номер скопирован.')
-                  : t('Keep this reference for your records.', 'Сохраните номер заявки.')}
+                  : copyError
+                    ? t(
+                        'Could not copy. Select the reference and copy it manually.',
+                        'Не удалось скопировать. Выделите номер и скопируйте вручную.',
+                      )
+                    : t('Keep this reference for your records.', 'Сохраните номер заявки.')}
               </span>
               <Action to="/markets" secondary>
                 {t('Explore the network', 'Посмотреть рынки')}
               </Action>
             </div>
           ) : (
-            <form ref={form} onSubmit={advance} key="form" className="application-form">
+            <form
+              ref={form}
+              onSubmit={advance}
+              key="form"
+              className="application-form"
+              aria-busy={sending}
+            >
               {ready && params.get('source') === 'forge' && (
                 <div className="forge-arrival">
                   <Check size={15} />
@@ -428,7 +499,7 @@ export default function ApplyPage() {
                 <span>{(step + 1).toString().padStart(2, '0')} — 03</span>
               </div>
               <>
-                <div key={step}>
+                <fieldset key={step} disabled={sending} aria-label={stepNames[step]}>
                   {step === 0 && (
                     <>
                       <h2>
@@ -519,6 +590,7 @@ export default function ApplyPage() {
                       <label className="field">
                         <span>{t('Other markets', 'Другие рынки')}</span>
                         <input
+                          name="otherMarkets"
                           value={otherMarkets}
                           onChange={(e) => {
                             setOtherMarkets(e.target.value);
@@ -526,6 +598,7 @@ export default function ApplyPage() {
                           }}
                           placeholder={t('e.g. Canada, Brazil', 'Например, Канада, Бразилия')}
                           maxLength={140}
+                          autoComplete="off"
                         />
                       </label>
                       <CategoryPicker
@@ -644,8 +717,21 @@ export default function ApplyPage() {
                             roles.find((r) => r.id === draft.role)!.ru,
                           )}
                         </span>
-                        <span>{selectedMarkets.join(' · ')}</span>
-                        <button type="button" onClick={() => setStep(1)}>
+                        <span>
+                          {selectedMarkets
+                            .map((name) => {
+                              const market = markets.find((m) => m.name === name);
+                              return market ? t(market.name, market.ru) : name;
+                            })
+                            .join(' · ')}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setStep(1);
+                            setError('');
+                          }}
+                        >
                           {t('Edit', 'Изменить')}
                         </button>
                       </div>
@@ -665,10 +751,12 @@ export default function ApplyPage() {
                       </p>
                     </>
                   )}
-                </div>
+                </fieldset>
               </>
               <div
+                ref={errorMessage}
                 className="form-error"
+                tabIndex={-1}
                 role={error ? 'alert' : undefined}
                 aria-live="polite"
                 hidden={!error}

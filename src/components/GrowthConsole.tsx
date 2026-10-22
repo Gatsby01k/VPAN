@@ -35,40 +35,74 @@ export default function GrowthConsole({ token }: { token: string }) {
   const [data, setData] = useState<GrowthReport | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [selected, setSelected] = useState<Guide | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedSlug, setSelectedSlug] = useState('');
   const request = useRef<AbortController | null>(null);
-  const load = async () => {
-    request.current?.abort();
+  const mutation = useRef<AbortController | null>(null);
+  const selected = data?.articles.find((guide) => guide.slug === selectedSlug);
+  const load = async (afterMutation = false) => {
+    if (request.current || (mutation.current && !afterMutation)) return;
     const controller = new AbortController();
     request.current = controller;
+    setLoading(true);
     try {
       const response = await fetch('/api/admin/growth', {
         headers: { Authorization: `Bearer ${token}` },
         signal: controller.signal,
       });
-      if (!response.ok)
+      const result = await response.json().catch(() => null);
+      if (controller.signal.aborted || request.current !== controller) return;
+      if (
+        !response.ok ||
+        !result ||
+        !result.connectors ||
+        !['articles', 'sources', 'runs', 'acquisition', 'pages', 'queries'].every((key) =>
+          Array.isArray(result[key]),
+        )
+      )
         throw new Error(
           t('Could not load acquisition data.', 'Не удалось загрузить данные привлечения.'),
         );
-      setData(await response.json());
+      setData(result);
       setError('');
     } catch (cause) {
       if (!controller.signal.aborted)
         setError(
-          cause instanceof Error ? cause.message : t('Connection failed.', 'Ошибка соединения.'),
+          cause instanceof Error && !(cause instanceof TypeError)
+            ? cause.message
+            : t('Connection failed. Please try again.', 'Ошибка соединения. Попробуйте снова.'),
         );
+    } finally {
+      if (request.current === controller) {
+        request.current = null;
+        setLoading(false);
+      }
     }
   };
   useEffect(() => {
+    setData(null);
+    setSelectedSlug('');
+    setError('');
+    setBusy(false);
     void load();
-    return () => request.current?.abort();
+    return () => {
+      request.current?.abort();
+      request.current = null;
+      mutation.current?.abort();
+      mutation.current = null;
+    };
   }, [token]);
   useEffect(() => {
     if (!data?.running) return;
-    const timer = window.setTimeout(() => void load(), 6000);
-    return () => clearTimeout(timer);
-  }, [data]);
+    const timer = window.setInterval(() => {
+      if (!mutation.current) void load();
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [data?.running, token, language]);
   const mutate = async (path: string, method: string, body?: object) => {
+    if (!data || mutation.current || request.current) return;
+    const controller = new AbortController();
+    mutation.current = controller;
     setBusy(true);
     setError('');
     try {
@@ -76,17 +110,36 @@ export default function GrowthConsole({ token }: { token: string }) {
         method,
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: body ? JSON.stringify(body) : undefined,
+        signal: controller.signal,
       });
-      const result = await response.json();
+      const result = await response.json().catch(() => null);
+      if (controller.signal.aborted || mutation.current !== controller) return;
       if (!response.ok)
-        throw new Error(result.error || t('Action failed.', 'Действие не выполнено.'));
-      await load();
+        throw new Error(
+          typeof result?.error === 'string'
+            ? result.error
+            : t('Action failed. Please try again.', 'Действие не выполнено. Попробуйте снова.'),
+        );
+      if (!result || typeof result !== 'object')
+        throw new Error(
+          t(
+            'The server did not confirm the action. Refresh the data to check its status.',
+            'Сервер не подтвердил действие. Обновите данные, чтобы проверить его статус.',
+          ),
+        );
+      await load(true);
     } catch (cause) {
+      if (controller.signal.aborted) return;
       setError(
-        cause instanceof Error ? cause.message : t('Action failed.', 'Действие не выполнено.'),
+        cause instanceof Error && !(cause instanceof TypeError)
+          ? cause.message
+          : t('Action failed. Please try again.', 'Действие не выполнено. Попробуйте снова.'),
       );
     } finally {
-      setBusy(false);
+      if (mutation.current === controller) {
+        mutation.current = null;
+        setBusy(false);
+      }
     }
   };
   const date = (value: string) =>
@@ -122,21 +175,32 @@ export default function GrowthConsole({ token }: { token: string }) {
               ? t('Paused', 'Приостановлен')
               : data?.enabled
                 ? t('Schedule enabled', 'Расписание включено')
-                : t('Manual mode', 'Ручной режим')}{' '}
+                : !data
+                  ? loading
+                    ? t('Loading…', 'Загружаем…')
+                    : t('Unavailable', 'Недоступно')
+                  : t('Manual mode', 'Ручной режим')}{' '}
           <ArrowUpRight size={18} />
         </span>
       </summary>
-      <div className="growth-console-body">
+      <div className="growth-console-body" aria-busy={loading || busy}>
         <div className="growth-actions">
           <p>
-            {data?.lastRun
-              ? `${t('Last run', 'Последний запуск')}: ${date(data.lastRun)}`
-              : t('The first run has not started yet.', 'Первого запуска ещё не было.')}
+            {!data
+              ? loading
+                ? t('Loading acquisition data…', 'Загружаем данные привлечения…')
+                : t(
+                    'Data is unavailable. Refresh to try again.',
+                    'Данные недоступны. Повторите обновление.',
+                  )
+              : data.lastRun
+                ? `${t('Last run', 'Последний запуск')}: ${date(data.lastRun)}`
+                : t('The first run has not started yet.', 'Первого запуска ещё не было.')}
           </p>
           <div>
             <button
               className="button button-outline"
-              disabled={busy || data?.running}
+              disabled={!data || loading || busy || data.running}
               onClick={() => void mutate('/run', 'POST')}
             >
               {busy || data?.running ? (
@@ -148,7 +212,7 @@ export default function GrowthConsole({ token }: { token: string }) {
             </button>
             <button
               className="button button-outline"
-              disabled={busy}
+              disabled={!data || loading || busy}
               onClick={() => void mutate('', 'PATCH', { paused: !data?.paused })}
             >
               {data?.paused ? <Play size={15} /> : <Pause size={15} />}
@@ -157,9 +221,10 @@ export default function GrowthConsole({ token }: { token: string }) {
             <button
               className="icon-button"
               aria-label={t('Refresh acquisition data', 'Обновить данные привлечения')}
+              disabled={loading || busy}
               onClick={() => void load()}
             >
-              <RefreshCw size={16} />
+              <RefreshCw size={16} className={loading ? 'spin' : ''} />
             </button>
           </div>
         </div>
@@ -212,7 +277,7 @@ export default function GrowthConsole({ token }: { token: string }) {
             <div className="growth-content-list">
               {data.articles.map((guide) => (
                 <div key={guide.slug}>
-                  <button onClick={() => setSelected(guide)}>
+                  <button onClick={() => setSelectedSlug(guide.slug)}>
                     <strong>{t(guide.title, guide.titleRu)}</strong>
                     <small>
                       {status(guide.status)} ·{' '}
@@ -227,7 +292,7 @@ export default function GrowthConsole({ token }: { token: string }) {
                         </Link>
                         <button
                           className="growth-text-button"
-                          disabled={busy}
+                          disabled={loading || busy}
                           onClick={() =>
                             void mutate('/articles/' + guide.slug, 'PATCH', { status: 'archived' })
                           }
@@ -238,7 +303,7 @@ export default function GrowthConsole({ token }: { token: string }) {
                     ) : guide.status !== 'archived' ? (
                       <button
                         className="button button-outline"
-                        disabled={busy}
+                        disabled={loading || busy}
                         onClick={() =>
                           void mutate('/articles/' + guide.slug, 'PATCH', { status: 'published' })
                         }
@@ -406,7 +471,7 @@ export default function GrowthConsole({ token }: { token: string }) {
       </div>
       <Dialog
         open={Boolean(selected)}
-        onClose={() => setSelected(null)}
+        onClose={() => setSelectedSlug('')}
         title={t('Publication preview', 'Предпросмотр материала')}
         className="application-dialog"
       >

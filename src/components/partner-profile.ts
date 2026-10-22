@@ -8,6 +8,15 @@ export interface PartnerProfile {
 }
 const key = 'pan.partner-profile.v1';
 const categories = ['iGaming', 'e-commerce', 'other'];
+
+// Locale and attribution query changes must not restore over in-progress edits.
+export function partnerProfileQuery(params: URLSearchParams): string {
+  const profile = new URLSearchParams();
+  for (const field of ['role', 'markets', 'category', 'methods'])
+    if (params.has(field)) profile.set(field, params.get(field) || '');
+  return profile.toString();
+}
+
 const list = (value: unknown) =>
   Array.isArray(value)
     ? value.filter((v): v is string => typeof v === 'string')
