@@ -7,7 +7,7 @@ export interface PartnerProfile {
   methods: string[];
 }
 const key = 'pan.partner-profile.v1';
-const categories = ['iGaming', 'e-commerce', 'other'];
+const categories = ['iGaming', 'Exchange', 'e-commerce', 'other'];
 
 // Locale and attribution query changes must not restore over in-progress edits.
 export function partnerProfileQuery(params: URLSearchParams): string {
@@ -35,7 +35,7 @@ export function restorePartnerProfile(params: URLSearchParams): PartnerProfile {
     /* Storage can be blocked; the URL still works. */
   }
   const rawRole = params.get('role') || saved.role;
-  const role = roles.some((r) => r.id === rawRole) ? (rawRole as RoleId) : 'affiliate';
+  const role = roles.some((r) => r.id === rawRole) ? (rawRole as RoleId) : 'provider';
   const rawMarkets = params.has('markets') ? params.get('markets') : saved.markets;
   const selected = [
     ...new Set(list(rawMarkets).filter((v) => markets.some((m) => m.slug === v))),

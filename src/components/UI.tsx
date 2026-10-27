@@ -2,8 +2,6 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, X } from 'lucide-react';
 import { useLocale } from '../locale';
-import { PanLogo } from './PanLogo';
-import { PanWordmark } from './PanWordmark';
 
 export function Brand({ compact = false }: { compact?: boolean }) {
   const { t } = useLocale();
@@ -17,16 +15,8 @@ export function Brand({ compact = false }: { compact?: boolean }) {
           : t('PAN / VlaDDoS — home', 'PAN / VlaDDoS — на главную')
       }
     >
-      <PanLogo />
-      <PanWordmark />
-      {!compact && (
-        <span className="brand-endorsement">
-          <span className="brand-signature" aria-hidden="true">
-            <img src="/assets/vladdos-signature-v2.webp" width="1846" height="852" alt="" />
-          </span>
-          <span className="brand-caption">PRIVATE AFFILIATE NETWORK</span>
-        </span>
-      )}
+      <span className="editorial-brand-mark" aria-hidden="true" />
+      <span className="editorial-brand-caption">NETWORK</span>
     </Link>
   );
 }

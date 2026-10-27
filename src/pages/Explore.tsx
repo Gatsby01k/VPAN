@@ -5,7 +5,7 @@ import { Action, Eyebrow, PageHeading, Reveal, Spotlight } from '../components/U
 import { markets, roles, type Region, type RoleId } from '../data';
 import { useLocale } from '../locale';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
-import { PanCoreArtwork } from '../components/PanCoreArtwork';
+import { SceneArt, SceneFoot, ThreadLink } from '../components/Editorial';
 
 const regionNameRu: Record<Region, string> = { Africa: 'Африка', LATAM: 'LATAM', Asia: 'Азия' };
 
@@ -28,7 +28,7 @@ export function MarketsPage() {
     <>
       <PageHeading
         eyebrow={t('Market explorer / PAN', 'Рынки / PAN')}
-        title={t('LOCAL KNOW-HOW.', 'ЛОКАЛЬНЫЕ ЗНАНИЯ.')}
+        title={t('Local know-how.', 'Локальные знания.')}
         accent={t('Global possibilities.', 'Широкие возможности.')}
         description={t(
           'Africa, Asia, Latin America. We are building relationships with people who understand local payments. Find the market you know.',
@@ -173,7 +173,7 @@ export function CountryPage() {
             {t(market.region, regionNameRu[market.region])} / {market.currency}
           </Eyebrow>
           <h1 className="display">
-            <span>{t(market.name, market.ru).toUpperCase()}.</span>
+            <span>{t(market.name, market.ru)}.</span>
             <span className="display-accent accent">{t('Next connections.', 'Новые связи.')}</span>
           </h1>
           <p className="country-intro">
@@ -328,37 +328,29 @@ export function PartnerPage({ roleId }: { roleId: RoleId }) {
   const index = roles.findIndex((r) => r.id === roleId) + 1;
   return (
     <>
-      <section className="partner-cover wrap">
-        <div className="partner-cover-top">
-          <Eyebrow>{t('YOUR PLACE IN PAN', 'ВАШЕ МЕСТО В PAN')}</Eyebrow>
-          <span>0{index} / 05</span>
-        </div>
-        <div className="partner-cover-grid">
-          <div>
-            <span className="partner-role-name">{t(role.title, role.ru)}</span>
-            <h1>{t(role.label, role.labelRu)}</h1>
-            <p>{t(role.description, role.descriptionRu)}</p>
-            <Action to={`/?role=${roleId}#forge`}>
-              {t('Build my partner profile', 'Собрать свой профиль')}
-            </Action>
-          </div>
-          <div className="partner-cover-object">
-            <PanCoreArtwork
-              label={t(
-                'PAN’s partner network: a graphite and glass nexus with flowing pink channels',
-                'Партнёрская сеть PAN: графитовое ядро со стеклом и розовыми потоками',
-              )}
-            />
-            <span aria-hidden="true">0{index}</span>
-          </div>
-        </div>
-        <div className="partner-cover-foot">
-          <span>PRIVATE AFFILIATE NETWORK</span>
-          <Link to="/#partners">
-            {t('All partnership roles', 'Все направления')}
-            <ArrowUpRight size={15} aria-hidden="true" />
+      <section className="editorial-scene partner-scene" aria-labelledby="partner-title">
+        <SceneArt name={roleId === 'affiliate' ? 'people' : 'exchange'} priority />
+        <div className="scene-copy partner-copy">
+          <span className="folio">
+            0{index} / {t(role.title, role.ru)}
+          </span>
+          <h1 className="editorial-title" id="partner-title">
+            {t('Your place', 'Ваше место')}
+            <em>{t('in the network.', 'в сети.')}</em>
+          </h1>
+          <p className="partner-lead">{t(role.description, role.descriptionRu)}</p>
+          <ThreadLink to={`/apply?role=${roleId}`}>
+            {t('Let’s make the connection', 'Давайте знакомиться')}
+          </ThreadLink>
+          <Link className="partner-brief-link" to={`/?role=${roleId}#forge`}>
+            {t('Build my partner brief', 'Собрать партнёрский бриф')} <ArrowUpRight size={17} />
           </Link>
         </div>
+        <SceneFoot number={`0${index}`} label="THE PEOPLE">
+          <Link to="/#partners">
+            {t('All partnerships', 'Все направления')} <ArrowUpRight size={17} />
+          </Link>
+        </SceneFoot>
       </section>
       <section className="partner-field-notes">
         <div className="wrap">
@@ -453,7 +445,7 @@ export function AboutPage() {
     <>
       <PageHeading
         eyebrow={t('Independent by design / PAN', 'Независимость как принцип / PAN')}
-        title={t('THE POWER', 'СИЛА')}
+        title={t('The power', 'Сила')}
         accent={t('is in the people.', 'в нужных людях.')}
         description={t(
           'PAN brings affiliates, payment teams, PSPs and merchants into its partnership program. Local expertise and relevant introductions are the starting point.',
@@ -464,7 +456,7 @@ export function AboutPage() {
         <Reveal>
           <img
             className="about-brand-art"
-            src="/assets/pan-gold.webp"
+            src="/assets/editorial/connection.webp"
             width="900"
             height="900"
             loading="lazy"

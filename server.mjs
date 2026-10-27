@@ -315,7 +315,8 @@ export function createApp({
           return reply(res, 429, { error: 'Too many applications. Please try later.' });
         const role = safeText(body.role, 40),
           name = safeText(body.name),
-          email = safeText(body.email).toLowerCase();
+          email = safeText(body.email).toLowerCase(),
+          telegram = safeText(body.telegram);
         const rawMarkets = Array.isArray(body.markets) ? body.markets : [];
         const markets = [
           ...new Set(rawMarkets.map((value) => safeText(value, 60)).filter(Boolean)),
@@ -326,7 +327,7 @@ export function createApp({
           !markets.length ||
           rawMarkets.length > 10 ||
           markets.join('').length > 250 ||
-          !/^\S+@\S+\.\S+$/.test(email)
+          (email ? !/^\S+@\S+\.\S+$/.test(email) : !/^@[A-Za-z][A-Za-z0-9_]{4,31}$/.test(telegram))
         ) {
           return reply(res, 422, {
             error: 'Please complete the required fields with valid information.',

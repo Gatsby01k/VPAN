@@ -1,37 +1,21 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import {
-  ArrowLeft,
-  ArrowUpRight,
-  Check,
-  CheckCheck,
-  ChevronDown,
-  Copy,
-  LoaderCircle,
-  LockKeyhole,
-  Mail,
-  Plus,
-} from 'lucide-react';
-import { Action, Eyebrow } from '../components/UI';
-import { CategoryPicker } from '../components/FormControls';
+import { ArrowDown, ArrowUpRight, Check, Copy, LoaderCircle } from 'lucide-react';
 import { markets, roles, type RoleId } from '../data';
 import { useLocale } from '../locale';
 import { acquisition } from '../components/acquisition';
+import { SceneArt } from '../components/Editorial';
 
 const DRAFT_KEY = 'pan-application-v2';
-const entryQuery = (params: URLSearchParams) => {
-  const entry = new URLSearchParams();
-  for (const key of ['role', 'market', 'source', 'markets', 'methods', 'category']) {
-    const value = params.get(key);
-    if (value !== null) entry.set(key, value);
-  }
-  return entry.toString();
-};
+const categories = ['iGaming', 'Exchange', 'e-commerce', 'other'];
+const emailPattern = /^\S+@\S+\.\S+$/;
+const telegramPattern = /^@[A-Za-z][A-Za-z0-9_]{4,31}$/;
 interface Draft {
   requestId: string;
   role: RoleId;
   markets: string[];
   category: string;
+  contact: string;
   name: string;
   company: string;
   email: string;
@@ -43,220 +27,140 @@ interface Draft {
   message: string;
   site: string;
 }
-const freshDraft = (role: RoleId = 'affiliate'): Draft => ({
-  requestId: '',
-  role,
-  markets: [],
-  category: '',
-  name: '',
-  company: '',
-  email: '',
-  telegram: '',
-  size: '',
-  methods: '',
-  volume: '',
-  experience: '',
-  message: '',
-  site: '',
-});
+function initialDraft(params: URLSearchParams): Draft {
+  const role = roles.find((r) => r.id === params.get('role'))?.id || 'affiliate';
+  const chosen = markets.filter((m) =>
+    [...(params.get('markets') || '').split(','), params.get('market')].includes(m.slug),
+  );
+  return {
+    requestId: '',
+    role,
+    markets: chosen.length ? chosen.map((m) => m.name) : ['Ghana'],
+    category: categories.includes(params.get('category') || '')
+      ? params.get('category')!
+      : 'Exchange',
+    contact: '',
+    name: '',
+    company: '',
+    email: '',
+    telegram: '',
+    size: '',
+    methods: params.get('methods') || '',
+    volume: '',
+    experience: '',
+    message: '',
+    site: '',
+  };
+}
 
 export default function ApplyPage() {
   const { t } = useLocale();
   const [params] = useSearchParams();
-  const roleQuery = params.get('role');
-  const initialRole = roles.find((r) => r.id === roleQuery)?.id || 'affiliate';
-  const [draft, setDraft] = useState<Draft>(() => freshDraft(initialRole));
-  const [step, setStep] = useState(() => (roles.some((r) => r.id === roleQuery) ? 1 : 0));
+  const entry = new URLSearchParams();
+  for (const key of ['role', 'market', 'markets', 'methods', 'category', 'source']) {
+    const value = params.get(key);
+    if (value !== null) entry.set(key, value);
+  }
+  const query = entry.toString();
+  const [draft, setDraft] = useState(() => initialDraft(params));
   const [ready, setReady] = useState(false);
   const [sending, setSending] = useState(false);
-  const [error, setError] = useState('');
   const [reference, setReference] = useState('');
-  const [otherMarkets, setOtherMarkets] = useState('');
+  const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
-  const [copyError, setCopyError] = useState(false);
   const controller = useRef<AbortController | null>(null);
-  const form = useRef<HTMLFormElement>(null);
-  const panel = useRef<HTMLDivElement>(null);
-  const errorMessage = useRef<HTMLDivElement>(null);
-  const lastView = useRef('0');
-  const query = entryQuery(params);
-
+  const errorRef = useRef<HTMLParagraphElement>(null);
+  const successRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
-    const entry = new URLSearchParams(query);
     controller.current?.abort();
-    controller.current = null;
     setSending(false);
     setReference('');
     setError('');
     setCopied(false);
-    setCopyError(false);
-    let next = freshDraft(initialRole),
-      savedStep = 0,
-      other = '',
-      sameEntry = false;
+    const current = new URLSearchParams(query);
+    let next = initialDraft(current);
     try {
       const stored = JSON.parse(sessionStorage.getItem(DRAFT_KEY) || 'null');
-      if (
-        stored &&
-        stored.version === 2 &&
-        typeof stored.draft === 'object' &&
-        stored.draft &&
-        roles.some((r) => r.id === stored.draft.role) &&
-        Array.isArray(stored.draft.markets)
-      ) {
+      if (stored?.version === 2 && stored.draft && typeof stored.draft === 'object') {
+        const saved = stored.draft;
         for (const key of Object.keys(next) as (keyof Draft)[]) {
-          if (key === 'markets')
-            next.markets = stored.draft.markets
-              .filter((v: unknown) => typeof v === 'string')
-              .slice(0, 10);
-          else if (typeof stored.draft[key] === 'string')
-            Object.assign(next, { [key]: stored.draft[key] });
+          if (key !== 'markets' && typeof saved[key] === 'string')
+            Object.assign(next, { [key]: saved[key] });
         }
-        sameEntry =
-          typeof stored.entry === 'string' &&
-          entryQuery(new URLSearchParams(stored.entry)) === query;
-        savedStep = Math.max(0, Math.min(2, Math.floor(Number(stored.step) || 0)));
-        other = typeof stored.otherMarkets === 'string' ? stored.otherMarkets : '';
+        if (!roles.some((r) => r.id === next.role)) next.role = 'affiliate';
+        if (Array.isArray(saved.markets)) {
+          const valid = saved.markets.filter(
+            (v: unknown): v is string =>
+              typeof v === 'string' && v.trim().length > 0 && v.length <= 60,
+          );
+          if (valid.length) next.markets = valid.slice(0, 10);
+        }
+        if (typeof stored.otherMarkets === 'string') {
+          next.markets = [
+            ...new Set([
+              ...next.markets,
+              ...stored.otherMarkets
+                .split(',')
+                .map((v: string) => v.trim())
+                .filter((v: string) => v.length > 0 && v.length <= 60),
+            ]),
+          ].slice(0, 10);
+        }
+        if (!categories.includes(next.category)) next.category = 'Exchange';
+        next.contact = next.contact || next.email || next.telegram;
+        if (stored.entry !== query) {
+          const incoming = initialDraft(current);
+          if (current.has('role')) next.role = incoming.role;
+          if (current.has('market') || current.has('markets')) next.markets = incoming.markets;
+          if (current.has('category')) next.category = incoming.category;
+          if (current.has('methods')) next.methods = incoming.methods;
+        }
       }
     } catch {
-      /* Continue with a clean draft if browser storage is unavailable. */
-    }
-    if (!sameEntry && roleQuery && roles.some((r) => r.id === roleQuery)) {
-      savedStep = 1;
-      next.role = initialRole;
-    }
-    const market = markets.find((m) => m.slug === entry.get('market'));
-    if (!sameEntry && market && !next.markets.includes(market.name))
-      next.markets = [...next.markets, market.name].slice(0, 10);
-    if (entry.get('source') === 'forge' && !sameEntry) {
-      const selected = markets
-        .filter((m) => (entry.get('markets') || '').split(',').includes(m.slug))
-        .slice(0, 3);
-      if (selected.length) {
-        next.markets = selected.map((m) => m.name).slice(0, 3);
-        other = '';
-        const allowedMethods = new Set(selected.flatMap((m) => m.methods));
-        next.methods = [
-          ...new Set(
-            (entry.get('methods') || '').split(',').filter((method) => allowedMethods.has(method)),
-          ),
-        ].join(', ');
-        if (['iGaming', 'e-commerce', 'other'].includes(entry.get('category') || ''))
-          next.category = entry.get('category')!;
-        savedStep = 1;
-      }
+      /* The form also works without browser storage. */
     }
     if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(next.requestId))
       next.requestId = crypto.randomUUID();
     setDraft(next);
-    setStep(savedStep);
-    setOtherMarkets(other);
     setReady(true);
-    // Only application entry fields restore a draft; changing language keeps the current step.
   }, [query]);
-
   useEffect(() => {
     if (!ready || reference) return;
     try {
-      sessionStorage.setItem(
-        DRAFT_KEY,
-        JSON.stringify({ version: 2, draft, step, otherMarkets, entry: query }),
-      );
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ version: 2, draft, entry: query }));
     } catch {
-      /* Form submission does not depend on storage. */
+      /* Submission does not depend on storage. */
     }
-  }, [draft, step, otherMarkets, ready, reference, query]);
+  }, [draft, query, ready, reference]);
   useEffect(() => () => controller.current?.abort(), []);
   useEffect(() => {
-    const view = reference || String(step);
-    if (lastView.current === view) return;
-    lastView.current = view;
-    const timer = window.setTimeout(() => {
-      if (errorMessage.current && !errorMessage.current.hidden) return;
-      panel.current?.scrollIntoView({
-        block: 'start',
-        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
-          ? 'instant'
-          : 'smooth',
-      });
-      const heading = panel.current?.querySelector('h2');
-      if (heading) {
-        heading.tabIndex = -1;
-        heading.focus({ preventScroll: true });
-      }
-    }, 220);
-    return () => clearTimeout(timer);
-  }, [step, reference]);
-  useEffect(() => {
-    if (!error) return;
-    errorMessage.current?.focus({ preventScroll: true });
-    errorMessage.current?.scrollIntoView({
-      block: 'nearest',
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        ? 'instant'
-        : 'smooth',
-    });
+    if (error) errorRef.current?.focus();
   }, [error]);
-
-  const update = (key: keyof Omit<Draft, 'markets'>, value: string) => {
-    setDraft((previous) => ({ ...previous, [key]: value }));
+  useEffect(() => {
+    if (reference) successRef.current?.focus();
+  }, [reference]);
+  const update = <K extends keyof Draft>(key: K, value: Draft[K]) => {
+    setDraft((current) => ({ ...current, [key]: value }));
     setError('');
   };
-  const selectedMarkets = [
-    ...new Set([
-      ...draft.markets,
-      ...otherMarkets
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean),
-    ]),
-  ];
-  const toggleMarket = (name: string) => {
-    setDraft((previous) => ({
-      ...previous,
-      markets: previous.markets.includes(name)
-        ? previous.markets.filter((m) => m !== name)
-        : [...previous.markets, name],
-    }));
-    setError('');
-  };
-  const advance = async (e: FormEvent) => {
-    e.preventDefault();
-    if (sending || !ready) return;
-    setError('');
-    if (!form.current?.reportValidity()) return;
-    if (step > 0 && (!selectedMarkets.length || selectedMarkets.length > 10)) {
-      setStep(1);
-      setError(t('Choose between one and ten markets.', 'Выберите от одного до десяти рынков.'));
-      return;
-    }
-    if (
-      step > 0 &&
-      (selectedMarkets.some((market) => market.length > 60) ||
-        selectedMarkets.join('').length > 250)
-    ) {
-      setStep(1);
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!ready || sending) return;
+    const contact = draft.contact.trim();
+    const isEmail = emailPattern.test(contact);
+    if (!isEmail && !telegramPattern.test(contact)) {
       setError(
         t(
-          'Shorten the country names in Other markets: up to 60 characters each and 250 across all markets.',
-          'Сократите названия в поле «Другие рынки»: до 60 символов на страну и 250 на весь список.',
+          'Enter a valid email or Telegram username, such as @yourname.',
+          'Укажите корректный email или имя в Telegram, например @yourname.',
         ),
       );
       return;
     }
-    if (step < 2) {
-      setStep(step + 1);
-      return;
-    }
-    if (draft.name.trim().length < 2 || !/^\S+@\S+\.\S+$/.test(draft.email.trim())) {
-      setError(
-        t('Enter your name and a valid work email.', 'Укажите имя и корректную рабочую почту.'),
-      );
-      return;
-    }
-    setSending(true);
     const active = new AbortController();
     controller.current = active;
+    setSending(true);
+    setError('');
     try {
       const response = await fetch('/api/apply', {
         method: 'POST',
@@ -264,14 +168,14 @@ export default function ApplyPage() {
         signal: active.signal,
         body: JSON.stringify({
           ...draft,
-          name: draft.name.trim(),
-          email: draft.email.trim(),
-          markets: selectedMarkets,
+          contact: undefined,
+          name: draft.name.trim() || contact,
+          email: isEmail ? contact : '',
+          telegram: isEmail ? '' : contact,
           attribution: acquisition(),
         }),
       });
       const result = await response.json().catch(() => null);
-      if (active.signal.aborted) return;
       if (!response.ok)
         throw new Error(
           response.status === 429
@@ -279,530 +183,302 @@ export default function ApplyPage() {
                 'Too many attempts. Please try again later.',
                 'Слишком много попыток. Попробуйте позже.',
               )
-            : response.status === 422
-              ? t(
-                  'Check your markets, name and work email, then try again.',
-                  'Проверьте рынки, имя и рабочую почту и повторите отправку.',
-                )
-              : t(
-                  'We could not save the application. Try again.',
-                  'Не удалось сохранить заявку. Попробуйте снова.',
-                ),
+            : t(
+                'We could not save your details. Please check them and try again.',
+                'Не удалось сохранить заявку. Проверьте данные и повторите отправку.',
+              ),
         );
       if (!result || typeof result.reference !== 'string' || !result.reference.trim())
         throw new Error(
           t(
-            'The server did not confirm the application. Try again.',
-            'Сервер не подтвердил заявку. Попробуйте снова.',
+            'No confirmation received. Please retry.',
+            'Подтверждение не получено. Повторите отправку.',
           ),
         );
       setReference(result.reference);
       try {
         sessionStorage.removeItem(DRAFT_KEY);
       } catch {
-        /* A saved server reference remains authoritative. */
+        /* The server reference confirms the application. */
       }
     } catch (cause) {
       if (active.signal.aborted) return;
       setError(
         cause instanceof TypeError
           ? t(
-              'Connection interrupted. Your draft is kept. Retry to confirm the same application.',
-              'Соединение прервано. Черновик сохранён. Повторите отправку для подтверждения той же заявки.',
+              'Connection interrupted. Your draft is saved; retry to confirm the same request.',
+              'Соединение прервано. Черновик сохранён; повторите отправку той же заявки.',
             )
           : cause instanceof Error
             ? cause.message
-            : t('Something went wrong. Please try again.', 'Возникла ошибка. Попробуйте снова.'),
+            : t('Please try again.', 'Повторите отправку.'),
       );
     } finally {
       if (controller.current === active) controller.current = null;
       if (!active.signal.aborted) setSending(false);
     }
   };
-
-  const field = (
-    key: keyof Omit<Draft, 'markets' | 'role'>,
-    label: string,
-    placeholder: string,
-    required = false,
-    type = 'text',
-  ) => (
-    <label className="field">
-      <span>
-        {label}
-        {required && <i> *</i>}
-      </span>
-      <input
-        type={type}
-        name={key}
-        value={draft[key]}
-        onChange={(e) => update(key, e.target.value)}
-        required={required}
-        minLength={key === 'name' ? 2 : undefined}
-        maxLength={180}
-        autoComplete={
-          key === 'email'
-            ? 'email'
-            : key === 'name'
-              ? 'name'
-              : key === 'company'
-                ? 'organization'
-                : 'off'
-        }
-        autoCapitalize={key === 'email' || key === 'telegram' ? 'none' : undefined}
-        spellCheck={key === 'email' || key === 'telegram' ? false : undefined}
-        placeholder={placeholder}
-      />
-    </label>
-  );
-  const stepNames = [
-    t('Your role', 'Ваша роль'),
-    t('Your network', 'Ваши рынки'),
-    t('Your introduction', 'Знакомство'),
+  const knownMarket = markets.find((m) => m.name === draft.markets[0]);
+  const currentMarket = knownMarket || {
+    ...markets[1],
+    name: draft.markets[0] || 'Ghana',
+    ru: draft.markets[0] || 'Гана',
+    currency: '—',
+  };
+  const roleOptions: { id: RoleId; label: string }[] = [
+    { id: 'affiliate', label: t('Affiliate', 'Аффилиат') },
+    { id: 'provider', label: t('Payment partner', 'Платёжный партнёр') },
+    { id: 'merchant', label: t('Business', 'Бизнес') },
   ];
-
+  if (draft.role === 'team' || draft.role === 'regional')
+    roleOptions.push({
+      id: draft.role,
+      label: t(
+        roles.find((r) => r.id === draft.role)!.title,
+        roles.find((r) => r.id === draft.role)!.ru,
+      ),
+    });
   return (
-    <section className="apply-page wrap">
-      <div className="apply-intro">
-        <Eyebrow>{t('A good connection starts here', 'Хорошие связи начинаются здесь')}</Eyebrow>
-        <h1>
-          {t('Let’s discuss', 'Обсудим')}
-          <br />
-          <span className="display-accent accent">{t('partnership.', 'партнёрство.')}</span>
+    <section className="editorial-scene contact-scene" aria-labelledby="contact-title">
+      <SceneArt name="contact" priority />
+      <div className="scene-copy contact-copy">
+        <h1 className="editorial-title" id="contact-title">
+          {t('Take the', 'Возьмите')}
+          <em>{t('other end.', 'другой конец.')}</em>
         </h1>
-        <p>
+        <p className="scene-subtitle">
           {t(
-            'Your markets and a work contact are enough to start. Add the details you already know.',
-            'Рынки и рабочий контакт — основа первого разговора. Дополните деталями, которые уже знаете.',
+            'A few details to start the right conversation.',
+            'Несколько деталей для нужного разговора.',
           )}
         </p>
-        <ol className="apply-progress">
-          {stepNames.map((name, i) => (
-            <li
-              key={name}
-              className={reference || i < step ? 'is-done' : i === step ? 'is-current' : ''}
+        {reference ? (
+          <div className="contact-success" role="status">
+            <span className="thread-eye">
+              <Check size={22} aria-hidden="true" />
+            </span>
+            <h2 ref={successRef} tabIndex={-1}>
+              {t('The thread is yours.', 'Связь установлена.')}
+            </h2>
+            <p>
+              {t(
+                'Your application is saved. We’ll use your contact details to continue the conversation.',
+                'Заявка сохранена. Мы свяжемся с вами по указанному контакту.',
+              )}
+            </p>
+            <span className="folio">{reference}</span>
+            <button
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(reference);
+                  setCopied(true);
+                } catch {
+                  setError(
+                    t('Select and copy the reference above.', 'Выделите и скопируйте номер выше.'),
+                  );
+                }
+              }}
             >
-              <button
-                type="button"
-                disabled={sending || reference !== '' || i >= step}
-                onClick={() => {
-                  setStep(i);
-                  setError('');
-                }}
-                aria-current={!reference && i === step ? 'step' : undefined}
-              >
-                <span>{i < step || reference ? <Check size={14} /> : `0${i + 1}`}</span>
-                {name}
-              </button>
-            </li>
-          ))}
-        </ol>
-        <div className="apply-private">
-          <LockKeyhole size={17} strokeWidth={1.4} />
-          <p>
-            {t(
-              'A private introduction. We never ask for passwords, OTPs or personal banking credentials.',
-              'Приватное знакомство. Не запрашиваем пароли, OTP или личные банковские данные.',
-            )}
-          </p>
-        </div>
-        <a href="mailto:hello@vladdos.com" className="apply-direct">
-          <Mail size={15} />
-          {t('Prefer a direct conversation?', 'Предпочитаете написать напрямую?')}
-          <ArrowUpRight size={15} />
-        </a>
-      </div>
-      <div ref={panel} className="apply-panel">
-        <>
-          {reference ? (
-            <div className="application-success">
-              <div className="success-mark">
-                <CheckCheck size={35} strokeWidth={1.2} />
+              <Copy size={16} />
+              {copied ? t('Copied', 'Скопировано') : t('Copy reference', 'Скопировать номер')}
+            </button>
+            <Link to="/markets">
+              {t('Explore markets', 'Изучить рынки')} <ArrowUpRight size={17} />
+            </Link>
+          </div>
+        ) : (
+          <form className="thread-form" onSubmit={submit} aria-busy={sending}>
+            <fieldset disabled={sending} className="thread-form-fields">
+              <div className="thread-form-row">
+                <span className="form-number">01</span>
+                <span className="form-prompt" id="role-label">
+                  {t('Your role', 'Ваша роль')}
+                </span>
+                <div className="inline-options" role="group" aria-labelledby="role-label">
+                  {roleOptions.map((option) => (
+                    <button
+                      type="button"
+                      key={option.id}
+                      aria-pressed={draft.role === option.id}
+                      onClick={() => update('role', option.id)}
+                    >
+                      {option.label}
+                      {draft.role === option.id && <Check size={15} />}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <Eyebrow>{t('Application saved', 'Заявка сохранена')}</Eyebrow>
-              <h2>
-                {t('A GOOD', 'ХОРОШЕЕ')}
-                <br />
-                <span className="display-accent">{t('first move.', 'начало.')}</span>
-              </h2>
-              <p>
+              <div className="thread-form-row market-form-row">
+                <span className="form-number">02</span>
+                <label className="form-prompt" htmlFor="contact-market">
+                  {t('Your market', 'Ваш рынок')}
+                </label>
+                <div className="thread-market">
+                  <select
+                    id="contact-market"
+                    value={currentMarket.name}
+                    onChange={(e) =>
+                      update('markets', [
+                        e.target.value,
+                        ...draft.markets.slice(1).filter((m) => m !== e.target.value),
+                      ])
+                    }
+                  >
+                    {!knownMarket && (
+                      <option value={currentMarket.name}>{currentMarket.name}</option>
+                    )}
+                    {markets.map((m) => (
+                      <option value={m.name} key={m.slug}>
+                        {t(m.name, m.ru)} / {m.currency}
+                      </option>
+                    ))}
+                  </select>
+                  <ArrowDown size={17} aria-hidden="true" />
+                </div>
+                <span className="form-prompt sector-prompt" id="sector-label">
+                  {t('Your sector', 'Ваша сфера')}
+                </span>
+                <div
+                  className="inline-options sector-options"
+                  role="group"
+                  aria-labelledby="sector-label"
+                >
+                  {categories.map((category) => (
+                    <button
+                      type="button"
+                      key={category}
+                      aria-pressed={draft.category === category}
+                      onClick={() => update('category', category)}
+                    >
+                      {category === 'other' ? t('Other', 'Другая') : category}
+                      {draft.category === category && <Check size={15} />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="thread-contact-fields">
+                <span className="form-number">03</span>
+                <p>{t('How can we reach you?', 'Как с вами связаться?')}</p>
+                <label htmlFor="thread-contact">
+                  {t('Telegram or email', 'Telegram или email')}
+                </label>
+                <input
+                  id="thread-contact"
+                  name="contact"
+                  value={draft.contact}
+                  onChange={(e) => update('contact', e.target.value)}
+                  required
+                  maxLength={180}
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  autoComplete="email"
+                  placeholder="@yourname or you@company.com"
+                  aria-describedby={error ? 'contact-error' : undefined}
+                />
+                <label htmlFor="thread-message">
+                  {t(
+                    'A few words about your connection (optional)',
+                    'Несколько слов о вашем предложении (необязательно)',
+                  )}
+                </label>
+                <textarea
+                  id="thread-message"
+                  name="message"
+                  value={draft.message}
+                  onChange={(e) => update('message', e.target.value)}
+                  maxLength={2500}
+                  placeholder={t(
+                    'Tell us what you’re building...',
+                    'Расскажите, над чем работаете...',
+                  )}
+                  rows={3}
+                />
+                <details className="contact-more">
+                  <summary>
+                    {t('Add company or operational details', 'Добавить компанию или детали работы')}
+                  </summary>
+                  <div className="contact-extra-grid">
+                    {(
+                      [
+                        ['name', t('Your name', 'Ваше имя')],
+                        ['company', t('Company', 'Компания')],
+                        ['methods', t('Payment methods', 'Платёжные методы')],
+                        ['volume', t('Monthly volume', 'Месячный объём')],
+                        ['experience', t('Experience', 'Опыт')],
+                        ['size', t('Team size', 'Размер команды')],
+                      ] as const
+                    ).map(([key, label]) => (
+                      <label key={key}>
+                        {label}
+                        <input
+                          name={key}
+                          value={draft[key]}
+                          onChange={(e) => update(key, e.target.value)}
+                          minLength={key === 'name' ? 2 : undefined}
+                          maxLength={180}
+                        />
+                      </label>
+                    ))}
+                  </div>
+                  {draft.markets.length > 1 && (
+                    <p>
+                      {t('Selected markets', 'Выбранные рынки')}: {draft.markets.join(', ')}
+                    </p>
+                  )}
+                </details>
+              </div>
+              <label className="honeypot" aria-hidden="true">
+                Website
+                <input
+                  name="site"
+                  value={draft.site}
+                  onChange={(e) => update('site', e.target.value)}
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+              </label>
+              <button className="thread-submit" type="submit" disabled={!ready || sending}>
+                {sending ? (
+                  <LoaderCircle className="spin" size={20} />
+                ) : (
+                  <>
+                    {t('Start a conversation', 'Начать разговор')}
+                    <ArrowUpRight size={24} />
+                  </>
+                )}
+              </button>
+              <p className="contact-terms">
                 {t(
-                  'Your introduction is recorded. We will review the information and contact you if there is a suitable opportunity.',
-                  'Ваша заявка записана. Рассмотрим информацию и свяжемся с вами, если найдём подходящую возможность.',
+                  'We’ll discuss fit and terms before introductions.',
+                  'Совместимость и условия обсудим до знакомства.',
                 )}
               </p>
-              <div className="reference-box">
-                <div>
-                  <span>{t('Your reference', 'Номер заявки')}</span>
-                  <strong>{reference}</strong>
-                </div>
-                <button
-                  className="icon-button"
-                  aria-label={t('Copy reference', 'Скопировать номер')}
-                  onClick={async () => {
-                    try {
-                      await navigator.clipboard.writeText(reference);
-                      setCopied(true);
-                      setCopyError(false);
-                    } catch {
-                      setCopied(false);
-                      setCopyError(true);
-                    }
-                  }}
-                >
-                  {copied ? <Check size={19} /> : <Copy size={19} />}
-                </button>
-              </div>
-              <span className="copy-status" aria-live="polite">
-                {copied
-                  ? t('Reference copied.', 'Номер скопирован.')
-                  : copyError
-                    ? t(
-                        'Could not copy. Select the reference and copy it manually.',
-                        'Не удалось скопировать. Выделите номер и скопируйте вручную.',
-                      )
-                    : t('Keep this reference for your records.', 'Сохраните номер заявки.')}
-              </span>
-              <Action to="/markets" secondary>
-                {t('Explore the network', 'Посмотреть рынки')}
-              </Action>
-            </div>
-          ) : (
-            <form
-              ref={form}
-              onSubmit={advance}
-              key="form"
-              className="application-form"
-              aria-busy={sending}
-            >
-              {ready && params.get('source') === 'forge' && (
-                <div className="forge-arrival">
-                  <Check size={15} />
-                  <span>
-                    {t(
-                      'Your PAN profile is here. Review it and add your contact.',
-                      'Профиль PAN перенесён. Проверьте его и добавьте контакт.',
-                    )}
-                  </span>
-                </div>
-              )}
-              <div className="form-topline">
-                <span>
-                  PAN /{' '}
-                  {step > 0
-                    ? t(
-                        roles.find((role) => role.id === draft.role)!.title,
-                        roles.find((role) => role.id === draft.role)!.ru,
-                      )
-                    : t('PARTNERSHIP', 'ПАРТНЁРСТВО')}
-                </span>
-                <span>{(step + 1).toString().padStart(2, '0')} — 03</span>
-              </div>
-              <>
-                <fieldset key={step} disabled={sending} aria-label={stepNames[step]}>
-                  {step === 0 && (
-                    <>
-                      <h2>
-                        {t('What do you', 'Что вы')}
-                        <br />
-                        <span className="display-accent">{t('bring?', 'предлагаете?')}</span>
-                      </h2>
-                      <p className="form-description">
-                        {t(
-                          'Choose the role that best describes your work.',
-                          'Выберите роль, которая лучше описывает вашу работу.',
-                        )}
-                      </p>
-                      <div className="role-options">
-                        {roles.map((role, i) => (
-                          <button
-                            type="button"
-                            key={role.id}
-                            className={`role-option ${draft.role === role.id ? 'is-selected' : ''}`}
-                            aria-pressed={draft.role === role.id}
-                            onClick={() => update('role', role.id)}
-                          >
-                            <span className="role-option-index">0{i + 1}</span>
-                            <span>
-                              <strong>{t(role.title, role.ru)}</strong>
-                              <small>{t(role.short, role.shortRu)}</small>
-                            </span>
-                            <span className="role-option-select">
-                              {draft.role === role.id ? (
-                                <Check size={14} />
-                              ) : (
-                                <ArrowUpRight size={15} />
-                              )}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                  {step === 1 && (
-                    <>
-                      <h2>
-                        {draft.role === 'merchant'
-                          ? t('Your business', 'Задачи вашего')
-                          : t('Your markets', 'Ваши рынки')}
-                        <br />
-                        <span className="display-accent">
-                          {draft.role === 'merchant'
-                            ? t('requirements.', 'бизнеса.')
-                            : t('and experience.', 'и опыт.')}
-                        </span>
-                      </h2>
-                      <p className="form-description">
-                        {t(
-                          'Select your markets and share the essentials.',
-                          'Выберите рынки и укажите главное.',
-                        )}
-                      </p>
-                      <fieldset className="market-choice-fieldset">
-                        <legend>
-                          {t('Partnership markets', 'Рынки для сотрудничества')} *
-                          <span>{selectedMarkets.length} / 10</span>
-                        </legend>
-                        <div className="market-choices">
-                          {markets.map((m) => (
-                            <label
-                              key={m.slug}
-                              className={draft.markets.includes(m.name) ? 'is-selected' : ''}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={draft.markets.includes(m.name)}
-                                onChange={() => toggleMarket(m.name)}
-                              />
-                              <b>{m.code}</b>
-                              <span>{t(m.name, m.ru)}</span>
-                              <span className="market-choice-mark">
-                                {draft.markets.includes(m.name) ? (
-                                  <Check size={14} />
-                                ) : (
-                                  <Plus size={14} />
-                                )}
-                              </span>
-                            </label>
-                          ))}
-                        </div>
-                      </fieldset>
-                      <label className="field">
-                        <span>{t('Other markets', 'Другие рынки')}</span>
-                        <input
-                          name="otherMarkets"
-                          value={otherMarkets}
-                          onChange={(e) => {
-                            setOtherMarkets(e.target.value);
-                            setError('');
-                          }}
-                          placeholder={t('e.g. Canada, Brazil', 'Например, Канада, Бразилия')}
-                          maxLength={140}
-                          autoComplete="off"
-                        />
-                      </label>
-                      <CategoryPicker
-                        value={draft.category}
-                        onChange={(value) => update('category', value)}
-                        label={t('Business category', 'Бизнес-категория')}
-                        optional
-                      />
-                      <details className="application-extra">
-                        <summary>
-                          {t(
-                            'Add experience & payment details',
-                            'Добавить опыт и платёжные детали',
-                          )}
-                          <ChevronDown size={16} />
-                        </summary>
-                        <p>
-                          {t(
-                            'Optional. You can discuss these with PAN later.',
-                            'Необязательно. Это можно обсудить с PAN позже.',
-                          )}
-                        </p>
-                        <div className="field-grid">
-                          {field(
-                            'methods',
-                            t('Payment methods', 'Платёжные методы'),
-                            'UPI, Mobile Money…',
-                          )}
-                          {field(
-                            'size',
-                            draft.role === 'team'
-                              ? t('Team size', 'Размер команды')
-                              : t('Company / network size', 'Размер компании / сети'),
-                            t('Optional', 'Необязательно'),
-                          )}
-                        </div>
-                        <div className="field-grid">
-                          {field(
-                            'experience',
-                            t('Experience', 'Опыт'),
-                            t('e.g. 3 years', 'Например, 3 года'),
-                          )}
-                          {field(
-                            'volume',
-                            t('Monthly volume, if relevant', 'Месячный объём, если применимо'),
-                            t('Optional', 'Необязательно'),
-                          )}
-                        </div>
-                      </details>
-                    </>
-                  )}
-                  {step === 2 && (
-                    <>
-                      <h2>
-                        {t('Make an', 'Начните')}
-                        <br />
-                        <span className="display-accent">{t('introduction.', 'знакомство.')}</span>
-                      </h2>
-                      <p className="form-description">
-                        {t(
-                          'Share a work contact and what you have in mind.',
-                          'Оставьте рабочий контакт и расскажите о своём запросе.',
-                        )}
-                      </p>
-                      <div className="field-grid">
-                        {field(
-                          'name',
-                          t('Your name', 'Ваше имя'),
-                          t('Full name', 'Имя и фамилия'),
-                          true,
-                        )}
-                        {field(
-                          'company',
-                          t('Company / team', 'Компания / команда'),
-                          t('Optional', 'Необязательно'),
-                        )}
-                      </div>
-                      <div className="field-grid">
-                        {field(
-                          'email',
-                          t('Work email', 'Рабочая почта'),
-                          'you@company.com',
-                          true,
-                          'email',
-                        )}
-                        {field('telegram', 'Telegram', '@handle')}
-                      </div>
-                      <label className="field">
-                        <span>
-                          {t('What would make this useful?', 'Какое партнёрство вам интересно?')}
-                        </span>
-                        <textarea
-                          value={draft.message}
-                          onChange={(e) => update('message', e.target.value)}
-                          maxLength={1500}
-                          placeholder={t(
-                            'Your experience, your needs, your next move…',
-                            'Ваш опыт, потребности, следующий шаг…',
-                          )}
-                        />
-                      </label>
-                      <label className="honeypot" aria-hidden="true">
-                        Leave blank
-                        <input
-                          name="site"
-                          value={draft.site}
-                          onChange={(e) => update('site', e.target.value)}
-                          tabIndex={-1}
-                          autoComplete="off"
-                        />
-                      </label>
-                      <div className="application-summary">
-                        <span>
-                          {t(
-                            roles.find((r) => r.id === draft.role)!.title,
-                            roles.find((r) => r.id === draft.role)!.ru,
-                          )}
-                        </span>
-                        <span>
-                          {selectedMarkets
-                            .map((name) => {
-                              const market = markets.find((m) => m.name === name);
-                              return market ? t(market.name, market.ru) : name;
-                            })
-                            .join(' · ')}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setStep(1);
-                            setError('');
-                          }}
-                        >
-                          {t('Edit', 'Изменить')}
-                        </button>
-                      </div>
-                      <p className="form-privacy">
-                        {t(
-                          'By submitting, you acknowledge our',
-                          'Отправляя заявку, вы подтверждаете ознакомление с',
-                        )}{' '}
-                        <Link to="/privacy">
-                          {t('Privacy Notice', 'уведомлением о конфиденциальности')}
-                        </Link>
-                        .{' '}
-                        {t(
-                          'Commercial terms are agreed separately.',
-                          'Коммерческие условия согласуются отдельно.',
-                        )}
-                      </p>
-                    </>
-                  )}
-                </fieldset>
-              </>
-              <div
-                ref={errorMessage}
-                className="form-error"
-                tabIndex={-1}
-                role={error ? 'alert' : undefined}
-                aria-live="polite"
-                hidden={!error}
-              >
-                {error}
-              </div>
-              <div className="form-actions">
-                {step > 0 ? (
-                  <button
-                    className="form-back"
-                    type="button"
-                    disabled={sending}
-                    onClick={() => {
-                      setStep(step - 1);
-                      setError('');
-                    }}
-                  >
-                    <ArrowLeft size={16} />
-                    {t('Back', 'Назад')}
-                  </button>
-                ) : (
-                  <span className="form-autosave">
-                    <span className="small-dot" />
-                    {t('Session draft', 'Черновик сессии')}
-                  </span>
-                )}
-                <button className="button button-gold" type="submit" disabled={sending || !ready}>
-                  {sending ? (
-                    <>
-                      <LoaderCircle className="spin" size={17} />
-                      {t('Saving…', 'Сохраняем…')}
-                    </>
-                  ) : (
-                    <>
-                      {step === 2
-                        ? t('Send introduction', 'Отправить заявку')
-                        : t('Continue', 'Продолжить')}
-                      <ArrowUpRight size={18} />
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          )}
-        </>
+            </fieldset>
+          </form>
+        )}
+        <p
+          id="contact-error"
+          ref={errorRef}
+          className="form-error"
+          role="alert"
+          tabIndex={-1}
+          hidden={!error}
+        >
+          {error}
+        </p>
+        <div className="contact-foot">
+          <span>
+            {roleOptions.find((r) => r.id === draft.role)?.label || draft.role} <i>/</i>{' '}
+            {t(currentMarket.name, currentMarket.ru)} <i>/</i>{' '}
+            {draft.category === 'other' ? t('Other', 'Другая') : draft.category}
+          </span>
+          <Link to="/privacy">{t('Privacy', 'Конфиденциальность')}</Link>
+          <a href="mailto:hello@vladdos.com">hello@vladdos.com</a>
+        </div>
       </div>
+      <span className="contact-you folio" aria-hidden="true">
+        {t('YOU', 'ВЫ')}
+      </span>
     </section>
   );
 }

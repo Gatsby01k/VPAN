@@ -4,16 +4,9 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './fonts.css';
 import './styles.css';
-import './pan.css';
+import './editorial-controls.css';
 import './growth.css';
-import './experience.css';
-import './glass.css';
-import './deck.css';
-import './brand-motion.css';
-import './scene.css';
-import './brand-identity.css';
-import './console.css';
-import './header.css';
+import './editorial.css';
 import { emptyGrowth, type GrowthData } from './growth';
 
 const root = document.getElementById('root')!;
