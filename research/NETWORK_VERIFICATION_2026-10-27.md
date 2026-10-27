@@ -50,7 +50,9 @@ Screenshots are saved outside the repository in the workspace's `previews/networ
 
 ## Deployment boundary
 
-The connected Vercel project inspection identified project `vpan` with vladdos.com/www.vladdos.com domains and a Vite deployment. Infrastructure/integration/environment reads for its owning team returned **403 forbidden** and requested an explicit team-access grant. A native authorisation link was generated for the user; it expires and is not saved in source.
+The connected Vercel project inspection identified project `vpan` with vladdos.com/www.vladdos.com domains and a Vite deployment. Initial infrastructure reads returned **403 forbidden**. After a native team-authorisation link was supplied, access became available; the project had no environment variables configured. An existing team-level Neon installation was visible, but no database was provisioned or attached in this task.
+
+The implementation was committed locally on branch `codex/vladdos-network-foundation`. The attempt to push that branch to the repository's existing GitHub remote was **rejected by automatic approval review**: it considered external code disclosure and a possible Vercel preview trigger insufficiently authorised. The push was not performed and no alternative upload/deployment path was used to bypass that rejection. Explicit user approval for that external release step remains required.
 
 The release is implemented and tested locally. It has **not been published to the production domain** in this task. A persistent backend, production volume/backup, strong operations credential, notification receiver and cloud routing must be connected and verified. The included Vercel gateway is tested locally with a mock; its actual deployed rewrites have not been verified. A static deployment cannot substitute for the durable backend.
 
