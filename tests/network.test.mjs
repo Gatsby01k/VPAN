@@ -429,6 +429,12 @@ test('legacy brief URLs and drafts retain countries, sector and relevant methods
     }),
     scope,
   );
+  const homeBrief = scopeFromParams(
+    new URLSearchParams('industry=payments&markets=mozambique&capabilities=local-methods,invalid'),
+  );
+  assert.equal(homeBrief.industry, 'payments');
+  assert.deepEqual(homeBrief.countries, ['mozambique']);
+  assert.deepEqual(homeBrief.capabilities, ['local-methods']);
 });
 
 test('static hosting keeps EN/RU documents behind public routes so filesystem precedence cannot shadow language selection', () => {
@@ -451,4 +457,31 @@ test('static hosting keeps EN/RU documents behind public routes so filesystem pr
     assert.match(ru, /hreflang="en"/);
     assert.match(ru, /href="https:\/\/www.vladdos.com/);
   }
+});
+
+test('the retained editorial homepage keeps its original artwork and identity while adding the two-sided business paths', async (t) => {
+  const f = await fixture(t);
+  const html = await (await fetch(f.base + '/')).text();
+  assert.match(html, /assets\/editorial\/hero.webp/);
+  assert.match(html, /class="editorial-scene hero-scene"/);
+  assert.match(html, /The other/);
+  assert.match(html, /side\./);
+  assert.match(html, /assets\/editorial\/connection.webp/);
+  assert.match(html, /assets\/editorial\/people.webp/);
+  assert.match(html, /assets\/editorial\/exchange.webp/);
+  assert.match(html, /I NEED/);
+  assert.match(html, /I OFFER/);
+  assert.match(html, /\/find-a-partner/);
+  assert.match(html, /\/join/);
+  assert.doesNotMatch(html, /Private Affiliate Network|PAN \//);
+  const markets = await (await fetch(f.base + '/markets')).text();
+  assert.match(markets, /class="region-picker"/);
+  assert.match(markets, /class="country-card"/);
+  assert.match(markets, /\/markets\/mozambique/);
+  const about = await (await fetch(f.base + '/about')).text();
+  assert.match(about, /class="about-statement wrap"/);
+  assert.match(about, /class="accordion"/);
+  const contact = await (await fetch(f.base + '/contact')).text();
+  assert.match(contact, /class="editorial-scene contact-scene"/);
+  assert.match(contact, /assets\/editorial\/contact.webp/);
 });

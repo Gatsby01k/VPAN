@@ -2,7 +2,7 @@
 
 Independent international B2B partner sourcing and deal origination across Asia, Latin America and Africa. The public product serves two equal paths: **I NEED → Find a Partner** and **I OFFER → Join the Network**. Countries describe sourcing destinations, not verified network coverage.
 
-The website uses the retained ivory paper, torn black fabric, engraved gold and fuchsia thread artwork. Public copy, navigation, metadata, forms and active components use VlaDDoS Network. Earlier brand assets and research are retained under `research/` for provenance, outside the public build.
+The website preserves the original compositions, character artwork, signature, ivory paper, torn black fabric, engraved gold and fuchsia thread. The new positioning and two-sided scenarios extend that design. Public copy, navigation, metadata and forms use VlaDDoS Network. Earlier assets and research remain under `research/` for provenance.
 
 ## Run and verify
 
@@ -24,13 +24,16 @@ npm start
 npm test
 ```
 
-`npm test` builds first, then tests HTTP → SQLite → response, legacy database migration, privacy boundaries, retry conflicts, qualification, matching, bilateral permission, commercial terms, statement accounting, outbox recovery and existing editorial behavior. The current suite has 36 passing tests and uses disposable databases. Browser QA also uses a separate database; fixture companies are never production seed data.
+`npm test` builds first, then tests HTTP → SQLite → response, legacy database migration, privacy boundaries, retry conflicts, qualification, matching, bilateral permission, commercial terms, statement accounting, outbox recovery and existing editorial behavior. The current suite has 38 passing tests and uses disposable databases. Browser QA also uses a separate database; fixture companies are never production seed data.
 
 ## Product architecture
 
 - `shared/taxonomy.json`: one active catalogue of regions, countries, industries, company types and capabilities. Methods and settlement currencies belong to their country context.
 - `src/network.ts`: shared frontend labels and route metadata.
-- `src/pages/NetworkPages.tsx`: public network, industries, market/country, contact, about, legal and field-note pages.
+- `src/pages/Home.tsx`, `src/components/Editorial.tsx`, `src/components/Layout.tsx`: original artwork, compositions, signature, navigation and footer with the updated positioning.
+- `src/pages/RetainedExplore.tsx`: original market cards, country compositions and About layout, populated from the shared catalogue and new business copy.
+- `src/components/ConnectionStudio.tsx`: original homepage brief layout, extended with need/offer, industry and capabilities; selections carry into the contact form.
+- `src/pages/NetworkPages.tsx`: network, industries, contact, legal and field-note content.
 - `src/pages/ConnectionEngine.tsx`: open connection loom and live private brief. Contact plus scope is sufficient; company, message and operational context are optional.
 - `operations/desk.mjs`: validation, additive migration, CRM, qualifications, matching candidates, introductions, agreements, revenue records and notification outbox.
 - `server.mjs`: persistent Node HTTP service, SQLite, authenticated operations endpoints and bilingual SSR.
@@ -72,7 +75,7 @@ The outbox sends JSON `{ event, id, reference, deskPath }`, without applicant co
 
 ## Production deployment and migration
 
-**A static deployment alone does not run SQLite, notifications or dynamic editorial SSR.** The existing `vpan` Vercel project serves vladdos.com. Its infrastructure access requires the owning team's grant; the implementation does not claim that the new backend is already deployed.
+**A static deployment alone does not run SQLite, notifications or dynamic editorial SSR.** The existing `vpan` Vercel project serves vladdos.com. An authorised preview branch is published; production and the persistent backend have not been changed.
 
 Preferred Foundation topology: one persistent Node/Docker service with a mounted SQLite volume and HTTPS reverse proxy. It can serve the complete website and API. Alternatively, keep Vercel for the frontend and use the included gateway to the persistent service.
 
@@ -92,7 +95,7 @@ DB_PATH=/path/to/current/partners.sqlite npm run backup -- /private/backup/befor
 
 For the split Vercel topology, set `INTAKE_SERVICE_ORIGIN` to the exact HTTPS origin of the persistent backend and the same strong `INTAKE_GATEWAY_TOKEN` on Vercel and the backend. The backend then requires that gateway key for API access and trusts forwarded client IPs only on authenticated gateway requests. `TRUST_PROXY=0` remains the default; enable it separately only behind a trusted reverse proxy. The gateway carries no database or admin key into the public client.
 
-`vercel.json` preserves legacy redirects, serves prebuilt RU HTML for `?lang=ru`, and forwards `/api/*`, `/health`, RSS and dynamic guide pages to the persistent service. An unset/unreachable service returns 503 and cannot produce a false receipt. The gateway's cloud routing still needs verification in an authorised Vercel deployment; local tests do not establish that live routing works.
+`vercel.json` preserves legacy redirects, serves prebuilt RU HTML for `?lang=ru`, and forwards `/api/*`, `/health`, RSS and dynamic guide pages to the persistent service. An unset/unreachable service returns 503 and cannot produce a false receipt. Preview API routing has been checked for an honest 503 when the persistent service is absent. End-to-end cloud intake still requires that service and its configuration.
 
 Rollback: restore the previous application image first. The original application tables remain compatible. Restore a backup only with the service stopped and after reconciling enquiries received since it was taken; blindly replacing a live database would lose newer records. Retain the newer database as a private recovery artifact.
 

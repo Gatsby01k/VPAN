@@ -43,13 +43,23 @@ export default function ConnectionEngine() {
   const entry =
     location.pathname +
     '?' +
-    ['country', 'market', 'markets', 'methods', 'category', 'industry', 'role', 'region']
+    [
+      'country',
+      'market',
+      'markets',
+      'methods',
+      'category',
+      'industry',
+      'capabilities',
+      'role',
+      'region',
+    ]
       .map((k) => k + '=' + params.get(k))
       .join('&');
   const initial: Brief = {
     side: location.pathname === '/join' ? 'offer' : 'need',
     ...scope,
-    capabilities: [],
+    capabilities: scope.capabilities,
     settlementCurrencies: [],
     companyType: '',
     targetType: '',

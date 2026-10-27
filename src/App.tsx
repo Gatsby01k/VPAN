@@ -1,18 +1,9 @@
 import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { LocaleProvider } from './locale';
-import { Header, Footer, RouteEffects } from './components/NetworkLayout';
-import {
-  Home,
-  Network,
-  Industries,
-  Markets,
-  Country,
-  About,
-  Contact,
-  Legal,
-  NotFound,
-  Knowledge,
-} from './pages/NetworkPages';
+import { Header, Footer, RouteEffects } from './components/Layout';
+import { Network, Industries, Contact, Legal, NotFound, Knowledge } from './pages/NetworkPages';
+import Home from './pages/Home';
+import { Markets, Country, About } from './pages/RetainedExplore';
 import ConnectionEngine from './pages/ConnectionEngine';
 import DealDesk from './pages/DealDesk';
 import { GrowthProvider, type GrowthData } from './growth';
@@ -22,11 +13,21 @@ function LegacyRoute({ offer = false }: { offer?: boolean }) {
 }
 function Pages() {
   const location = useLocation();
+  const pagePath = location.pathname.replace(/\/+$/, '') || '/';
   return (
     <>
       <Header />
       <RouteEffects />
-      <main id="main" tabIndex={-1}>
+      <main
+        id="main"
+        tabIndex={-1}
+        className={
+          ['/', '/contact', '/markets', '/about'].includes(pagePath) ||
+          pagePath.startsWith('/markets/')
+            ? ''
+            : 'network-product'
+        }
+      >
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/network" element={<Network />} />

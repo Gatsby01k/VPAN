@@ -1,0 +1,306 @@
+/* Extend the established artwork and editorial layout without replacing it. */
+@media (min-width: 1181px) {
+  .site-header.is-deck-home:not(.is-scrolled) .desktop-nav {
+    gap: 14px;
+  }
+}
+.hero-network-context {
+  font-size: clamp(12px, 1.05vw, 17px);
+  line-height: 1.5;
+  margin-top: 13px;
+  max-width: 390px;
+  margin-left: auto;
+}
+.hero-network-context > span {
+  display: block;
+  font:
+    10px/1.5 'Courier New',
+    monospace;
+  letter-spacing: 0.12em;
+  margin-top: 10px;
+}
+.hero-network-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 25px;
+  margin-top: 18px;
+}
+.hero-network-actions > a {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font:
+    11px/1.5 'Courier New',
+    monospace;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 6px;
+}
+.hero-network-actions svg {
+  color: var(--pink);
+}
+.editorial-home .connection-roles {
+  grid-template-columns: 1fr 1fr;
+}
+.editorial-home .connection-roles button {
+  font-size: clamp(18px, 1.7vw, 28px);
+}
+.editorial-home .connection-roles p {
+  font-size: clamp(12px, 1.05vw, 17px);
+  line-height: 1.5;
+  max-width: 230px;
+}
+.editorial-home .connection-roles a {
+  font-size: 14px;
+}
+.editorial-home .profile-role-picker button {
+  white-space: normal;
+}
+.editorial-home .profile-market-picker {
+  margin-top: 14px;
+}
+.editorial-home .editorial-brief {
+  scroll-margin-top: 0;
+}
+.editorial-home .profile-market-picker > button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.editorial-home .profile-market-picker small {
+  margin-left: auto;
+}
+.editorial-home .profile-builder .partner-pass h3 {
+  font-size: 58px;
+}
+.editorial-home .pass-head > span:first-child {
+  font-family: var(--serif);
+  color: var(--gold);
+}
+.network-product {
+  padding-top: 95px;
+}
+.network-product .page-intro h1 em,
+.network-product .invitation h2 em,
+.network-product .engine-title h1 em {
+  color: var(--ink);
+}
+.network-product .action {
+  background: none;
+  color: var(--ink);
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  padding: 12px 0;
+  min-height: 44px;
+}
+.network-product .action:hover {
+  background: none;
+  color: var(--pink);
+  border-color: var(--pink);
+  transform: none;
+}
+.network-product .action > svg {
+  color: var(--pink);
+}
+.network-product .submit-action,
+.network-product .desk-login .action {
+  background: var(--ink);
+  color: var(--paper);
+  border: 0;
+  padding: 16px 22px;
+}
+.network-product .live-brief {
+  transform: none;
+  background: transparent;
+  box-shadow: none;
+  border-color: var(--line);
+}
+.network-product .live-brief h2 em {
+  color: var(--ink);
+}
+.network-product .intent-selector > button {
+  background: none;
+  color: var(--ink);
+}
+.network-product .intent-selector > button[aria-pressed='true'] {
+  background: none;
+  color: var(--ink);
+  box-shadow: inset 0 -2px 0 var(--pink);
+  border-color: var(--line);
+}
+.network-product .intent-selector > button[aria-pressed='true'] > span {
+  color: var(--pink);
+}
+.network-product .choice-set button[aria-pressed='true'] {
+  background: #ff006d0b;
+  border-color: var(--pink);
+  color: var(--ink);
+  box-shadow: none;
+}
+.network-product .choice-set button[aria-pressed='true']:before {
+  color: var(--pink);
+}
+.network-product .connection-engine {
+  padding-top: 60px;
+}
+.network-product .engine-title {
+  margin-bottom: 40px;
+}
+.network-product .loom-section:before,
+.network-product .loom-section:after {
+  display: none;
+}
+.network-product .live-brief:before,
+.network-product .brief-pin {
+  display: none;
+}
+.network-product .receipt {
+  background: none;
+  border-color: var(--line);
+}
+.network-product .about-art {
+  margin-inline: 0;
+}
+.editorial-footer {
+  margin-top: 20px;
+}
+@media (max-width: 800px) {
+  .hero-network-context {
+    max-width: 340px;
+    font-size: 14px;
+  }
+  .hero-network-actions {
+    justify-content: flex-start;
+  }
+  .network-product {
+    padding-top: 90px;
+  }
+  .network-product .connection-engine {
+    padding-top: 35px;
+  }
+}
+@media (max-width: 600px) {
+  .hero-network-context {
+    margin-left: 0;
+    max-width: 340px;
+    font-size: 14px;
+  }
+  .hero-network-context > span {
+    font-size: 10px;
+  }
+  .hero-network-actions {
+    justify-content: flex-start;
+    gap: 30px;
+    margin-top: 20px;
+  }
+  .hero-network-actions > a {
+    font-size: 12px;
+  }
+  .editorial-home .connection-roles {
+    grid-template-columns: 1fr;
+  }
+  .editorial-home .connection-roles > div + div {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    padding-top: 20px;
+  }
+  .editorial-home .connection-roles p {
+    max-width: 100%;
+    font-size: 14px;
+  }
+  .editorial-home .connection-roles button {
+    font-size: 24px;
+  }
+  .editorial-home .connection-roles a {
+    font-size: 14px;
+    margin-top: 10px;
+  }
+  .editorial-home .profile-builder .partner-pass h3 {
+    font-size: 44px;
+  }
+  .network-product {
+    padding-top: 76px;
+  }
+  .network-product .connection-engine {
+    padding-top: 30px;
+  }
+  .network-product .engine-title h1 {
+    font-size: 49px;
+  }
+  .network-product .page-intro {
+    padding-top: 45px;
+  }
+  .hero-copy .thread-link {
+    margin-top: 20px;
+  }
+}
+.people-industries {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+  margin-top: 20px;
+}
+.people-industries svg {
+  color: var(--pink);
+}
+.retained-contact-paths {
+  margin-top: 32px;
+}
+.retained-contact-paths > div {
+  padding: 20px 0;
+  border-top: 1px solid var(--line);
+}
+.retained-contact-paths .folio {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--muted);
+}
+.retained-contact-paths .thread-link {
+  font-size: clamp(17px, 1.5vw, 23px);
+}
+.retained-contact-paths p {
+  font-size: clamp(12px, 1vw, 16px);
+  line-height: 1.6;
+  margin-top: 12px;
+  max-width: 400px;
+}
+.contact-foot a {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.retained-country-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 28px;
+}
+@media (min-width: 901px) {
+  .contact-foot {
+    padding-left: 52px;
+  }
+}
+@media (max-width: 600px) {
+  .retained-contact-paths {
+    margin-top: 25px;
+  }
+  .retained-contact-paths > div {
+    padding: 20px 0;
+  }
+  .retained-contact-paths .thread-link {
+    font-size: 20px;
+  }
+  .retained-contact-paths p {
+    font-size: 14px;
+  }
+  .people-industries {
+    font-size: 14px;
+    margin-top: 18px;
+  }
+}
+@media (max-width: 359px) {
+  .editorial-home .hero-copy h1 > span {
+    display: inline-block;
+    transform: scaleX(0.86);
+    transform-origin: left top;
+  }
+}

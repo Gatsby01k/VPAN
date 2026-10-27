@@ -69,6 +69,13 @@ export function scopeFromParams(params: URLSearchParams) {
     industry,
     region: selected[0]?.region || regions.find((r) => r.id === params.get('region'))?.id || '',
     countries: selected.map((c) => c.id),
+    capabilities: [
+      ...new Set(
+        (params.get('capabilities') || '')
+          .split(',')
+          .filter((id) => capabilities.some((c) => c.id === id)),
+      ),
+    ],
     methods: (params.get('methods') || '').split(',').flatMap((raw) => {
       const method = selected
         .flatMap((c) => c.methods)

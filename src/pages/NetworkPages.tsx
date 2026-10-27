@@ -1,151 +1,12 @@
 import { useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
-import { ArrowDown, Plus, Minus } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { Plus, Minus } from 'lucide-react';
 import { useLocale } from '../locale';
-import { regions, industries, countries, label } from '../network';
+import { industries, label } from '../network';
 import { NLink, Action, Arrow, Eyebrow } from '../components/NetworkLayout';
 import { useGrowth } from '../growth';
+import { SceneArt, ThreadLink } from '../components/Editorial';
 
-export function Home() {
-  const { t } = useLocale();
-  return (
-    <>
-      <section className="hero">
-        <img
-          className="hero-art"
-          src="/assets/editorial/exchange.webp"
-          alt=""
-          width="1586"
-          height="992"
-          fetchPriority="high"
-        />
-        <div className="hero-index">
-          <span>INDEPENDENT CONNECTIONS</span>
-          <span>ASIA / LATAM / AFRICA</span>
-        </div>
-        <div className="hero-copy">
-          <Eyebrow>
-            {t('International B2B partnership network', 'Международная B2B-сеть партнёрств')}
-          </Eyebrow>
-          <h1>
-            {t('Local knowledge.', 'Локальные связи.')}
-            <em>{t('Global opportunity.', 'Глобальные возможности.')}</em>
-          </h1>
-          <p>
-            {t(
-              'We connect companies with payment partners, local expertise and commercial opportunities across Asia, Latin America and Africa.',
-              'Соединяем компании с платёжными партнёрами, локальной экспертизой и коммерческими возможностями в Азии, Латинской Америке и Африке.',
-            )}
-          </p>
-          <div className="hero-choices">
-            <NLink to="/find-a-partner">
-              <span>I NEED</span>
-              <strong>{t('Find a partner', 'Найти партнёра')}</strong>
-              <Arrow />
-            </NLink>
-            <NLink to="/join">
-              <span>I OFFER</span>
-              <strong>{t('Join the network', 'Стать партнёром')}</strong>
-              <Arrow />
-            </NLink>
-          </div>
-          <small>
-            {t(
-              'One brief. A human review. A relevant introduction.',
-              'Короткий бриф. Личная проверка. Релевантное знакомство.',
-            )}
-          </small>
-        </div>
-        <div className="hero-caption">
-          <span>01 / THE CONNECTION</span>
-          <a href="#opportunity" aria-label={t('Explore the network', 'Узнать о сети')}>
-            <ArrowDown size={18} />
-          </a>
-          <span>{t('Follow the thread.', 'Следуйте за нитью.')}</span>
-        </div>
-      </section>
-      <section id="opportunity" className="intro-section wrap">
-        <Eyebrow>02 / {t('Connections with a purpose', 'Связи с целью')}</Eyebrow>
-        <div className="intro-grid">
-          <h2>
-            {t('A new market starts', 'Новый рынок начинается')}{' '}
-            <em>{t('with the right people.', 'с нужных людей.')}</em>
-          </h2>
-          <div>
-            <p className="large-copy">
-              {t(
-                'You know what your business needs. Somewhere, a company knows exactly how to help. We work on the connection between you.',
-                'Вы знаете, что нужно вашему бизнесу. Где-то есть компания, которая умеет это делать. Наша работа — найти связь между вами.',
-              )}
-            </p>
-            <p>
-              {t(
-                'VlaDDoS Network is an independent partner sourcing and deal origination network. We clarify the brief, qualify the opportunity and arrange introductions when there is a credible fit.',
-                'VlaDDoS Network — независимая сеть поиска партнёров и формирования сделок. Мы уточняем задачу, проверяем возможность и организуем знакомство при обоснованном соответствии.',
-              )}
-            </p>
-            <NLink className="text-link" to="/network">
-              {t('Inside the network', 'Как устроена сеть')}
-              <Arrow />
-            </NLink>
-          </div>
-        </div>
-      </section>
-      <section className="thread-section">
-        <img src="/assets/editorial/people.webp" alt="" width="1586" height="992" loading="lazy" />
-        <div className="thread-copy">
-          <Eyebrow>03 / THE CONNECTION ENGINE</Eyebrow>
-          <h2>
-            {t('Two sides.', 'Две стороны.')}
-            <em>{t('One good reason to connect.', 'Одна причина для знакомства.')}</em>
-          </h2>
-          <div className="two-paths">
-            <div>
-              <span>I NEED</span>
-              <h3>{t('Bring your ambition.', 'Расскажите о задаче.')}</h3>
-              <p>
-                {t(
-                  'Find a PSP, local payment partner, liquidity relationship or the expertise to enter a market.',
-                  'Найдите PSP, локального платёжного партнёра, поставщика ликвидности или экспертизу для выхода на рынок.',
-                )}
-              </p>
-              <Action to="/find-a-partner">{t('Define your need', 'Опишите задачу')}</Action>
-            </div>
-            <div>
-              <span>I OFFER</span>
-              <h3>{t('Bring your edge.', 'Предложите свой опыт.')}</h3>
-              <p>
-                {t(
-                  'Offer infrastructure, local methods, merchant relationships or first-hand market knowledge.',
-                  'Предложите инфраструктуру, локальные методы, знакомства с мерчантами или знание рынка.',
-                )}
-              </p>
-              <Action to="/join">{t('Introduce your offer', 'Представьте предложение')}</Action>
-            </div>
-          </div>
-        </div>
-      </section>
-      <MarketIndex home />
-      <section className="industries-preview wrap">
-        <div className="section-heading">
-          <div>
-            <Eyebrow>05 / {t('Business context matters', 'Контекст имеет значение')}</Eyebrow>
-            <h2>
-              {t('Different industries.', 'Разные индустрии.')}
-              <em>{t('Specific conversations.', 'Конкретный разговор.')}</em>
-            </h2>
-          </div>
-          <NLink className="text-link" to="/industries">
-            {t('Explore industries', 'Все направления')}
-            <Arrow />
-          </NLink>
-        </div>
-        <IndustryList />
-      </section>
-      <Invitation />
-    </>
-  );
-}
 export function Invitation() {
   const { t } = useLocale();
   return (
@@ -255,187 +116,6 @@ export function Industries() {
     </>
   );
 }
-export function MarketIndex({ home = false }: { home?: boolean }) {
-  const { language, t } = useLocale();
-  const [params, setParams] = useSearchParams();
-  const [query, setQuery] = useState('');
-  const active = home ? '' : params.get('region') || '';
-  return (
-    <section className={'market-index wrap' + (home ? ' home-markets' : '')}>
-      <div className="section-heading">
-        <div>
-          <Eyebrow>
-            {home ? '04 / ' : ''}
-            {t('Our geographic focus', 'География интересов')}
-          </Eyebrow>
-          <h2>
-            {t('Think beyond', 'Думайте шире')}
-            <em>{t('your borders.', 'своих границ.')}</em>
-          </h2>
-        </div>
-        <p>
-          {t(
-            'Three regions. Distinct markets. Every country starts with its own brief. These are sourcing destinations, not a claim of available coverage.',
-            'Три региона. Разные рынки. Для каждой страны — своя задача. Это направления поиска, а не заявление о доступном покрытии.',
-          )}
-        </p>
-      </div>
-      {!home && (
-        <div className="market-tools">
-          <label>
-            {t('Search countries or methods', 'Поиск стран и методов')}
-            <input
-              type="search"
-              value={query}
-              placeholder={t(
-                'Country, currency, payment method…',
-                'Страна, валюта, платёжный метод…',
-              )}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </label>
-          <label>
-            {t('Region', 'Регион')}
-            <select
-              value={active}
-              onChange={(e) => {
-                const p = new URLSearchParams(params);
-                if (e.target.value) p.set('region', e.target.value);
-                else p.delete('region');
-                setParams(p);
-              }}
-            >
-              <option value="">{t('All regions', 'Все регионы')}</option>
-              {regions.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {label(r, language)}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      )}
-      <div className="region-list">
-        {regions
-          .filter((r) => !active || active === r.id)
-          .map((region, i) => {
-            const items = countries.filter(
-              (c) =>
-                c.region === region.id &&
-                [c.en, c.ru, c.currency, ...c.methods]
-                  .join(' ')
-                  .toLowerCase()
-                  .includes(query.toLowerCase().trim()),
-            );
-            return (
-              <div key={region.id} className="region-row">
-                <div className="region-title">
-                  <span>0{i + 1}</span>
-                  <NLink to={'/markets?region=' + region.id}>
-                    {label(region, language)}
-                    <Arrow />
-                  </NLink>
-                  <small>{language === 'ru' ? region.noteRu : region.note}</small>
-                </div>
-                <div className="country-links">
-                  {items.map((c) => (
-                    <NLink key={c.id} to={'/markets/' + c.id}>
-                      <span>{label(c, language)}</span>
-                      <small>{c.currency}</small>
-                      <Arrow />
-                    </NLink>
-                  ))}
-                  {!items.length && (
-                    <p role="status">
-                      {t('No countries match this search.', 'По этому запросу стран не найдено.')}
-                    </p>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-      </div>
-      {!home && (
-        <p className="catalogue-note">
-          {t(
-            'Your country isn’t listed? Start a conversation. We will assess the scope before agreeing a search.',
-            'Вашей страны нет в списке? Напишите нам. Оценим задачу до согласования поиска.',
-          )}{' '}
-          <NLink to="/contact">{t('Contact the network', 'Связаться')}</NLink>
-        </p>
-      )}
-    </section>
-  );
-}
-export function Markets() {
-  const { t } = useLocale();
-  return (
-    <>
-      <PageIntro
-        index="THE MARKETS"
-        title={t('Local is the', 'Локальные знания —')}
-        italic={t('starting point.', 'точка отсчёта.')}
-        description={t(
-          'Explore countries by region. Local infrastructure is context for a partner search; availability, eligibility and commercial terms need separate confirmation.',
-          'Изучайте страны по регионам. Локальная инфраструктура — контекст для поиска; доступность, допустимость и коммерческие условия подтверждаются отдельно.',
-        )}
-      />
-      <MarketIndex />
-    </>
-  );
-}
-export function Country() {
-  const { id, slug } = useParams();
-  const { t, language } = useLocale();
-  const c = countries.find((c) => c.id === (id || slug));
-  if (!c) return <NotFound />;
-  const r = regions.find((r) => r.id === c.region);
-  return (
-    <>
-      <div className="wrap breadcrumb">
-        <NLink to="/markets">{t('Markets', 'Рынки')}</NLink>
-        <span>/</span>
-        <NLink to={'/markets?region=' + c.region}>{label(r, language)}</NLink>
-      </div>
-      <PageIntro
-        index={c.code + ' / ' + c.currency}
-        title={label(c, language) + '.'}
-        italic={t('Start with local context.', 'Начните с локального контекста.')}
-        description={t(
-          'Build a specific brief for this market. We review partner fit, operating scope and commercial intent before arranging an introduction.',
-          'Сформируйте конкретный бриф для этого рынка. До знакомства мы проверяем совместимость, границы работы и коммерческую задачу.',
-        )}
-      />
-      <section className="country-detail wrap">
-        <div>
-          <Eyebrow>
-            {t('Local infrastructure reference', 'Справка о локальной инфраструктуре')}
-          </Eyebrow>
-          <h2>{c.methods.join(' / ')}</h2>
-          <p>
-            {t(
-              'These methods describe the market, not verified capabilities of VlaDDoS or a network member. Industry acceptance, access and settlement must be confirmed directly with the provider.',
-              'Методы описывают рынок, а не проверенные возможности VlaDDoS или участника сети. Допустимость индустрии, доступ и расчёты необходимо подтвердить у провайдера.',
-            )}
-          </p>
-          <a className="text-link" href={c.source} target="_blank" rel="noreferrer">
-            {t('Infrastructure source', 'Источник об инфраструктуре')}
-            <Arrow />
-          </a>
-        </div>
-        <div className="country-actions">
-          <Action to={'/find-a-partner?country=' + c.id}>
-            {t('Find a partner here', 'Найти партнёра здесь')}
-          </Action>
-          <Action to={'/join?country=' + c.id}>
-            {t('Offer local capabilities', 'Предложить локальные возможности')}
-          </Action>
-        </div>
-      </section>
-      <Invitation />
-    </>
-  );
-}
 const process = [
   [
     'The brief',
@@ -528,113 +208,52 @@ export function Network() {
     </>
   );
 }
-export function About() {
-  const { t } = useLocale();
-  return (
-    <>
-      <PageIntro
-        index="ABOUT VLADDOS"
-        title={t('Independent', 'Независимая сеть.')}
-        italic={t('by design.', 'Осознанный выбор.')}
-        description={t(
-          'VlaDDoS Network brings professional relationships and local expertise into one focused B2B practice: finding the right commercial counterparties.',
-          'VlaDDoS Network объединяет профессиональные связи и локальную экспертизу для одной B2B-задачи: поиска подходящих коммерческих контрагентов.',
-        )}
-      />
-      <div className="about-art">
-        <img src="/assets/editorial/people.webp" alt="" width="1586" height="992" loading="lazy" />
-      </div>
-      <section className="wrap principles">
-        {[
-          [
-            'Specific over broad',
-            'Конкретика',
-            'We start with a defined business need and assess markets one country at a time.',
-            'Начинаем с конкретной задачи и оцениваем рынки по отдельным странам.',
-          ],
-          [
-            'Evidence before introduction',
-            'Подтверждения',
-            'Self-declared capabilities stay unverified until the supporting information is reviewed.',
-            'Заявленные возможности остаются непроверенными до изучения подтверждающих данных.',
-          ],
-          [
-            'Permission and discretion',
-            'Согласие и конфиденциальность',
-            'Contacts and commercial details are shared only within a permissioned introduction.',
-            'Контакты и коммерческие сведения передаются только в рамках согласованного знакомства.',
-          ],
-          [
-            'Clarity of responsibility',
-            'Понятная ответственность',
-            'We facilitate business relationships. Counterparties contract for and deliver their own financial services.',
-            'Мы организуем деловое взаимодействие. Контрагенты самостоятельно заключают договоры и оказывают финансовые услуги.',
-          ],
-        ].map(([en, ru, copy, copyRu], i) => (
-          <div key={en}>
-            <Eyebrow>0{i + 1}</Eyebrow>
-            <h2>{t(en, ru)}</h2>
-            <p>{t(copy, copyRu)}</p>
-          </div>
-        ))}
-      </section>
-      <Invitation />
-    </>
-  );
-}
 export function Contact() {
   const { t } = useLocale();
   return (
-    <>
-      <PageIntro
-        index="THE FIRST CONVERSATION"
-        title={t('Good business', 'Хороший бизнес')}
-        italic={t('starts with a hello.', 'начинается с разговора.')}
-        description={t(
-          'A clear need. A local capability. A relationship worth exploring. Tell us where you would like to begin.',
-          'Конкретная задача. Локальная возможность. Перспективное партнёрство. Расскажите, с чего хотите начать.',
-        )}
-      />
-      <section className="contact-options wrap">
-        <NLink to="/find-a-partner">
-          <span>I NEED</span>
-          <h2>{t('Find a partner', 'Найти партнёра')}</h2>
-          <p>
-            {t(
-              'Create a short brief for a specific business need.',
-              'Сформируйте короткий бриф по задаче бизнеса.',
-            )}
-          </p>
-          <Arrow />
-        </NLink>
-        <NLink to="/join">
-          <span>I OFFER</span>
-          <h2>{t('Join the network', 'Стать партнёром')}</h2>
-          <p>
-            {t(
-              'Introduce your company and what you can offer.',
-              'Представьте компанию и её возможности.',
-            )}
-          </p>
-          <Arrow />
-        </NLink>
-        <div>
-          <Eyebrow>
-            {t('Prefer a direct conversation?', 'Предпочитаете написать напрямую?')}
-          </Eyebrow>
-          <a className="contact-email" href="mailto:hello@vladdos.com">
-            hello@vladdos.com
-            <Arrow />
-          </a>
-          <p>
-            {t(
-              'Please share only the context needed for a first conversation. Keep credentials, account details and identity documents out of your introduction.',
-              'Для первого разговора достаточно контекста. Не отправляйте пароли, реквизиты счетов и документы, удостоверяющие личность.',
-            )}
-          </p>
+    <section className="editorial-scene contact-scene" aria-labelledby="contact-title">
+      <SceneArt name="contact" priority />
+      <div className="scene-copy contact-copy">
+        <h1 className="editorial-title" id="contact-title">
+          {t('Take the', 'Возьмите')}
+          <em>{t('other end.', 'другой конец.')}</em>
+        </h1>
+        <p className="scene-subtitle">
+          {t(
+            'A few details to start the right conversation.',
+            'Несколько деталей для нужного разговора.',
+          )}
+        </p>
+        <div className="retained-contact-paths">
+          <div>
+            <span className="folio">I NEED</span>
+            <ThreadLink to="/find-a-partner">{t('Find a partner', 'Найти партнёра')}</ThreadLink>
+            <p>
+              {t(
+                'A specific business need, a country and the right capabilities.',
+                'Конкретная задача, страна и нужные возможности.',
+              )}
+            </p>
+          </div>
+          <div>
+            <span className="folio">I OFFER</span>
+            <ThreadLink to="/join">{t('Join the network', 'Стать партнёром')}</ThreadLink>
+            <p>
+              {t(
+                'Your company, local expertise and what you can provide.',
+                'Ваша компания, локальная экспертиза и предложение.',
+              )}
+            </p>
+          </div>
         </div>
-      </section>
-    </>
+        <div className="contact-foot">
+          <span className="folio">{t('OR JUST SAY HELLO', 'ИЛИ ПРОСТО НАПИШИТЕ')}</span>
+          <a href="mailto:hello@vladdos.com">
+            hello@vladdos.com <Arrow />
+          </a>
+        </div>
+      </div>
+    </section>
   );
 }
 export function Legal({ type }: { type: 'privacy' | 'terms' }) {

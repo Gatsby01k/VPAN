@@ -3,7 +3,13 @@ import { createRoot, hydrateRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './fonts.css';
+import './styles.css';
+import './editorial-controls.css';
+import './growth.css';
+import './editorial.css';
+import './audit.css';
 import './network.css';
+import './network-integration.css';
 import { emptyGrowth, type GrowthData } from './growth';
 
 const root = document.getElementById('root')!;
