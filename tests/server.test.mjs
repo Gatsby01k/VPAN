@@ -198,3 +198,38 @@ test('old persistent databases upgrade without losing applications', async (t) =
   );
   assert.equal((await inbox(base)).length, 2);
 });
+
+test('editorial contact form accepts a Telegram-only introduction and rejects invalid handles', async (t) => {
+  const { base } = await setup(t);
+  const body = {
+    ...payload(),
+    email: '',
+    telegram: '@editorial_partner',
+    name: '@editorial_partner',
+    category: 'Exchange',
+  };
+  const response = await submit(base, body);
+  assert.equal(response.status, 201);
+  const { reference } = await response.json();
+  const rows = await inbox(base);
+  assert.equal(rows[0].reference, reference);
+  assert.equal(rows[0].email, '');
+  assert.equal(rows[0].telegram, '@editorial_partner');
+  assert.equal(rows[0].category, 'Exchange');
+  const retry = await submit(base, body);
+  assert.equal(retry.status, 200);
+  assert.equal((await retry.json()).reference, reference);
+  assert.equal(
+    (await submit(base, { ...body, requestId: crypto.randomUUID(), telegram: '@bad' })).status,
+    422,
+  );
+  assert.equal(
+    (await submit(base, { ...body, requestId: crypto.randomUUID(), telegram: 'not a handle' }))
+      .status,
+    422,
+  );
+  assert.equal(
+    (await submit(base, { ...body, requestId: crypto.randomUUID(), telegram: '' })).status,
+    422,
+  );
+});

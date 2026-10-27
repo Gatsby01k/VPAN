@@ -54,7 +54,7 @@ export default function AdminPage() {
       items.filter(
         (i) =>
           (filter === 'all' || i.status === filter) &&
-          `${i.name} ${i.email} ${i.company} ${i.reference} ${i.markets} ${i.role}`
+          `${i.name} ${i.email} ${i.telegram} ${i.company} ${i.reference} ${i.markets} ${i.role}`
             .toLowerCase()
             .includes(query.trim().toLowerCase()),
       ),
@@ -371,7 +371,7 @@ export default function AdminPage() {
                     {item.name}
                     <ArrowUpRight size={15} />
                   </strong>
-                  <span>{item.company || item.email}</span>
+                  <span>{item.company || item.email || item.telegram}</span>
                 </button>
                 <div className="inbox-market">
                   <strong>{roleName(item.role)}</strong>

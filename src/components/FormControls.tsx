@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
-import { Check, ChevronDown, Gamepad2, Layers3, ShoppingBag } from 'lucide-react';
+import { Check, ChevronDown, Gamepad2, Layers3, ShoppingBag, ArrowLeftRight } from 'lucide-react';
 import { useLocale } from '../locale';
 
 interface SelectOption {
@@ -198,6 +198,12 @@ export function CategoryPicker({
   const { t } = useLocale();
   const name = useId();
   const options = [
+    {
+      value: 'Exchange',
+      title: 'Exchange',
+      detail: t('Exchange & OTC', 'Обмен и OTC'),
+      Icon: ArrowLeftRight,
+    },
     {
       value: 'iGaming',
       title: 'iGaming',

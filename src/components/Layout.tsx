@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowDownRight, ArrowUpRight, Command, Menu, Search, X } from 'lucide-react';
+import { ArrowUpRight, Command, Menu, Search } from 'lucide-react';
 import { Brand, Dialog } from './UI';
-import { MatrixNavLabel } from './MatrixNavLabel';
 import { useLocale } from '../locale';
 import { markets, pageMeta } from '../data';
 import { useGrowth } from '../growth';
@@ -133,12 +132,25 @@ export function Header() {
   const [menu, setMenu] = useState(false);
   const [command, setCommand] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [onArtwork, setOnArtwork] = useState(false);
   useEffect(() => {
-    const update = () => setScrolled(window.scrollY > 24);
+    const update = () => {
+      setScrolled(window.scrollY > 24);
+      setOnArtwork(
+        [...document.querySelectorAll('.scene-art')].some((scene) => {
+          const box = scene.getBoundingClientRect();
+          return box.top <= 84 && box.bottom > 84;
+        }),
+      );
+    };
     update();
     window.addEventListener('scroll', update, { passive: true });
-    return () => window.removeEventListener('scroll', update);
-  }, []);
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, [location.pathname]);
   useEffect(() => {
     setMenu(false);
   }, [location.pathname, location.hash]);
@@ -154,10 +166,10 @@ export function Header() {
     return () => window.removeEventListener('keydown', key);
   }, []);
   const links = [
-    ['/#partners', t('Partnerships', 'Партнёрство')],
+    ['/#connection', t('Network', 'Сеть')],
     ['/markets', t('Markets', 'Рынки')],
-    ['/knowledge', t('Guides', 'Материалы')],
-    ['/about', t('About', 'О PAN')],
+    ['/about', t('Our story', 'О нас')],
+    ['/apply', t('Let’s talk', 'Обсудим')],
   ];
   return (
     <>
@@ -169,7 +181,7 @@ export function Header() {
         {t('Skip to content', 'Перейти к содержимому')}
       </a>
       <header
-        className={`site-header ${location.pathname === '/' ? 'is-deck-home' : ''} ${scrolled ? 'is-scrolled' : ''}`}
+        className={`site-header ${location.pathname === '/' ? 'is-deck-home' : ''} ${scrolled ? 'is-scrolled' : ''} ${onArtwork ? 'on-artwork' : ''}`}
       >
         <div className="header-inner wrap">
           <Brand />
@@ -180,16 +192,18 @@ export function Header() {
                   key={path}
                   to={path}
                   aria-current={
-                    location.pathname === '/' && location.hash === '#partners'
+                    location.pathname === '/' && location.hash === '#connection'
                       ? 'location'
                       : undefined
                   }
                 >
-                  <MatrixNavLabel text={label} />
+                  {label}
+                  {path === '/apply' && <ArrowUpRight size={17} aria-hidden="true" />}
                 </Link>
               ) : (
                 <NavLink key={path} to={path}>
-                  <MatrixNavLabel text={label} />
+                  {label}
+                  {path === '/apply' && <ArrowUpRight size={17} aria-hidden="true" />}
                 </NavLink>
               ),
             )}
@@ -239,7 +253,7 @@ export function Header() {
             </div>
           ))}
           <Link to="/apply" onClick={() => setMenu(false)} className="mobile-menu-apply">
-            {t('Join PAN', 'Присоединиться')}
+            {t('Take the other end', 'Возьмите другой конец')}
             <ArrowUpRight size={28} />
           </Link>
         </div>
@@ -262,65 +276,17 @@ export function Header() {
 export function Footer() {
   const { t } = useLocale();
   return (
-    <footer className="site-footer">
-      <div className="wrap">
-        <div className="footer-top">
-          <div>
-            <div className="footer-kicker">
-              <span className="signal-dot" />
-              PAN / {t('PARTNERSHIPS', 'СОТРУДНИЧЕСТВО')}
-            </div>
-            <Link to="/apply" className="footer-invite">
-              {t('LET’S DISCUSS', 'ОБСУДИМ')}
-              <br />
-              <span className="display-accent">{t('YOUR NEXT MARKET.', 'ВАШ НОВЫЙ РЫНОК.')}</span>
-              <ArrowUpRight aria-hidden="true" />
-            </Link>
-          </div>
-          <div className="footer-columns">
-            <div>
-              <span>{t('Network', 'Сеть')}</span>
-              <Link to="/affiliates">{t('Affiliates', 'Аффилиаты')}</Link>
-              <Link to="/teams">{t('Payment teams', 'Платёжные команды')}</Link>
-              <Link to="/payment-partners">{t('Payment partners', 'Платёжные партнёры')}</Link>
-              <Link to="/merchants">{t('Merchants', 'Мерчанты')}</Link>
-            </div>
-            <div>
-              <span>{t('Explore', 'Узнать больше')}</span>
-              <Link to="/markets">{t('Markets', 'Рынки')}</Link>
-              <Link to="/knowledge">{t('Partner guides', 'Практика партнёрства')}</Link>
-              <Link to="/about">{t('About PAN', 'О PAN')}</Link>
-              <Link to="/apply">{t('Join the network', 'Присоединиться')}</Link>
-              <a href="https://t.me/PAN_Affiliate" target="_blank" rel="noopener noreferrer">
-                Telegram ↗
-              </a>
-            </div>
-          </div>
-        </div>
-        <div className="footer-contact">
-          <a href="mailto:hello@vladdos.com">
-            hello@vladdos.com <ArrowUpRight size={15} />
-          </a>
-          <span>
-            {t(
-              'Individual terms. Relevant connections.',
-              'Индивидуальные условия. Полезные связи.',
-            )}
-          </span>
-        </div>
-        <div className="footer-wordmark" aria-hidden="true">
-          PAN<span>.</span>
-          <ArrowDownRight />
-        </div>
-        <div className="footer-bottom">
-          <span>© {new Date().getUTCFullYear()} PAN — Private Affiliate Network</span>
-          <div>
-            <Link to="/privacy">{t('Privacy', 'Конфиденциальность')}</Link>
-            <Link to="/terms">{t('Terms', 'Условия')}</Link>
-            <span>{t('PRIVATE BY NATURE.', 'PRIVATE BY NATURE.')}</span>
-          </div>
-        </div>
-      </div>
+    <footer className="editorial-footer wrap">
+      <Link to="/" className="folio">
+        VlaDDoS Network / PAN
+      </Link>
+      <nav aria-label={t('Footer navigation', 'Навигация в подвале')}>
+        <Link to="/knowledge">{t('Field notes', 'Материалы')}</Link>
+        <Link to="/privacy">{t('Privacy', 'Конфиденциальность')}</Link>
+        <Link to="/terms">{t('Terms', 'Условия')}</Link>
+        <a href="mailto:hello@vladdos.com">hello@vladdos.com</a>
+      </nav>
+      <span>© {new Date().getUTCFullYear()}</span>
     </footer>
   );
 }

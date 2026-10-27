@@ -1,343 +1,203 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { ArrowUpRight, Check, ChevronDown, Plus } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { ArrowDown, ArrowUpRight } from 'lucide-react';
+import { useLocale } from '../locale';
+import { type RoleId } from '../data';
 import { BriefStudio } from '../components/BriefStudio';
 import { partnerProfileQuery, restorePartnerProfile } from '../components/partner-profile';
+import { SceneArt, SceneFoot, ThreadLink, ExchangeScene } from '../components/Editorial';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
-import { NetworkConsole } from '../components/NetworkConsole';
-import { useLocale } from '../locale';
-import { markets, type RoleId } from '../data';
-
-const directions = [
-  {
-    id: 'affiliate',
-    label: ['I introduce partners', 'Рекомендую партнёров'],
-    caption: ['Affiliates & introducers', 'Аффилиаты и рекомендации'],
-    title: ['A clear agreement behind every introduction.', 'Рекомендация с понятными условиями.'],
-    description: [
-      'Know a payment team, PSP or business that could work with PAN? Tell us about the connection. We discuss referral ownership, the qualifying result and commercial terms before an introduction.',
-      'Знаете платёжную команду, PSP или бизнес, которому может быть полезен PAN? Расскажите о контакте. До знакомства обсудим авторство рекомендации, ожидаемый результат и коммерческие условия.',
-    ],
-    discussion: [
-      'Who you want to introduce, their markets and the terms of your participation.',
-      'Кого вы рекомендуете, на каких рынках он работает и на каких условиях участвуете вы.',
-    ],
-    action: ['Discuss an introduction', 'Обсудить рекомендацию'],
-  },
-  {
-    id: 'provider',
-    label: ['I offer payment solutions', 'Предлагаю платёжное решение'],
-    caption: ['PSPs & payment teams', 'PSP и платёжные команды'],
-    title: [
-      'Your local infrastructure. A new partnership.',
-      'Ваша инфраструктура. Новое партнёрство.',
-    ],
-    description: [
-      'Bring a PSP, local payment method or operating team to PAN. Show us the markets you cover, the businesses you support and how your operations work.',
-      'Предложите PAN свой PSP, локальный метод или платёжную команду. Расскажите о рынках, подходящих категориях бизнеса и том, как устроена ваша работа.',
-    ],
-    discussion: [
-      'Supported methods, integration, payment reconciliation and each side’s responsibilities.',
-      'Поддерживаемые методы, интеграцию, сверку платежей и ответственность сторон.',
-    ],
-    action: ['Present my solution', 'Представить решение'],
-  },
-  {
-    id: 'merchant',
-    label: ['I need payment partners', 'Ищу платёжных партнёров'],
-    caption: ['Merchants & businesses', 'Мерчанты и бизнес'],
-    title: [
-      'Start with the payment flow your business needs.',
-      'Начнём с платежей вашего бизнеса.',
-    ],
-    description: [
-      'Which markets are you entering? How do your customers pay? Describe your business and payment flow so we can assess a relevant partnership.',
-      'На какие рынки вы выходите? Как платят ваши клиенты? Опишите бизнес и платёжный сценарий — по этим деталям оценим возможности сотрудничества.',
-    ],
-    discussion: [
-      'Business category, target markets, payment methods and onboarding requirements.',
-      'Категорию бизнеса, целевые рынки, нужные методы и требования к подключению.',
-    ],
-    action: ['Discuss my requirements', 'Обсудить задачу'],
-  },
-  {
-    id: 'regional',
-    label: ['Local expertise', 'Локальная экспертиза'],
-    caption: ['Regional partners', 'Региональные партнёры'],
-    title: ['Local knowledge comes from working there.', 'Локальный опыт начинается с практики.'],
-    description: [
-      'You know the providers, payment habits and people in your market. Tell PAN where you work and which relationships you can bring to a partnership.',
-      'Вы знаете провайдеров, платёжные привычки и людей своего рынка. Расскажите PAN, где работаете и какие связи можете привнести в партнёрство.',
-    ],
-    discussion: [
-      'Your market experience, contacts and scope of cooperation.',
-      'Ваш опыт на рынке, контакты и формат сотрудничества.',
-    ],
-    action: ['Introduce myself', 'Рассказать о себе'],
-  },
-] as const;
-
-function Cover({ role, onRole }: { role: RoleId; onRole: (role: RoleId) => void }) {
-  return (
-    <section className="pan-deck" aria-labelledby="pan-heading">
-      <NetworkConsole role={role} onRole={onRole} />
-    </section>
-  );
-}
-
-function PartnershipDirections({ role, onRole }: { role: RoleId; onRole: (role: RoleId) => void }) {
-  const { t } = useLocale();
-  const selected = role === 'team' ? 'provider' : role;
-  const current = directions.find((d) => d.id === selected)!;
-  return (
-    <section className="signal-partners" id="partners" aria-labelledby="directions-heading">
-      <div className="wrap">
-        <div className="signal-section-heading">
-          <div>
-            <p className="signal-overline">01 / {t('WORK WITH PAN', 'СОТРУДНИЧЕСТВО С PAN')}</p>
-            <h2 id="directions-heading">
-              {t('Where do you fit in?', 'Как вы можете работать с PAN?')}
-            </h2>
-          </div>
-          <p>
-            {t(
-              'Bring a connection, a payment solution or a business requirement. Each starts a different conversation.',
-              'Рекомендация, платёжное решение или задача бизнеса — выберите, с чего начнём разговор.',
-            )}
-          </p>
-        </div>
-        <div className="signal-direction-layout">
-          <div
-            className="signal-direction-options"
-            role="group"
-            aria-label={t('Your partnership goal', 'Ваша задача')}
-          >
-            {directions.slice(0, 3).map((direction, index) => (
-              <button
-                type="button"
-                key={direction.id}
-                aria-pressed={selected === direction.id}
-                aria-controls="direction-description"
-                onClick={() => onRole(direction.id)}
-              >
-                <span className="signal-direction-index">0{index + 1}</span>
-                <span>
-                  <strong>{t(direction.label[0], direction.label[1])}</strong>
-                  <small>{t(direction.caption[0], direction.caption[1])}</small>
-                </span>
-                <span className="signal-direction-mark">
-                  {selected === direction.id ? <Check size={17} /> : <ArrowUpRight size={19} />}
-                </span>
-              </button>
-            ))}
-            <Link
-              className="signal-regional"
-              to="/apply?role=regional"
-              aria-current={role === 'regional' ? 'true' : undefined}
-            >
-              {t('Local expertise & regional contacts', 'Локальный опыт и региональные связи')}
-              <ArrowUpRight size={16} />
-            </Link>
-          </div>
-          <div className="signal-direction-detail" id="direction-description" aria-live="polite">
-            <span className="signal-detail-kicker">
-              PAN / {t(current.caption[0], current.caption[1])}
-            </span>
-            <h3>{t(current.title[0], current.title[1])}</h3>
-            <p>{t(current.description[0], current.description[1])}</p>
-            {selected === 'provider' && (
-              <div
-                className="signal-team-switch"
-                role="group"
-                aria-label={t('Type of payment partner', 'Тип платёжного партнёра')}
-              >
-                <button
-                  type="button"
-                  aria-pressed={role === 'provider'}
-                  onClick={() => onRole('provider')}
-                >
-                  PSP / {t('Solution', 'Решение')}
-                </button>
-                <button type="button" aria-pressed={role === 'team'} onClick={() => onRole('team')}>
-                  {t('Payment team', 'Платёжная команда')}
-                </button>
-              </div>
-            )}
-            <div className="signal-discussion">
-              <span>{t('What we will discuss', 'Что обсудим')}</span>
-              <p>{t(current.discussion[0], current.discussion[1])}</p>
-            </div>
-            <Link className="signal-action" to={`/apply?role=${role}`}>
-              {role === 'team'
-                ? t('Introduce my team', 'Представить команду')
-                : t(current.action[0], current.action[1])}
-              <ArrowUpRight size={18} />
-            </Link>
-            <span className="signal-detail-note">
-              {t(
-                'Scope and commercial terms are agreed before cooperation begins.',
-                'Формат работы и коммерческие условия согласуем до старта.',
-              )}
-            </span>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Territories() {
-  const { t } = useLocale();
-  return (
-    <section className="signal-territories wrap" aria-labelledby="territories-heading">
-      <div className="signal-section-heading">
-        <div>
-          <p className="signal-overline">02 / {t('LOCAL EXPERTISE', 'ЛОКАЛЬНАЯ ЭКСПЕРТИЗА')}</p>
-          <h2 id="territories-heading">
-            {t('Every market', 'У каждого рынка')}
-            <br />
-            <span>{t('works differently.', 'свои правила.')}</span>
-          </h2>
-        </div>
-        <p>
-          {t(
-            'Local methods, customer habits and operating experience matter. We want to meet people who work with these markets first-hand.',
-            'Важны местные методы, привычки клиентов и опыт команды. Ищем партнёров, которые знают эти рынки по своей ежедневной работе.',
-          )}
-        </p>
-      </div>
-      <div className="signal-market-list">
-        {(['Africa', 'LATAM', 'Asia'] as const).map((region, index) => (
-          <div className="signal-market-region" key={region}>
-            <div>
-              <span>0{index + 1}</span>
-              <h3>
-                {region === 'Africa'
-                  ? t('Africa', 'Африка')
-                  : region === 'Asia'
-                    ? t('Asia', 'Азия')
-                    : 'LATAM'}
-              </h3>
-            </div>
-            <div>
-              {markets
-                .filter((market) => market.region === region)
-                .map((market) => (
-                  <Link to={`/markets/${market.slug}`} key={market.slug}>
-                    <span>{market.code}</span>
-                    {t(market.name, market.ru)}
-                    <ArrowUpRight size={14} />
-                  </Link>
-                ))}
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="signal-market-foot">
-        <p>
-          {t(
-            'Markets shown are open for partnership discussions. Method availability and business eligibility are reviewed for each request.',
-            'Это рынки для обсуждения партнёрства. Доступность методов и возможность работы с вашим бизнесом проверяем по запросу.',
-          )}
-        </p>
-        <Link className="signal-direct" to="/markets">
-          {t('Explore markets & methods', 'Рынки и платёжные методы')}
-          <ArrowUpRight size={17} />
-        </Link>
-      </div>
-    </section>
-  );
-}
-
-function PartnershipProcess() {
-  const { t } = useLocale();
-  return (
-    <section className="signal-process wrap" aria-labelledby="process-heading">
-      <div>
-        <p className="signal-overline">03 / {t('THE NEXT STEP', 'СЛЕДУЮЩИЙ ШАГ')}</p>
-        <h2 id="process-heading">
-          {t('From a first contact to clear terms.', 'От знакомства — к понятным условиям.')}
-        </h2>
-      </div>
-      <ol>
-        {[
-          [
-            t('Give us the context', 'Дайте контекст'),
-            t(
-              'Your role, markets and a contact we can reach directly.',
-              'Ваша роль, рынки и контакт для прямой связи.',
-            ),
-          ],
-          [
-            t('Discuss the practical fit', 'Разберём задачу'),
-            t(
-              'We review the request and clarify the experience, methods and responsibilities it needs.',
-              'Уточним запрос, опыт, методы и необходимые роли сторон.',
-            ),
-          ],
-          [
-            t('Put the terms first', 'Согласуем до старта'),
-            t(
-              'Scope, responsibilities and commercial terms come before introductions or integration.',
-              'Задачи, ответственность и коммерческие условия — до рекомендаций или интеграции.',
-            ),
-          ],
-        ].map(([title, text], index) => (
-          <li key={index}>
-            <span>0{index + 1}</span>
-            <div>
-              <h3>{title}</h3>
-              <p>{text}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
-    </section>
-  );
-}
 
 export default function Home() {
   const { t } = useLocale();
-  const [role, setRole] = useState<RoleId>('affiliate');
   const [params] = useSearchParams();
-  const profileQuery = partnerProfileQuery(params);
-  const location = useLocation();
-  const [briefOpen, setBriefOpen] = useState(false);
+  const query = partnerProfileQuery(params);
+  const [role, setRole] = useState<RoleId>('provider');
   useEffect(() => {
-    setRole(restorePartnerProfile(new URLSearchParams(profileQuery)).role);
-  }, [profileQuery]);
-  useEffect(() => {
-    if (location.hash === '#forge') setBriefOpen(true);
-  }, [location.hash]);
+    setRole(restorePartnerProfile(new URLSearchParams(query)).role);
+  }, [query]);
+  const entries = [
+    {
+      id: 'affiliate' as const,
+      title: t('Affiliates', 'Аффилиаты'),
+      text: t('Introduce the right people.', 'Знакомьте с нужными людьми.'),
+    },
+    {
+      id: 'provider' as const,
+      title: t('Payment partners', 'Платёжные партнёры'),
+      text: t('Bring your payment expertise.', 'Привносите платёжный опыт.'),
+    },
+    {
+      id: 'merchant' as const,
+      title: t('Businesses', 'Бизнес'),
+      text: t('Find the right connection.', 'Находите подходящие связи.'),
+    },
+  ];
   return (
-    <div className="signal-home">
-      <Cover role={role} onRole={setRole} />
-      <PartnershipDirections role={role} onRole={setRole} />
-      <div className="signal-brief-area wrap">
-        <details
-          id="forge"
-          open={briefOpen}
-          onToggle={(event) => setBriefOpen(event.currentTarget.open)}
-        >
-          <summary>
-            <Plus size={19} />
+    <div className="editorial-home">
+      <section className="editorial-scene hero-scene" aria-labelledby="hero-title">
+        <SceneArt name="hero" priority />
+        <div className="scene-copy hero-copy">
+          <h1 className="editorial-title" id="hero-title">
+            <span>{t('The other', 'Другая')}</span>
+            <em>{t('side.', 'сторона.')}</em>
+          </h1>
+          <p className="hero-subtitle">
+            iGaming <span>·</span> Exchange <span>·</span> {t('Connections.', 'Связи.')}
+          </p>
+          <ThreadLink to="/#connection">{t('Meet the network', 'Знакомьтесь с сетью')}</ThreadLink>
+        </div>
+        <div className="hero-follow">
+          <span className="folio">VlaDDoS Network</span>
+          <i>/</i>
+          <Link to="/#connection">
+            {t('Follow the thread', 'Следуйте за нитью')}
+            <ArrowDown size={16} />
+          </Link>
+        </div>
+      </section>
+      <section
+        className="editorial-scene connection-scene"
+        id="connection"
+        aria-labelledby="connection-title"
+      >
+        <SceneArt name="connection" />
+        <div className="scene-copy connection-copy">
+          <h2 className="editorial-title" id="connection-title">
+            {t('Every connection', 'У каждой связи')}
             <span>
-              <strong>{t('Have a specific proposal?', 'Есть конкретное предложение?')}</strong>
-              <small>
-                {t(
-                  'Put your role, markets and payment methods into one brief.',
-                  'Соберите роль, рынки и платёжные методы в одном брифе.',
-                )}
-              </small>
+              {t('has ', 'есть ')}
+              <em>{t('another end.', 'другой конец.')}</em>
             </span>
-            <ChevronDown size={18} />
-          </summary>
-          <BriefStudio role={role} onRole={setRole} />
-        </details>
+          </h2>
+          <p className="scene-subtitle">{t('Where do you fit in?', 'Где ваше место?')}</p>
+          <div
+            className="connection-roles"
+            role="group"
+            aria-label={t('Your place in the network', 'Ваше место в сети')}
+          >
+            {entries.map((entry, i) => (
+              <div key={entry.id} className={role === entry.id ? 'is-selected' : ''}>
+                <button aria-pressed={role === entry.id} onClick={() => setRole(entry.id)}>
+                  <small>0{i + 1}</small>
+                  {entry.title}
+                  <ArrowUpRight size={17} />
+                </button>
+                <p>{entry.text}</p>
+                {role === entry.id && (
+                  <Link to={`/apply?role=${role}`}>
+                    {t('Continue', 'Продолжить')}
+                    <ArrowUpRight size={16} />
+                  </Link>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+        <span className="connection-you folio" aria-hidden="true">
+          {t('YOU', 'ВЫ')}
+        </span>
+        <SceneFoot number="02" label="THE CONNECTION">
+          <span className="folio">AFRICA / LATAM / ASIA</span>
+          <Link to="/markets">
+            {t('Explore markets', 'Изучить рынки')}
+            <ArrowUpRight size={17} />
+          </Link>
+          <a href="mailto:hello@vladdos.com">hello@vladdos.com</a>
+        </SceneFoot>
+      </section>
+      <section
+        className="editorial-scene people-scene"
+        id="partners"
+        aria-labelledby="people-title"
+      >
+        <SceneArt name="people" />
+        <div className="scene-copy people-copy">
+          <h2 className="editorial-title" id="people-title">
+            <span>{t('Your place', 'Ваше место')}</span>
+            <em>{t('in the network.', 'в сети.')}</em>
+          </h2>
+          <p className="scene-subtitle">
+            {t(
+              'Bring a connection, a payment solution or local expertise.',
+              'Привносите связи, платёжные решения или локальный опыт.',
+            )}
+          </p>
+          <div className="people-links">
+            {entries.map((entry, i) => (
+              <Link
+                to={
+                  entry.id === 'affiliate'
+                    ? '/affiliates'
+                    : entry.id === 'provider'
+                      ? '/payment-partners'
+                      : '/merchants'
+                }
+                key={entry.id}
+              >
+                <small>0{i + 1}</small>
+                <span>{entry.title}</span>
+                <ArrowUpRight />
+              </Link>
+            ))}
+          </div>
+        </div>
+        <svg className="people-thread" viewBox="0 0 1586 992" fill="none" aria-hidden="true">
+          <path
+            d="M101 532C254 533 367 522 467 526C620 524 710 562 865 612"
+            stroke="#ff006d"
+            strokeWidth="6"
+            strokeLinecap="round"
+          />
+          <path
+            d="M104 530C270 533 371 520 476 525C627 527 716 562 862 609"
+            stroke="#ffafce"
+            strokeWidth="1"
+            strokeLinecap="round"
+          />
+          <circle cx="101" cy="532" r="13" fill="#f6eddf" stroke="#252017" strokeWidth="1.5" />
+          <circle cx="101" cy="530" r="8" fill="#fff9e9" />
+        </svg>
+        <aside className="people-aside">
+          <h3>{t('Know the right people?', 'Знаете нужных людей?')}</h3>
+          <p>
+            {t(
+              'Tell us who you can connect, where they work and what they bring.',
+              'Расскажите, кого можете представить, где они работают и что предлагают.',
+            )}
+          </p>
+          <ol>
+            <li>{t('Outline the opportunity', 'Обозначьте возможность')}</li>
+            <li>{t('Agree the terms', 'Согласуйте условия')}</li>
+            <li>{t('Make the introduction', 'Организуйте знакомство')}</li>
+          </ol>
+          <ThreadLink to="/#forge">{t('Build my brief', 'Собрать бриф')}</ThreadLink>
+          <small>{t('Terms come before introductions.', 'Условия согласуем до знакомства.')}</small>
+        </aside>
+        <SceneFoot number="03" label="THE PEOPLE">
+          <Link to="/markets">
+            {t('Explore markets', 'Изучить рынки')}
+            <ArrowUpRight size={17} />
+          </Link>
+          <a href="mailto:hello@vladdos.com">hello@vladdos.com</a>
+        </SceneFoot>
+      </section>
+      <ExchangeScene />
+      <div id="forge" className="editorial-brief">
+        <BriefStudio role={role} onRole={setRole} />
       </div>
-      <Territories />
-      <PartnershipProcess />
-      <KnowledgeTeaser />
+      <div className="editorial-guides">
+        <KnowledgeTeaser />
+      </div>
+      <section className="editorial-invitation wrap">
+        <span className="folio">06 / YOUR NEXT CONNECTION</span>
+        <h2>
+          {t('Take the', 'Возьмите')} <em>{t('other end.', 'другой конец.')}</em>
+        </h2>
+        <ThreadLink to={`/apply?role=${role}`}>
+          {t('Start a conversation', 'Начать разговор')}
+        </ThreadLink>
+      </section>
     </div>
   );
 }
