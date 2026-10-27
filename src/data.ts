@@ -131,14 +131,16 @@ export const roles = [
     path: '/affiliates',
     title: 'Affiliates',
     ru: 'Аффилиаты',
-    short: 'Introduce a team or business. Agree referral terms with PAN before the introduction.',
-    shortRu: 'Познакомьте PAN с командой или бизнесом. Условия рекомендации согласуем заранее.',
+    short:
+      'Introduce a team or business. Agree referral terms with VlaDDoS Network before the introduction.',
+    shortRu:
+      'Познакомьте VlaDDoS Network с командой или бизнесом. Условия рекомендации согласуем заранее.',
     description:
-      'Introduce experienced teams, PSPs and merchants to PAN. Agree referral attribution and commercial terms before making introductions.',
+      'Introduce experienced teams, PSPs and merchants to VlaDDoS Network. Agree referral attribution and commercial terms before making introductions.',
     descriptionRu:
-      'Приводите в PAN опытные платёжные команды, PSP и мерчантов. Авторство рекомендаций и коммерческие условия обсуждаем до знакомства.',
-    label: 'Bring the right partners to PAN.',
-    labelRu: 'Приводите партнёров в PAN.',
+      'Приводите в VlaDDoS Network опытные платёжные команды, PSP и мерчантов. Авторство рекомендаций и коммерческие условия обсуждаем до знакомства.',
+    label: 'Bring the right partners to VlaDDoS Network.',
+    labelRu: 'Приводите партнёров в VlaDDoS Network.',
     art: 'network-crown.webp',
   },
   {
@@ -149,9 +151,9 @@ export const roles = [
     short: 'Bring the markets, methods and operating experience your team knows first-hand.',
     shortRu: 'Ваши рынки, методы и операционный опыт — основа разговора о партнёрстве.',
     description:
-      'Introduce your payment team to PAN: operating markets, payment methods, practical experience and a responsible contact.',
+      'Introduce your payment team to VlaDDoS Network: operating markets, payment methods, practical experience and a responsible contact.',
     descriptionRu:
-      'Представьте свою платёжную команду PAN: рынки работы, методы, практический опыт и ответственный контакт.',
+      'Представьте свою платёжную команду VlaDDoS Network: рынки работы, методы, практический опыт и ответственный контакт.',
     label: 'Your team. Your local expertise.',
     labelRu: 'Ваша команда. Ваш локальный опыт.',
     art: 'server-crown.webp',
@@ -164,9 +166,9 @@ export const roles = [
     short: 'Present your PSP or local payment method. Let’s discuss markets and integration.',
     shortRu: 'Предложите свой PSP или локальный метод. Обсудим рынки и подключение.',
     description:
-      'Propose your PSP or local payment solution to PAN. Discuss supported markets, business categories and integration requirements.',
+      'Propose your PSP or local payment solution to VlaDDoS Network. Discuss supported markets, business categories and integration requirements.',
     descriptionRu:
-      'Предложите PAN свой PSP или локальное платёжное решение. Обсудим поддерживаемые рынки, категории бизнеса и требования к интеграции.',
+      'Предложите VlaDDoS Network свой PSP или локальное платёжное решение. Обсудим поддерживаемые рынки, категории бизнеса и требования к интеграции.',
     label: 'Bring your payment solution.',
     labelRu: 'Предложите платёжное решение.',
     art: 'market-landscape.webp',
@@ -179,9 +181,9 @@ export const roles = [
     short: 'Tell us where and how your business needs to accept payments.',
     shortRu: 'Расскажите, где и как вашему бизнесу нужно принимать платежи.',
     description:
-      'Tell PAN your business category, markets and payment requirements. We review fit and discuss possible cooperation individually.',
+      'Tell VlaDDoS Network your business category, markets and payment requirements. We review fit and discuss possible cooperation individually.',
     descriptionRu:
-      'Расскажите PAN о категории бизнеса, рынках и платёжных требованиях. Совместимость и возможности сотрудничества обсуждаем индивидуально.',
+      'Расскажите VlaDDoS Network о категории бизнеса, рынках и платёжных требованиях. Совместимость и возможности сотрудничества обсуждаем индивидуально.',
     label: 'Start with your business needs.',
     labelRu: 'Начнём с задач вашего бизнеса.',
     art: 'access-card.webp',
@@ -192,9 +194,11 @@ export const roles = [
     title: 'Regional partners',
     ru: 'Региональные партнёры',
     short: 'Bring local relationships and payment experience from the markets you work in.',
-    shortRu: 'Локальные связи и знание платёжного рынка — ваш вклад в PAN.',
-    description: 'Introduce your local relationships and practical market knowledge to PAN.',
-    descriptionRu: 'Представьте PAN свои локальные связи и практический опыт работы на рынке.',
+    shortRu: 'Локальные связи и знание платёжного рынка — ваш вклад в VlaDDoS Network.',
+    description:
+      'Introduce your local relationships and practical market knowledge to VlaDDoS Network.',
+    descriptionRu:
+      'Представьте VlaDDoS Network свои локальные связи и практический опыт работы на рынке.',
     label: 'Make local knowledge count.',
     labelRu: 'Превратите знания в возможности.',
     art: 'pan-gold.webp',
@@ -227,35 +231,35 @@ export function pageMeta(path: string, language: 'en' | 'ru' = 'en') {
   const market = markets.find((m) => path === `/markets/${m.slug}`);
   const role = roles.find((r) => path === r.path);
   const names: Record<string, string> = {
-    '/': 'PAN — Private Affiliate Network',
-    '/markets': 'Markets — PAN',
-    '/knowledge': 'Payment partner guides and checklists — PAN',
-    '/apply': 'Join the network — PAN',
-    '/about': 'About PAN',
-    '/privacy': 'Privacy — PAN',
-    '/terms': 'Terms — PAN',
-    '/admin': 'Partner desk — PAN',
+    '/': 'VlaDDoS Network',
+    '/markets': 'Markets — VlaDDoS Network',
+    '/knowledge': 'Payment partner guides and checklists — VlaDDoS Network',
+    '/apply': 'Join the network — VlaDDoS Network',
+    '/about': 'About VlaDDoS Network',
+    '/privacy': 'Privacy — VlaDDoS Network',
+    '/terms': 'Terms — VlaDDoS Network',
+    '/admin': 'Partner desk — VlaDDoS Network',
   };
   const namesRu: Record<string, string> = {
-    '/': 'PAN — Частная партнёрская сеть',
-    '/markets': 'Рынки партнёрства — PAN',
-    '/knowledge': 'Руководства и чек-листы платёжных партнёров — PAN',
-    '/apply': 'Заявка на партнёрство — PAN',
-    '/about': 'О PAN',
-    '/privacy': 'Конфиденциальность — PAN',
-    '/terms': 'Условия — PAN',
-    '/admin': 'Партнёрский отдел — PAN',
+    '/': 'VlaDDoS Network — Частная партнёрская сеть',
+    '/markets': 'Рынки партнёрства — VlaDDoS Network',
+    '/knowledge': 'Руководства и чек-листы платёжных партнёров — VlaDDoS Network',
+    '/apply': 'Заявка на партнёрство — VlaDDoS Network',
+    '/about': 'О VlaDDoS Network',
+    '/privacy': 'Конфиденциальность — VlaDDoS Network',
+    '/terms': 'Условия — VlaDDoS Network',
+    '/admin': 'Партнёрский отдел — VlaDDoS Network',
   };
   const ru = language === 'ru';
   return {
     title: market
       ? ru
-        ? `${market.ru}: партнёрство — PAN`
-        : `${market.name} partnerships — PAN`
+        ? `${market.ru}: партнёрство — VlaDDoS Network`
+        : `${market.name} partnerships — VlaDDoS Network`
       : role
-        ? `${ru ? role.ru : role.title} — PAN`
+        ? `${ru ? role.ru : role.title} — VlaDDoS Network`
         : (ru ? namesRu[path] : names[path]) ||
-          (ru ? 'Страница не найдена — PAN' : 'Page not found — PAN'),
+          (ru ? 'Страница не найдена — VlaDDoS Network' : 'Page not found — VlaDDoS Network'),
     description: market
       ? ru
         ? `${market.ru}: знакомства с партнёрами и методы ${market.methods.join(', ')}. ${market.focusRu}. Доступность рассматривается отдельно.`
@@ -269,7 +273,7 @@ export function pageMeta(path: string, language: 'en' | 'ru' = 'en') {
             ? 'Практические руководства и чек-листы для знакомства, оценки и подключения PSP, платёжных команд и мерчантов. Первоисточники и подготовка к разговору.'
             : 'Practical guides and checklists for introducing, evaluating and connecting PSPs, payment teams and merchants. Primary sources and preparation for a first conversation.'
           : ru
-            ? 'PAN объединяет аффилиатов, платёжные команды, PSP и мерчантов через частные бизнес-партнёрства на выбранных рынках.'
-            : 'PAN connects affiliates, payment teams, PSPs and merchants through private business partnerships across selected markets.',
+            ? 'VlaDDoS Network объединяет аффилиатов, платёжные команды, PSP и мерчантов через частные бизнес-партнёрства на выбранных рынках.'
+            : 'VlaDDoS Network connects affiliates, payment teams, PSPs and merchants through private business partnerships across selected markets.',
   };
 }

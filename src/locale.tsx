@@ -23,14 +23,15 @@ export function LocaleProvider({
     if (explicit === 'ru' || explicit === 'en') {
       setLanguage(explicit);
       try {
-        localStorage.setItem('pan-language', explicit);
+        localStorage.setItem('vladdos-language', explicit);
       } catch {
         /* The explicit URL still determines this page's language. */
       }
       return;
     }
     try {
-      const saved = localStorage.getItem('pan-language');
+      const saved =
+        localStorage.getItem('vladdos-language') || localStorage.getItem('pan-language');
       if (saved === 'en' || saved === 'ru') setLanguage(saved);
     } catch {
       /* Browser storage can be unavailable. */
@@ -49,7 +50,7 @@ export function LocaleProvider({
       { replace: true },
     );
     try {
-      localStorage.setItem('pan-language', next);
+      localStorage.setItem('vladdos-language', next);
     } catch {
       /* The interface still works without storage. */
     }

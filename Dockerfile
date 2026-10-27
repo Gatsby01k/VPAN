@@ -11,6 +11,8 @@ COPY --from=build /app/dist ./dist
 COPY --from=build /app/dist-server ./dist-server
 COPY package.json package-lock.json server.mjs ./
 COPY growth ./growth
+COPY operations ./operations
+COPY shared ./shared
 COPY scripts/growth.mjs ./scripts/growth.mjs
 RUN npm ci --omit=dev
 RUN mkdir -p data && chown -R node:node /app

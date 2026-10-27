@@ -1,5 +1,5 @@
 services:
-  pan:
+  network:
     build: .
     restart: unless-stopped
     ports:
@@ -13,4 +13,4 @@ services:
       timeout: 5s
       retries: 3
 volumes:
-  pan-data:
+  pan-data: # Preserve this volume identity: it may contain existing production applications.

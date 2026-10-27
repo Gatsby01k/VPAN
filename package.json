@@ -1,5 +1,5 @@
 {
-  "name": "vpan-private-affiliate-network",
+  "name": "vladdos-network",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -14,11 +14,12 @@
     "check": "tsc --noEmit",
     "growth:run": "node scripts/growth.mjs",
     "growth:status": "node scripts/growth.mjs --status",
-    "format": "prettier --write src scripts growth server.mjs tests vite.config.ts tsconfig.json package.json index.html",
-    "format:check": "prettier --check src scripts growth server.mjs tests vite.config.ts tsconfig.json package.json index.html",
+    "format": "prettier --write src scripts growth operations api shared tests server.mjs vite.config.ts tsconfig.json package.json index.html vercel.json",
+    "format:check": "prettier --check src scripts growth operations api shared tests server.mjs vite.config.ts tsconfig.json package.json index.html vercel.json",
     "build": "tsc --noEmit && vite build && vite build --ssr src/entry-server.tsx --outDir dist-server && node scripts/prerender.mjs",
     "pretest": "npm run build",
-    "test": "node --experimental-strip-types --test tests/*.test.mjs"
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "backup": "node scripts/backup.mjs"
   },
   "dependencies": {
     "@fontsource-variable/bodoni-moda": "^5.3.0",

@@ -1,4 +1,5 @@
-// Reviewed editorial inputs. These describe infrastructure and preparation, not PAN capacity.
+import taxonomy from '../shared/taxonomy.json' with { type: 'json' };
+// Reviewed editorial inputs. These describe infrastructure and preparation, not VlaDDoS Network capacity.
 export const sources = [
   {
     id: 'npci',
@@ -64,7 +65,7 @@ const base = (
   checklistRu,
   initial,
   kind: 'guide',
-  author: 'PAN Research',
+  author: 'VlaDDoS Network Research',
   generated: false,
 });
 
@@ -107,8 +108,8 @@ export const catalog = [
         'operations',
         'Separate payment success from commercial settlement',
         'Отделите успешный платёж от расчётов',
-        'A successful customer payment is only one part of the operating relationship. Ask how funds move to the agreed recipient, which records explain adjustments, and how exceptions are reconciled. Define report fields, export format, reporting timezone and a contact for disputed entries. Agree incident ownership and a communication path before production. PAN can receive a partner introduction and review the proposed fit; availability, pricing and operating commitments require a separate discussion with the relevant parties.',
-        'Успешный платёж клиента — только часть отношений. Уточните движение средств к согласованному получателю, учёт корректировок и сверку исключений. Определите поля отчёта, формат выгрузки, часовой пояс и контакт по спорным операциям. До запуска согласуйте ответственность за инциденты и канал связи. PAN принимает знакомства и рассматривает подходящие варианты; доступность, стоимость и обязательства обсуждаются отдельно.',
+        'A successful customer payment is only one part of the operating relationship. Ask how funds move to the agreed recipient, which records explain adjustments, and how exceptions are reconciled. Define report fields, export format, reporting timezone and a contact for disputed entries. Agree incident ownership and a communication path before production. VlaDDoS Network can receive a partner introduction and review the proposed fit; availability, pricing and operating commitments require a separate discussion with the relevant parties.',
+        'Успешный платёж клиента — только часть отношений. Уточните движение средств к согласованному получателю, учёт корректировок и сверку исключений. Определите поля отчёта, формат выгрузки, часовой пояс и контакт по спорным операциям. До запуска согласуйте ответственность за инциденты и канал связи. VlaDDoS Network принимает знакомства и рассматривает подходящие варианты; доступность, стоимость и обязательства обсуждаются отдельно.',
       ),
     ],
     [
@@ -160,15 +161,15 @@ export const catalog = [
         'attribution',
         'Agree attribution before sharing the contact',
         'Согласуйте авторство заранее',
-        'Contact attribution and remuneration are separate questions. Establish what counts as a new introduction, how existing relationships are handled, and which evidence records the introduction. If compensation is offered, the agreement should identify the qualifying outcome, the responsible party and the conditions for calculation. Do not assume that submitting a form creates a commission entitlement. PAN’s affiliate entry invites a discussion of attribution and individual terms before introductions are made.',
-        'Авторство контакта и вознаграждение — разные вопросы. Определите, что считается новым знакомством, как обрабатываются существующие связи и что подтверждает рекомендацию. Если предусмотрено вознаграждение, согласуйте результат, ответственную сторону и условия расчёта. Отправка формы сама по себе не создаёт право на комиссию. Условия и авторство рекомендации PAN предлагает обсуждать до знакомства.',
+        'Contact attribution and remuneration are separate questions. Establish what counts as a new introduction, how existing relationships are handled, and which evidence records the introduction. If compensation is offered, the agreement should identify the qualifying outcome, the responsible party and the conditions for calculation. Do not assume that submitting a form creates a commission entitlement. VlaDDoS Network’s affiliate entry invites a discussion of attribution and individual terms before introductions are made.',
+        'Авторство контакта и вознаграждение — разные вопросы. Определите, что считается новым знакомством, как обрабатываются существующие связи и что подтверждает рекомендацию. Если предусмотрено вознаграждение, согласуйте результат, ответственную сторону и условия расчёта. Отправка формы сама по себе не создаёт право на комиссию. Условия и авторство рекомендации VlaDDoS Network предлагает обсуждать до знакомства.',
       ),
       section(
         'handover',
         'Make the handover specific',
         'Сделайте передачу конкретной',
-        'Identify the next action, the owner of that action and the information required to proceed. Ask for a status update at an agreed point instead of repeatedly forwarding the same contact. Keep an introduction reference and note whether the contact was accepted, required more context or was outside the current scope. Share only information that is relevant to the proposed relationship. The PAN application accepts role, markets, company and a message; use the message to explain fit rather than to imply an unconfirmed deal.',
-        'Определите следующий шаг, ответственного и необходимые сведения. Согласуйте момент обновления статуса, чтобы не пересылать один контакт повторно. Сохраняйте номер обращения и причину принятия, уточнения или отказа. Передавайте сведения, относящиеся к предполагаемым отношениям. В заявке PAN укажите роль, рынки, компанию и пользу знакомства; неподтверждённую сделку не стоит представлять как состоявшуюся.',
+        'Identify the next action, the owner of that action and the information required to proceed. Ask for a status update at an agreed point instead of repeatedly forwarding the same contact. Keep an introduction reference and note whether the contact was accepted, required more context or was outside the current scope. Share only information that is relevant to the proposed relationship. The VlaDDoS Network application accepts role, markets, company and a message; use the message to explain fit rather than to imply an unconfirmed deal.',
+        'Определите следующий шаг, ответственного и необходимые сведения. Согласуйте момент обновления статуса, чтобы не пересылать один контакт повторно. Сохраняйте номер обращения и причину принятия, уточнения или отказа. Передавайте сведения, относящиеся к предполагаемым отношениям. В заявке VlaDDoS Network укажите роль, рынки, компанию и пользу знакомства; неподтверждённую сделку не стоит представлять как состоявшуюся.',
       ),
     ],
     [
@@ -215,8 +216,8 @@ export const catalog = [
         'handoff',
         'Define the operating handoff',
         'Определите операционный процесс',
-        'Specify the export format, delivery mechanism, access permissions and escalation contact. Request a sample containing success, pending, failed and adjusted records. Reconcile gross amounts, fees and final settlement separately under the actual agreement. In your PAN merchant brief, identify the markets, payment methods and the reporting problem you are trying to solve. This helps establish a relevant introduction; it does not imply that a provider’s commercial or technical commitments are already confirmed.',
-        'Определите формат и способ получения выгрузки, права доступа и контакт для эскалации. Запросите пример с успешными, ожидающими, неуспешными и исправленными записями. Суммы платежей, комиссии и итоговые расчёты сверяйте отдельно по действительному соглашению. В брифе для PAN опишите страны, методы и проблему отчётности. Это помогает подготовить знакомство и не заменяет подтверждение обязательств провайдера.',
+        'Specify the export format, delivery mechanism, access permissions and escalation contact. Request a sample containing success, pending, failed and adjusted records. Reconcile gross amounts, fees and final settlement separately under the actual agreement. In your VlaDDoS Network merchant brief, identify the markets, payment methods and the reporting problem you are trying to solve. This helps establish a relevant introduction; it does not imply that a provider’s commercial or technical commitments are already confirmed.',
+        'Определите формат и способ получения выгрузки, права доступа и контакт для эскалации. Запросите пример с успешными, ожидающими, неуспешными и исправленными записями. Суммы платежей, комиссии и итоговые расчёты сверяйте отдельно по действительному соглашению. В брифе для VlaDDoS Network опишите страны, методы и проблему отчётности. Это помогает подготовить знакомство и не заменяет подтверждение обязательств провайдера.',
       ),
     ],
     [
@@ -249,8 +250,8 @@ export const catalog = [
         'acquiring',
         'Identify the acquiring relationship',
         'Определите отношения с эквайером',
-        'NPCI’s merchant FAQ describes merchant acceptance through an acquiring bank. In a prospective partner discussion, ask which entity provides that relationship, who contracts with the merchant and who handles onboarding. Identify whether the proposed partner is the acquirer, an integration provider or an introducer. Request documents relevant to that actual role. The existence of UPI infrastructure does not confirm eligibility for a particular business category, and this guide does not establish PAN’s ability to process UPI payments.',
-        'В FAQ NPCI приём UPI мерчантом описан через банк-эквайер. У потенциального партнёра уточните, кто предоставляет эту связь, заключает договор и проводит подключение. Определите его роль: эквайер, интегратор или посредник знакомства. Запросите относящиеся к роли документы. Наличие инфраструктуры UPI не подтверждает допустимость конкретной категории бизнеса; руководство не устанавливает возможность PAN проводить такие платежи.',
+        'NPCI’s merchant FAQ describes merchant acceptance through an acquiring bank. In a prospective partner discussion, ask which entity provides that relationship, who contracts with the merchant and who handles onboarding. Identify whether the proposed partner is the acquirer, an integration provider or an introducer. Request documents relevant to that actual role. The existence of UPI infrastructure does not confirm eligibility for a particular business category, and this guide does not establish VlaDDoS Network’s ability to process UPI payments.',
+        'В FAQ NPCI приём UPI мерчантом описан через банк-эквайер. У потенциального партнёра уточните, кто предоставляет эту связь, заключает договор и проводит подключение. Определите его роль: эквайер, интегратор или посредник знакомства. Запросите относящиеся к роли документы. Наличие инфраструктуры UPI не подтверждает допустимость конкретной категории бизнеса; руководство не устанавливает возможность VlaDDoS Network проводить такие платежи.',
       ),
       section(
         'category',
@@ -263,8 +264,8 @@ export const catalog = [
         'tests',
         'Prepare an integration test plan',
         'Подготовьте план проверки интеграции',
-        'Ask which integration modes are available to the proposed merchant and what the production approval path involves. Test transaction creation, customer abandonment, final status retrieval, callbacks and retries in a permitted test environment. Agree how a payment is matched to an order and how unsettled or disputed entries are investigated. Include these questions in the PAN partner brief so a first conversation can focus on specific responsibilities and evidence rather than a generic request for India coverage.',
-        'Уточните доступные мерчанту режимы интеграции и порядок допуска в рабочую среду. В разрешённой тестовой среде проверьте создание операции, отказ клиента, конечный статус, уведомления и повторы. Согласуйте связь платежа с заказом и расследование спорных записей. Включите эти вопросы в бриф PAN, чтобы первый разговор касался ответственности и подтверждений.',
+        'Ask which integration modes are available to the proposed merchant and what the production approval path involves. Test transaction creation, customer abandonment, final status retrieval, callbacks and retries in a permitted test environment. Agree how a payment is matched to an order and how unsettled or disputed entries are investigated. Include these questions in the VlaDDoS Network partner brief so a first conversation can focus on specific responsibilities and evidence rather than a generic request for India coverage.',
+        'Уточните доступные мерчанту режимы интеграции и порядок допуска в рабочую среду. В разрешённой тестовой среде проверьте создание операции, отказ клиента, конечный статус, уведомления и повторы. Согласуйте связь платежа с заказом и расследование спорных записей. Включите эти вопросы в бриф VlaDDoS Network, чтобы первый разговор касался ответственности и подтверждений.',
       ),
     ],
     [
@@ -310,8 +311,8 @@ export const catalog = [
         'callbacks',
         'Test the evidence returned by the flow',
         'Проверьте подтверждения операции',
-        'Walk through request identifiers, asynchronous notifications and final status checks. Test a delayed callback and a repeated request, and agree which system is authoritative when records disagree. Ask how collection and payout records appear in exports and how an incident reaches the operating team. In a PAN introduction, describe your actual experience, market, methods and operating responsibility. This provides context for a conversation without promising an unverified M-Pesa arrangement or a particular processing capacity.',
-        'Проверьте идентификаторы запросов, асинхронные уведомления и конечные статусы. Испытайте задержку уведомления и повтор, согласуйте источник итогового состояния при расхождении записей. Уточните отображение приёма и выплат в отчётах и путь инцидента к команде. Для PAN опишите действительный опыт, рынок, методы и ответственность; это не обещание неподтверждённой схемы M-Pesa или мощности.',
+        'Walk through request identifiers, asynchronous notifications and final status checks. Test a delayed callback and a repeated request, and agree which system is authoritative when records disagree. Ask how collection and payout records appear in exports and how an incident reaches the operating team. In a VlaDDoS Network introduction, describe your actual experience, market, methods and operating responsibility. This provides context for a conversation without promising an unverified M-Pesa arrangement or a particular processing capacity.',
+        'Проверьте идентификаторы запросов, асинхронные уведомления и конечные статусы. Испытайте задержку уведомления и повтор, согласуйте источник итогового состояния при расхождении записей. Уточните отображение приёма и выплат в отчётах и путь инцидента к команде. Для VlaDDoS Network опишите действительный опыт, рынок, методы и ответственность; это не обещание неподтверждённой схемы M-Pesa или мощности.',
       ),
     ],
     [
@@ -357,8 +358,8 @@ export const catalog = [
         'exceptions',
         'Agree the exception workflow',
         'Согласуйте обработку исключений',
-        'Discuss unmatched transfers, repeated customer payments, delayed notifications and report corrections. Agree the reporting timezone, export fields and escalation contact. Request a sample reconciliation file before comparing commercials, because an unclear operating flow can hide important work. In a PAN provider introduction, state the market and your actual responsibility in the proposed flow. PAN reviews introductions individually; this preparation guide does not confirm capacity, settlement terms or support for a particular business category.',
-        'Обсудите неопознанные переводы, повторы клиентов, задержки уведомлений и исправления отчётов. Согласуйте часовой пояс, поля выгрузки и контакт эскалации. Запросите пример сверки до сравнения коммерческих условий. В знакомстве через PAN укажите рынок и свою реальную роль. PAN рассматривает обращения отдельно; руководство не подтверждает мощность, условия расчётов или поддержку категории.',
+        'Discuss unmatched transfers, repeated customer payments, delayed notifications and report corrections. Agree the reporting timezone, export fields and escalation contact. Request a sample reconciliation file before comparing commercials, because an unclear operating flow can hide important work. In a VlaDDoS Network provider introduction, state the market and your actual responsibility in the proposed flow. VlaDDoS Network reviews introductions individually; this preparation guide does not confirm capacity, settlement terms or support for a particular business category.',
+        'Обсудите неопознанные переводы, повторы клиентов, задержки уведомлений и исправления отчётов. Согласуйте часовой пояс, поля выгрузки и контакт эскалации. Запросите пример сверки до сравнения коммерческих условий. В знакомстве через VlaDDoS Network укажите рынок и свою реальную роль. VlaDDoS Network рассматривает обращения отдельно; руководство не подтверждает мощность, условия расчётов или поддержку категории.',
       ),
     ],
     [
@@ -378,28 +379,18 @@ export const catalog = [
   ),
 ];
 
+export const legacyRoutes = ['/affiliates', '/teams', '/payment-partners', '/merchants', '/apply'];
 export const staticRoutes = [
   '/',
-  '/affiliates',
-  '/teams',
-  '/payment-partners',
-  '/merchants',
+  '/network',
+  '/industries',
   '/markets',
   '/about',
-  '/apply',
+  '/find-a-partner',
+  '/join',
+  '/contact',
   '/privacy',
   '/terms',
   '/knowledge',
-  ...[
-    'india',
-    'ghana',
-    'kenya',
-    'peru',
-    'colombia',
-    'uganda',
-    'tanzania',
-    'nigeria',
-    'mexico',
-    'south-africa',
-  ].map((slug) => '/markets/' + slug),
+  ...taxonomy.countries.map((country) => '/markets/' + country.id),
 ];

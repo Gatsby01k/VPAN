@@ -1,0 +1,205 @@
+{
+  "version": 1,
+  "regions": [
+    {
+      "id": "asia",
+      "en": "Asia",
+      "ru": "Азия",
+      "note": "Domestic rails. Local relationships.",
+      "noteRu": "Локальная инфраструктура и деловые связи."
+    },
+    {
+      "id": "latam",
+      "en": "Latin America",
+      "ru": "Латинская Америка",
+      "note": "Market by market. Method by method.",
+      "noteRu": "От страны к стране. От метода к методу."
+    },
+    {
+      "id": "africa",
+      "en": "Africa",
+      "ru": "Африка",
+      "note": "Mobile money. Ground-level expertise.",
+      "noteRu": "Мобильные деньги и локальная экспертиза."
+    }
+  ],
+  "industries": [
+    { "id": "payments", "en": "Payments & Fintech", "ru": "Payments и Fintech" },
+    { "id": "igaming", "en": "iGaming & Betting", "ru": "iGaming и беттинг" },
+    { "id": "exchange", "en": "Exchange & OTC", "ru": "Обмен и OTC" },
+    { "id": "commerce", "en": "Digital Commerce", "ru": "Цифровая коммерция" },
+    { "id": "other", "en": "Other B2B", "ru": "Другой B2B" }
+  ],
+  "capabilities": [
+    { "id": "collections", "en": "Payment collection", "ru": "Приём платежей" },
+    { "id": "payouts", "en": "Local payouts", "ru": "Локальные выплаты" },
+    { "id": "local-methods", "en": "Local payment methods", "ru": "Локальные платёжные методы" },
+    { "id": "psp", "en": "PSP infrastructure", "ru": "Инфраструктура PSP" },
+    { "id": "liquidity", "en": "Liquidity", "ru": "Ликвидность" },
+    { "id": "settlement", "en": "Settlement relationships", "ru": "Партнёры для расчётов" },
+    { "id": "market-entry", "en": "Market entry expertise", "ru": "Выход на рынок" },
+    { "id": "merchant-access", "en": "Merchant introductions", "ru": "Знакомства с мерчантами" },
+    { "id": "strategic", "en": "Strategic partnerships", "ru": "Стратегические партнёрства" }
+  ],
+  "companyTypes": [
+    { "id": "merchant", "en": "Merchant / operator", "ru": "Мерчант / оператор" },
+    { "id": "psp", "en": "PSP / aggregator", "ru": "PSP / агрегатор" },
+    { "id": "local-partner", "en": "Local payment partner", "ru": "Локальный платёжный партнёр" },
+    { "id": "otc", "en": "Exchange / OTC provider", "ru": "Обмен / OTC-провайдер" },
+    { "id": "liquidity", "en": "Liquidity provider", "ru": "Поставщик ликвидности" },
+    { "id": "affiliate", "en": "Affiliate / introducer", "ru": "Аффилиат / рекомендатель" },
+    { "id": "strategic", "en": "Strategic partner", "ru": "Стратегический партнёр" }
+  ],
+  "countries": [
+    {
+      "id": "india",
+      "code": "IN",
+      "region": "asia",
+      "en": "India",
+      "ru": "Индия",
+      "currency": "INR",
+      "methods": ["UPI", "IMPS", "NEFT"],
+      "source": "https://www.npci.org.in/what-we-do/upi/faqs"
+    },
+    {
+      "id": "indonesia",
+      "code": "ID",
+      "region": "asia",
+      "en": "Indonesia",
+      "ru": "Индонезия",
+      "currency": "IDR",
+      "methods": ["Bank transfers"],
+      "source": "https://www.bis.org/project/nexus"
+    },
+    {
+      "id": "philippines",
+      "code": "PH",
+      "region": "asia",
+      "en": "Philippines",
+      "ru": "Филиппины",
+      "currency": "PHP",
+      "methods": ["Bank transfers"],
+      "source": "https://www.bis.org/project/nexus"
+    },
+    {
+      "id": "thailand",
+      "code": "TH",
+      "region": "asia",
+      "en": "Thailand",
+      "ru": "Таиланд",
+      "currency": "THB",
+      "methods": ["Bank transfers"],
+      "source": "https://www.bis.org/project/nexus"
+    },
+    {
+      "id": "brazil",
+      "code": "BR",
+      "region": "latam",
+      "en": "Brazil",
+      "ru": "Бразилия",
+      "currency": "BRL",
+      "methods": ["Pix", "Bank transfers"],
+      "source": "https://www.bcb.gov.br/en/financialstability/pix_en"
+    },
+    {
+      "id": "mexico",
+      "code": "MX",
+      "region": "latam",
+      "en": "Mexico",
+      "ru": "Мексика",
+      "currency": "MXN",
+      "methods": ["SPEI", "Bank transfers"],
+      "source": "https://www.banxico.org.mx/services/interbanking-electronic-payme.html"
+    },
+    {
+      "id": "colombia",
+      "code": "CO",
+      "region": "latam",
+      "en": "Colombia",
+      "ru": "Колумбия",
+      "currency": "COP",
+      "methods": ["PSE", "Bre-B", "Bank transfers"],
+      "source": "https://www.banrep.gov.co/es/bre-b"
+    },
+    {
+      "id": "peru",
+      "code": "PE",
+      "region": "latam",
+      "en": "Peru",
+      "ru": "Перу",
+      "currency": "PEN",
+      "methods": ["Yape", "Plin", "Bank transfers"],
+      "source": "https://www.bcrp.gob.pe/sistema-de-pagos.html"
+    },
+    {
+      "id": "mozambique",
+      "code": "MZ",
+      "region": "africa",
+      "en": "Mozambique",
+      "ru": "Мозамбик",
+      "currency": "MZN",
+      "methods": ["M-Pesa", "e-Mola", "Bank transfers"],
+      "source": "https://www.vm.co.mz/m-pesa/artigo/api-aberta-do-m-pesa"
+    },
+    {
+      "id": "kenya",
+      "code": "KE",
+      "region": "africa",
+      "en": "Kenya",
+      "ru": "Кения",
+      "currency": "KES",
+      "methods": ["M-Pesa", "Airtel Money", "Bank transfers"],
+      "source": "https://developer.safaricom.co.ke/apis"
+    },
+    {
+      "id": "ghana",
+      "code": "GH",
+      "region": "africa",
+      "en": "Ghana",
+      "ru": "Гана",
+      "currency": "GHS",
+      "methods": ["Mobile Money", "Bank transfers"],
+      "source": "https://www.gsma.com/mobile-money-metrics/"
+    },
+    {
+      "id": "nigeria",
+      "code": "NG",
+      "region": "africa",
+      "en": "Nigeria",
+      "ru": "Нигерия",
+      "currency": "NGN",
+      "methods": ["Bank transfers"],
+      "source": "https://www.cbn.gov.ng/PaymentsSystem/"
+    },
+    {
+      "id": "tanzania",
+      "code": "TZ",
+      "region": "africa",
+      "en": "Tanzania",
+      "ru": "Танзания",
+      "currency": "TZS",
+      "methods": ["M-Pesa", "Mobile Money"],
+      "source": "https://www.gsma.com/mobile-money-metrics/"
+    },
+    {
+      "id": "uganda",
+      "code": "UG",
+      "region": "africa",
+      "en": "Uganda",
+      "ru": "Уганда",
+      "currency": "UGX",
+      "methods": ["MTN MoMo", "Airtel Money"],
+      "source": "https://www.gsma.com/mobile-money-metrics/"
+    },
+    {
+      "id": "south-africa",
+      "code": "ZA",
+      "region": "africa",
+      "en": "South Africa",
+      "ru": "ЮАР",
+      "currency": "ZAR",
+      "methods": ["Bank transfers"],
+      "source": "https://www.resbank.co.za/en/home/what-we-do/payments-and-settlements"
+    }
+  ]
+}

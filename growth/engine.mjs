@@ -105,7 +105,7 @@ export function validateGuide(guide, existing = []) {
   const text = JSON.stringify(guide);
   if (
     guide.generated &&
-    /(?:guaranteed (?:approval|revenue|returns)|PAN (?:guarantees|is licensed|processes)|PAN (?:гарантирует|лицензирован)|\b\d+(?:\.\d+)?\s*%)/i.test(
+    /(?:guaranteed (?:approval|revenue|returns)|(?:PAN|VlaDDoS Network) (?:guarantees|is licensed|processes)|(?:PAN|VlaDDoS Network) (?:гарантирует|лицензирован)|\b\d+(?:\.\d+)?\s*%)/i.test(
       text,
     )
   )
@@ -204,7 +204,7 @@ export function createGrowth(
       )
       .all()
       .map((row) => ({
-        ...JSON.parse(row.body),
+        ...JSON.parse(row.body.replace(/\bPAN\b/g, 'VlaDDoS Network')),
         status: row.status,
         publishedAt: row.published_at,
         updatedAt: row.updated_at,
@@ -463,7 +463,7 @@ export function createGrowth(
                           ''
                         : '',
                     kind: 'guide',
-                    author: 'PAN Research',
+                    author: 'VlaDDoS Network Research',
                     generated: true,
                   };
                   const issues = validateGuide(guide, existing);

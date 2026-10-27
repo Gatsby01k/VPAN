@@ -1,4 +1,4 @@
-const KEY = 'pan-acquisition-v1';
+const KEY = 'vladdos-acquisition-v1';
 export interface Attribution {
   source?: string;
   medium?: string;

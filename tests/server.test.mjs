@@ -80,10 +80,10 @@ test('all public routes have prerendered content, assets and a real 404', async 
     assert.equal(response.status, 200, route);
     const html = await response.text();
     assert.match(html, /<h1/);
-    assert.match(html, /<title>[^<]*PAN/);
+    assert.match(html, /<title>[^<]*VlaDDoS Network/);
     assert.doesNotMatch(html, /<!--app-html-->/);
   }
-  const image = await fetch(base + '/assets/hero-king.webp');
+  const image = await fetch(base + '/assets/editorial/exchange.webp');
   assert.equal(image.status, 200);
   assert.equal(image.headers.get('content-type'), 'image/webp');
   const missing = await fetch(base + '/assets/missing.webp');
@@ -111,7 +111,7 @@ test('applications save all merchant fields, are idempotent, and validate input/
   let response = await submit(base, body);
   assert.equal(response.status, 201);
   const { reference } = await response.json();
-  assert.match(reference, /^PAN-\d{4}-[A-F0-9]{8}$/);
+  assert.match(reference, /^VN-\d{4}-[A-F0-9]{8}$/);
   response = await submit(base, body);
   assert.equal(response.status, 200);
   assert.equal((await response.json()).reference, reference);
@@ -132,6 +132,13 @@ test('applications save all merchant fields, are idempotent, and validate input/
     body: JSON.stringify(payload()),
   });
   assert.equal(response.status, 403);
+});
+
+test('legacy intake never returns a saved reference for a rejected honeypot', async (t) => {
+  const { base } = await setup(t);
+  const response = await submit(base, { ...payload(), site: 'automated-fill' });
+  assert.equal(response.status, 422);
+  assert.equal((await inbox(base)).length, 0);
 });
 
 test('multibyte names survive UTF-8 split across HTTP chunks', async (t) => {

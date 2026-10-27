@@ -173,7 +173,7 @@ export function applicationEmail(draft: ApplicationDraft, language: 'en' | 'ru')
       : name;
   });
   const lines = [
-    'PAN / VlaDDoS Network',
+    'VlaDDoS Network / VlaDDoS Network',
     `${label('Role', 'Роль')}: ${role ? (ru ? role.ru : role.title) : draft.role}`,
     `${label('Countries', 'Страны')}: ${countries.join('; ')}`,
     `${label('Sector', 'Сфера')}: ${draft.category === 'other' ? label('Other', 'Другая') : draft.category}`,

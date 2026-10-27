@@ -7,6 +7,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { createGrowth, cleanAttribution } from './growth/engine.mjs';
 import { staticRoutes } from './growth/catalog.mjs';
 import { renderHead } from './growth/seo.mjs';
+import { createDesk } from './operations/desk.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.resolve(HERE, 'dist');
@@ -64,9 +65,9 @@ async function jsonBody(req) {
   return body;
 }
 export function openDatabase(dbPath) {
-  fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+  fs.mkdirSync(path.dirname(dbPath), { recursive: true, mode: 0o700 });
   const db = new DatabaseSync(dbPath);
-  db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
+  db.exec(`PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
     CREATE TABLE IF NOT EXISTS applications (
       id TEXT PRIMARY KEY, request_key TEXT UNIQUE NOT NULL, reference TEXT UNIQUE NOT NULL,
       created_at TEXT NOT NULL, updated_at TEXT NOT NULL, role TEXT NOT NULL, markets TEXT NOT NULL,
@@ -96,6 +97,8 @@ export function openDatabase(dbPath) {
       .some((column) => column.name === 'attribution')
   )
     db.exec("ALTER TABLE applications ADD COLUMN attribution TEXT NOT NULL DEFAULT '{}'");
+  for (const filename of [dbPath, dbPath + '-wal', dbPath + '-shm'])
+    if (fs.existsSync(filename)) fs.chmodSync(filename, 0o600);
   return db;
 }
 function serveFile(req, res, urlPath) {
@@ -147,6 +150,8 @@ export function createApp({
   publicSiteUrl = process.env.PUBLIC_SITE_URL || '',
   growthEnabled = false,
   growthOptions = {},
+  deskOptions = {},
+  gatewayToken = process.env.INTAKE_GATEWAY_TOKEN || '',
 } = {}) {
   const db = openDatabase(dbPath);
   const growth = createGrowth(db, {
@@ -158,6 +163,11 @@ export function createApp({
     gscFile: process.env.GSC_SERVICE_ACCOUNT_FILE || '',
     gscProperty: process.env.GSC_PROPERTY || '',
     ...growthOptions,
+  });
+  const desk = createDesk(db, {
+    notificationUrl: process.env.NOTIFICATION_WEBHOOK_URL || '',
+    notificationSecret: process.env.NOTIFICATION_WEBHOOK_SECRET || '',
+    ...deskOptions,
   });
   const attempts = new Map();
   const eventAttempts = new Map();
@@ -211,7 +221,31 @@ export function createApp({
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     const url = new URL(req.url || '/', 'http://localhost');
     const pathname = url.pathname;
-    if (req.method === 'GET' && pathname === '/health') return reply(res, 200, { status: 'ok' });
+    const gatewayVerified =
+      gatewayToken &&
+      secureCompare(String(req.headers['x-intake-gateway-key'] || ''), gatewayToken);
+    if (gatewayToken && pathname.startsWith('/api/') && !gatewayVerified)
+      return reply(res, 403, { error: 'Use the configured website gateway.' });
+    const legacy = {
+      '/affiliates': '/join',
+      '/teams': '/join',
+      '/payment-partners': '/join',
+      '/merchants': '/find-a-partner',
+      '/apply':
+        url.searchParams.get('role') && url.searchParams.get('role') !== 'merchant'
+          ? '/join'
+          : '/find-a-partner',
+    };
+    if ((req.method === 'GET' || req.method === 'HEAD') && legacy[pathname]) {
+      res.writeHead(308, { Location: legacy[pathname] + url.search });
+      return res.end();
+    }
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self' mailto:",
+    );
+    if (req.method === 'GET' && pathname === '/health')
+      return reply(res, 200, { status: 'ok', intake: 'durable', taxonomyVersion: 1 });
     if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/sitemap.xml') {
       const xml = growth.sitemap();
       if (!xml)
@@ -257,11 +291,84 @@ export function createApp({
       return res.end(
         req.method === 'HEAD'
           ? undefined
-          : `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>PAN — Partner field notes</title><link>${growth.origin}/knowledge</link><description>Payment partner preparation guides and checklists.</description>${items}</channel></rss>`,
+          : `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>VlaDDoS Network — Partner field notes</title><link>${growth.origin}/knowledge</link><description>Payment partner preparation guides and checklists.</description>${items}</channel></rss>`,
       );
     }
     // The build shell is an internal rendering artifact, not a public duplicate homepage.
     if (pathname === '/shell.html') return reply(res, 404, { error: 'Not found' });
+    if (pathname === '/api/opportunities' || pathname.startsWith('/api/admin/desk')) {
+      if (
+        !['GET', 'HEAD'].includes(req.method) &&
+        allowedOrigin &&
+        req.headers.origin &&
+        req.headers.origin !== allowedOrigin
+      )
+        return reply(res, 403, { error: 'This request origin is not allowed.' });
+      if (pathname.startsWith('/api/admin/desk')) {
+        if (
+          !secureCompare(
+            String(req.headers.authorization || '').replace(/^Bearer\s+/i, ''),
+            adminToken,
+          )
+        )
+          return reply(res, 401, { error: 'Unauthorized' });
+        if (req.method === 'GET' && pathname === '/api/admin/desk')
+          return reply(res, 200, desk.report());
+        const item = pathname.match(
+          /^\/api\/admin\/desk\/opportunities\/([a-f0-9-]{36})(\/notes)?$/i,
+        );
+        if (item) {
+          if (req.method === 'GET' && !item[2]) return reply(res, 200, desk.detail(item[1]));
+          if (req.method === 'PATCH' && !item[2])
+            return reply(res, 200, desk.patch(item[1], await jsonBody(req)));
+          if (req.method === 'POST' && item[2])
+            return reply(res, 201, desk.note(item[1], await jsonBody(req)));
+        }
+        const revenueMatch = pathname.match(/^\/api\/admin\/desk\/revenue\/([a-f0-9-]{36})$/i);
+        if (revenueMatch && req.method === 'PATCH')
+          return reply(res, 200, desk.updateRevenue(revenueMatch[1], await jsonBody(req)));
+        const intro = pathname.match(/^\/api\/admin\/desk\/introductions\/([a-f0-9-]{36})$/i);
+        if (intro && req.method === 'PATCH')
+          return reply(res, 200, desk.updateIntroduction(intro[1], await jsonBody(req)));
+        if (req.method === 'POST') {
+          const body = await jsonBody(req);
+          if (pathname === '/api/admin/desk/introductions')
+            return reply(res, 201, desk.introduce(body));
+          if (pathname === '/api/admin/desk/agreements')
+            return reply(res, 201, desk.agreement(body));
+          if (pathname === '/api/admin/desk/revenue') return reply(res, 201, desk.revenue(body));
+          if (pathname === '/api/admin/desk/merge') return reply(res, 200, desk.merge(body));
+          if (pathname === '/api/admin/desk/notifications/retry') {
+            await desk.flush();
+            return reply(res, 200, desk.report().notifications);
+          }
+        }
+        return reply(res, 405, { error: 'Method not allowed.' });
+      }
+      if (req.method !== 'POST') return reply(res, 405, { error: 'Method not allowed.' });
+      const forwarded = req.headers['x-forwarded-for'];
+      const addr =
+        ((trustProxy || gatewayVerified) && typeof forwarded === 'string'
+          ? forwarded.split(',')[0].trim()
+          : '') ||
+        req.socket.remoteAddress ||
+        'unknown';
+      const key = 'network:' + addr;
+      let rate = attempts.get(key);
+      if (!rate || rate.until < Date.now()) rate = { count: 0, until: Date.now() + 3600000 };
+      attempts.set(key, rate);
+      const body = await jsonBody(req);
+      if (rate.count >= 12)
+        return reply(res, 429, { error: 'Too many requests. Please try again later.' });
+      rate.count++;
+      if (attempts.size > 5000)
+        for (const [k, v] of attempts) if (v.until < Date.now()) attempts.delete(k);
+      const result = desk.submit(body);
+      return reply(res, result.replay ? 200 : 201, {
+        reference: result.reference,
+        status: 'received',
+      });
+    }
     if (pathname.startsWith('/api/')) {
       if (req.method === 'GET' && pathname === '/api/content')
         return reply(res, 200, growth.publicData(safeText(url.searchParams.get('article'), 100)));
@@ -293,7 +400,8 @@ export function createApp({
         if (allowedOrigin && req.headers.origin && req.headers.origin !== allowedOrigin)
           return reply(res, 403, { error: 'This request origin is not allowed.' });
         const body = await jsonBody(req);
-        if (safeText(body.site, 80)) return reply(res, 200, { reference: 'PAN-RECEIVED' });
+        if (safeText(body.site, 80))
+          return reply(res, 422, { error: 'Unable to accept this request.' });
         const requestKey = safeText(body.requestId, 75);
         if (!UUID.test(requestKey)) return reply(res, 400, { error: 'Invalid request ID.' });
         const existing = db
@@ -330,7 +438,9 @@ export function createApp({
         }
         const forwarded = req.headers['x-forwarded-for'];
         const addr =
-          (trustProxy && typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : '') ||
+          ((trustProxy || gatewayVerified) && typeof forwarded === 'string'
+            ? forwarded.split(',')[0].trim()
+            : '') ||
           req.socket.remoteAddress ||
           'unknown';
         let record = attempts.get(addr) || { count: 0, until: Date.now() + 3600000 };
@@ -364,7 +474,7 @@ export function createApp({
         const now = new Date().toISOString(),
           id = crypto.randomUUID();
         const reference =
-          'PAN-' +
+          'VN-' +
           new Date().getUTCFullYear() +
           '-' +
           crypto.randomBytes(4).toString('hex').toUpperCase();
@@ -392,6 +502,7 @@ export function createApp({
           'new',
           JSON.stringify(cleanAttribution(body.attribution)),
         );
+        desk.legacyReceived(id);
         return reply(res, 201, { reference });
       }
       if (pathname.startsWith('/api/admin/')) {
@@ -463,6 +574,7 @@ export function createApp({
             db.prepare(
               'INSERT INTO audit_log(application_id, at, from_status, to_status) VALUES (?,?,?,?)',
             ).run(match[1], now, current.status, next);
+            desk.syncLegacyStatus(match[1], next);
             db.exec('COMMIT');
           } catch (error) {
             db.exec('ROLLBACK');
@@ -484,7 +596,10 @@ export function createApp({
     });
   });
   growth.start();
-  server.on('close', () => void growth.stop().finally(() => db.close()));
+  server.on(
+    'close',
+    () => void Promise.all([growth.stop(), desk.stop()]).finally(() => db.close()),
+  );
   return server;
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -493,6 +608,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const port = Number(process.env.PORT || 3000),
     host = process.env.HOST || '0.0.0.0';
   const server = createApp({ growthEnabled: process.env.GROWTH_ENABLED !== '0' });
-  server.listen(port, host, () => process.stdout.write(`PAN running on http://${host}:${port}\n`));
+  server.listen(port, host, () =>
+    process.stdout.write(`VlaDDoS Network running on http://${host}:${port}\n`),
+  );
   ['SIGTERM', 'SIGINT'].forEach((signal) => process.on(signal, () => server.close()));
 }

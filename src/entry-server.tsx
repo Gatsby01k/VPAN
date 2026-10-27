@@ -10,4 +10,4 @@ export function renderPage(url: string, initialGrowth?: GrowthData) {
     </MemoryRouter>,
   );
 }
-export { pageMeta } from './data';
+export { networkMeta as pageMeta } from './network';

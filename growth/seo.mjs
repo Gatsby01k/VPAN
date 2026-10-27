@@ -5,7 +5,7 @@ export function renderHead(
   { origin, pathname, language, metadata, article, bootstrap, noindex = false },
 ) {
   const title = article
-    ? (language === 'ru' ? article.titleRu : article.title) + ' — PAN'
+    ? (language === 'ru' ? article.titleRu : article.title) + ' — VlaDDoS Network'
     : metadata.title;
   const description = article
     ? language === 'ru'
@@ -16,7 +16,7 @@ export function renderHead(
     .replace(/<html lang="[^"]*"/, `<html lang="${language}"`)
     .replace(/<title>.*?<\/title>/, `<title>${escapeHtml(title)}</title>`)
     .replace(
-      /(<meta (?:name="description"|property="og:description") content=")[^"]*("\s*\/?>)/g,
+      /(<meta\s+(?:name="description"|property="og:description")\s+content=")[^"]*("\s*\/?>)/g,
       `$1${escapeHtml(description).replaceAll('$', '$$$$')}$2`,
     )
     .replace(
@@ -26,12 +26,12 @@ export function renderHead(
   let tags = noindex ? '<meta name="robots" content="noindex, follow" />' : '';
   if (origin) {
     const canonical = origin + pathname + (language === 'ru' ? '?lang=ru' : '');
-    tags += `<link rel="canonical" href="${escapeHtml(canonical)}"/><link rel="alternate" hreflang="en" href="${escapeHtml(origin + pathname)}"/><link rel="alternate" hreflang="ru" href="${escapeHtml(origin + pathname + '?lang=ru')}"/><link rel="alternate" hreflang="x-default" href="${escapeHtml(origin + pathname)}"/><meta property="og:url" content="${escapeHtml(canonical)}"/><meta property="og:image" content="${escapeHtml(origin + '/assets/pan-nexus-social.webp')}"/>`;
+    tags += `<link rel="canonical" href="${escapeHtml(canonical)}"/><link rel="alternate" hreflang="en" href="${escapeHtml(origin + pathname)}"/><link rel="alternate" hreflang="ru" href="${escapeHtml(origin + pathname + '?lang=ru')}"/><link rel="alternate" hreflang="x-default" href="${escapeHtml(origin + pathname)}"/><meta property="og:url" content="${escapeHtml(canonical)}"/><meta property="og:image" content="${escapeHtml(origin + '/assets/editorial/exchange.webp')}"/>`;
     const graph = [
       {
         '@type': 'Organization',
         '@id': origin + '/#organization',
-        name: 'PAN — Private Affiliate Network',
+        name: 'VlaDDoS Network',
         url: origin,
         logo: origin + '/favicon.svg',
       },
@@ -39,7 +39,7 @@ export function renderHead(
         '@type': 'WebSite',
         '@id': origin + '/#website',
         url: origin,
-        name: 'PAN',
+        name: 'VlaDDoS Network',
         inLanguage: ['en', 'ru'],
         publisher: { '@id': origin + '/#organization' },
       },
@@ -47,7 +47,7 @@ export function renderHead(
     if (article) {
       graph.push({
         '@type': 'Article',
-        headline: title.replace(/ — PAN$/, ''),
+        headline: title.replace(/ — VlaDDoS Network$/, ''),
         description,
         mainEntityOfPage: canonical,
         inLanguage: language,
@@ -62,19 +62,24 @@ export function renderHead(
       graph.push({
         '@type': 'BreadcrumbList',
         itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'PAN', item: origin },
+          { '@type': 'ListItem', position: 1, name: 'VlaDDoS Network', item: origin },
           {
             '@type': 'ListItem',
             position: 2,
             name: language === 'ru' ? 'База знаний' : 'Knowledge',
             item: origin + '/knowledge',
           },
-          { '@type': 'ListItem', position: 3, name: title.replace(/ — PAN$/, ''), item: canonical },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: title.replace(/ — VlaDDoS Network$/, ''),
+            item: canonical,
+          },
         ],
       });
     }
     tags += `<script type="application/ld+json">${scriptJson({ '@context': 'https://schema.org', '@graph': graph })}</script>`;
   }
-  tags += `<script id="pan-bootstrap" type="application/json">${scriptJson({ ...bootstrap, language })}</script>`;
+  tags += `<script id="vladdos-bootstrap" type="application/json">${scriptJson({ ...bootstrap, language })}</script>`;
   return html.replace('</head>', tags + '</head>');
 }
