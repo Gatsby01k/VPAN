@@ -297,9 +297,37 @@ export function createApp({
         const requestKey = safeText(body.requestId, 75);
         if (!UUID.test(requestKey)) return reply(res, 400, { error: 'Invalid request ID.' });
         const existing = db
-          .prepare('SELECT reference FROM applications WHERE request_key = ?')
+          .prepare('SELECT * FROM applications WHERE request_key = ?')
           .get(requestKey);
-        if (existing) return reply(res, 200, { reference: existing.reference });
+        if (typeof body.message === 'string' && body.message.trim().length > 1500)
+          return reply(res, 422, { error: 'The introduction is limited to 1500 characters.' });
+        if (existing) {
+          const submitted = {
+            role: safeText(body.role, 40),
+            name: safeText(body.name),
+            email: safeText(body.email).toLowerCase(),
+            markets: [
+              ...new Set(
+                (Array.isArray(body.markets) ? body.markets : [])
+                  .map((value) => safeText(value, 60))
+                  .filter(Boolean),
+              ),
+            ].join(', '),
+            company: safeText(body.company),
+            telegram: safeText(body.telegram),
+            size: safeText(body.size),
+            methods: safeText(body.methods),
+            volume: safeText(body.volume),
+            experience: safeText(body.experience),
+            message: safeText(body.message, 1500),
+            category: safeText(body.category, 80),
+          };
+          if (Object.entries(submitted).some(([field, value]) => (existing[field] || '') !== value))
+            return reply(res, 409, {
+              error: 'This request ID was already used for different application details.',
+            });
+          return reply(res, 200, { reference: existing.reference });
+        }
         const forwarded = req.headers['x-forwarded-for'];
         const addr =
           (trustProxy && typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : '') ||

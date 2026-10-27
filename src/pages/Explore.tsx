@@ -1,153 +1,175 @@
 import { useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { ArrowDown, ArrowUpRight, Check, ChevronDown, Globe2, Search, X } from 'lucide-react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
+import {
+  ArrowDown,
+  ArrowRight,
+  ArrowUpRight,
+  Check,
+  ChevronDown,
+  Globe2,
+  Search,
+  X,
+} from 'lucide-react';
 import { Action, Eyebrow, PageHeading, Reveal, Spotlight } from '../components/UI';
-import { markets, roles, type Region, type RoleId } from '../data';
+import { markets, roles, type RoleId } from '../data';
 import { useLocale } from '../locale';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
 import { SceneArt, SceneFoot, ThreadLink } from '../components/Editorial';
-
-const regionNameRu: Record<Region, string> = { Africa: 'Африка', LATAM: 'LATAM', Asia: 'Азия' };
+import { countryGroups, findRegion, regionName } from '../geography';
 
 export function MarketsPage() {
-  const { t } = useLocale();
-  const [region, setRegion] = useState('All');
-  const [query, setQuery] = useState('');
+  const { language, t } = useLocale();
+  const [params, setParams] = useSearchParams();
+  const region = findRegion(params.get('region'));
+  const query = params.get('q') || '';
+  const updateFilter = (key: string, value: string) => {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    setParams(next, { replace: key === 'q', preventScrollReset: true });
+  };
   const filtered = useMemo(
     () =>
       markets.filter(
-        (m) =>
-          (region === 'All' || m.region === region) &&
-          `${m.name} ${m.ru} ${m.code} ${m.currency} ${m.region} ${regionNameRu[m.region]} ${m.methods.join(' ')}`
-            .toLowerCase()
-            .includes(query.trim().toLowerCase()),
+        (country) =>
+          (!region || country.region === region.value) &&
+          `${country.name} ${country.ru} ${country.code} ${country.currency} ${country.methods.join(' ')}`
+            .toLocaleLowerCase()
+            .includes(query.trim().toLocaleLowerCase()),
       ),
     [region, query],
   );
+  const groups = countryGroups(filtered, language).filter((group) => group.countries.length);
+  const reset = () => {
+    const next = new URLSearchParams(params);
+    next.delete('q');
+    next.delete('region');
+    setParams(next, { preventScrollReset: true });
+  };
   return (
     <>
       <PageHeading
-        eyebrow={t('Market explorer / PAN', 'Рынки / PAN')}
-        title={t('Local know-how.', 'Локальные знания.')}
-        accent={t('Global possibilities.', 'Широкие возможности.')}
+        eyebrow={t('Markets / regions & countries', 'Рынки / регионы и страны')}
+        title={t('Choose a region.', 'Выберите регион.')}
+        accent={t('Find your country.', 'Найдите свою страну.')}
         description={t(
-          'Africa, Asia, Latin America. We are building relationships with people who understand local payments. Find the market you know.',
-          'Африка, Азия, Латинская Америка. Развиваем связи с людьми, которые понимают местные платежи. Найдите свой рынок.',
+          'Africa, Asia and Latin America are our regional directions. Choose a region to see its countries, currencies and local payment methods.',
+          'Африка, Азия и Латинская Америка — региональные направления. Выберите регион, затем страну: её валюту и локальные платёжные методы.',
         )}
       />
-      <section className="markets-section wrap">
+      <section
+        className="markets-section wrap"
+        aria-label={t('Regions and countries', 'Регионы и страны')}
+      >
+        <div
+          className="region-picker"
+          role="group"
+          aria-label={t('Choose a region', 'Выберите регион')}
+        >
+          {countryGroups(markets, language).map((group, index) => (
+            <button
+              key={group.id}
+              aria-pressed={region?.id === group.id}
+              onClick={() => updateFilter('region', region?.id === group.id ? '' : group.id)}
+            >
+              <span className="folio">
+                0{index + 1} / {t('REGION', 'РЕГИОН')}
+              </span>
+              <strong>{t(group.name, group.ru)}</strong>
+              <span>
+                {t('Countries', 'Страны')}: {group.countries.length}
+              </span>
+              <ArrowUpRight size={22} aria-hidden="true" />
+            </button>
+          ))}
+        </div>
         <div className="market-toolbar">
-          <div
-            className="filters"
-            role="group"
-            aria-label={t('Filter by region', 'Фильтр по региону')}
+          <button
+            className="region-reset"
+            onClick={() => updateFilter('region', '')}
+            aria-pressed={!region}
           >
-            {['All', 'Africa', 'LATAM', 'Asia'].map((r) => (
-              <button
-                key={r}
-                aria-pressed={r === region}
-                aria-label={r === 'All' ? t('All markets', 'Все рынки') : undefined}
-                onClick={() => setRegion(r)}
-              >
-                {r === region && <span className="filter-active" />}
-                <span>
-                  {r === 'All'
-                    ? t('All', 'Все')
-                    : r === 'Africa'
-                      ? t('Africa', 'Африка')
-                      : r === 'Asia'
-                        ? t('Asia', 'Азия')
-                        : 'LATAM'}
-                </span>
-              </button>
-            ))}
-          </div>
-          <div className="search-field">
-            <Search size={17} aria-hidden="true" />
+            {t('All regions', 'Все регионы')}
+          </button>
+          <label className="search-field country-search">
+            <Search size={18} aria-hidden="true" />
             <input
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => updateFilter('q', e.target.value)}
               placeholder={t('Country, currency or method', 'Страна, валюта или метод')}
-              aria-label={t('Search markets', 'Поиск рынков')}
+              aria-label={t('Search countries', 'Поиск стран')}
             />
             {query && (
               <button
                 className="icon-button"
-                onClick={() => setQuery('')}
+                onClick={() => updateFilter('q', '')}
                 aria-label={t('Clear search', 'Очистить поиск')}
               >
-                <X size={15} aria-hidden="true" />
+                <X size={18} aria-hidden="true" />
               </button>
             )}
-          </div>
+          </label>
         </div>
-        <div className="market-count" aria-live="polite">
-          <span>
-            {t('Markets found', 'Найдено рынков')}: {filtered.length.toString().padStart(2, '0')}
-          </span>
-          <span>
-            <span className="signal-dot" />
-            {t('Exploring partnerships', 'Развиваем партнёрства')}
-          </span>
-        </div>
-        <div className="market-grid">
-          <>
-            {filtered.map((m) => (
-              <article key={m.slug}>
-                <Spotlight className="market-card">
-                  <Link to={`/markets/${m.slug}`}>
-                    <div className="market-card-meta">
+        <p className="country-result-count" role="status">
+          {region ? t(region.name, region.ru) : t('All regions', 'Все регионы')} <span>/</span>{' '}
+          {t('Countries found', 'Найдено стран')}: {filtered.length}
+        </p>
+        {groups.map((group) => (
+          <section className="country-group" key={group.id} aria-labelledby={`region-${group.id}`}>
+            <div className="country-group-heading">
+              <div>
+                <span className="folio">{t('REGION', 'РЕГИОН')}</span>
+                <h2 id={`region-${group.id}`}>{t(group.name, group.ru)}</h2>
+              </div>
+              <span>
+                {t('Countries', 'Страны')}: {group.countries.length}
+              </span>
+            </div>
+            <div className="market-grid">
+              {group.countries.map((country) => (
+                <article key={country.slug}>
+                  <Link to={`/markets/${country.slug}`} className="country-card">
+                    <div className="country-card-meta">
                       <span>
-                        {t(m.region, regionNameRu[m.region])} / {m.currency}
+                        {country.code} / {country.currency}
                       </span>
                       <ArrowUpRight size={20} aria-hidden="true" />
                     </div>
-                    <div className="market-card-name">
-                      <span className="market-country-code" aria-hidden="true">
-                        {m.code}
-                      </span>
-                      <h2>{t(m.name, m.ru)}</h2>
-                    </div>
+                    <h3>{t(country.name, country.ru)}</h3>
                     <div className="market-methods">
-                      {m.methods.map((method) => (
+                      {country.methods.map((method) => (
                         <span key={method}>{method}</span>
                       ))}
                     </div>
-                    <div className="market-card-footer">
-                      <span>{t('Explore market', 'Посмотреть рынок')}</span>
-                      <span className="small-dot" />
-                    </div>
+                    <span className="country-card-action">
+                      {t('View country', 'Подробнее о стране')}{' '}
+                      <ArrowRight size={19} aria-hidden="true" />
+                    </span>
                   </Link>
-                </Spotlight>
-              </article>
-            ))}
-          </>
-        </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ))}
         {!filtered.length && (
           <div className="empty-state">
-            <Globe2 size={38} strokeWidth={1} aria-hidden="true" />
-            <h2>{t('A different search?', 'Попробуем другой запрос?')}</h2>
+            <Globe2 size={36} strokeWidth={1.5} aria-hidden="true" />
+            <h2>{t('No countries found.', 'Страны не найдены.')}</h2>
             <p>
               {t(
-                'Try another country, payment method or region.',
-                'Попробуйте другую страну, платёжный метод или регион.',
+                'Change the search or choose another region.',
+                'Измените запрос или выберите другой регион.',
               )}
             </p>
-            <button
-              className="button button-gold"
-              onClick={() => {
-                setQuery('');
-                setRegion('All');
-              }}
-            >
+            <button className="button" onClick={reset}>
               {t('Reset filters', 'Сбросить фильтры')}
             </button>
           </div>
         )}
         <p className="market-disclaimer">
           {t(
-            'Payment methods are references to local market infrastructure. A listing does not imply that PAN currently processes payments or guarantees availability. Each business category and partnership is reviewed individually.',
-            'Платёжные методы указаны как сведения о местной инфраструктуре. Наличие рынка в списке не означает, что PAN обрабатывает платежи или гарантирует доступность. Категории бизнеса и партнёрства рассматриваются отдельно.',
+            'Countries describe the local context for a potential partnership. Payment methods are infrastructure references; availability and commercial terms are discussed individually.',
+            'Страны показывают локальный контекст для возможного партнёрства. Платёжные методы — сведения об инфраструктуре; доступность и коммерческие условия обсуждаются индивидуально.',
           )}
         </p>
       </section>
@@ -157,7 +179,7 @@ export function MarketsPage() {
 
 export function CountryPage() {
   const { slug } = useParams();
-  const { t } = useLocale();
+  const { language, t } = useLocale();
   const market = markets.find((m) => m.slug === slug);
   if (!market) return <NotFoundPage />;
   return (
@@ -165,16 +187,22 @@ export function CountryPage() {
       <nav className="breadcrumbs wrap" aria-label={t('Breadcrumb', 'Навигационная цепочка')}>
         <Link to="/markets">{t('Markets', 'Рынки')}</Link>
         <span aria-hidden="true">/</span>
+        <Link to={`/markets?region=${findRegion(market.region)!.id}`}>
+          {regionName(market.region, language)}
+        </Link>
+        <span aria-hidden="true">/</span>
         <span aria-current="page">{t(market.name, market.ru)}</span>
       </nav>
       <section className="country-hero wrap">
         <div>
           <Eyebrow>
-            {t(market.region, regionNameRu[market.region])} / {market.currency}
+            {regionName(market.region, language)} / {market.currency}
           </Eyebrow>
           <h1 className="display">
             <span>{t(market.name, market.ru)}.</span>
-            <span className="display-accent accent">{t('Next connections.', 'Новые связи.')}</span>
+            <span className="display-accent accent">
+              {t('Local connections.', 'Локальные связи.')}
+            </span>
           </h1>
           <p className="country-intro">
             {t(market.focus, market.focusRu)}.{' '}
@@ -197,7 +225,7 @@ export function CountryPage() {
       <section className="country-details section">
         <div className="wrap country-details-grid">
           <Reveal>
-            <Eyebrow number="01">{t('Market context', 'Контекст рынка')}</Eyebrow>
+            <Eyebrow number="01">{t('Country context', 'Контекст страны')}</Eyebrow>
             <h2 className="section-title">
               {t('Understand the', 'Понимайте')}
               <br />

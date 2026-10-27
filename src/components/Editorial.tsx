@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowDown, ArrowUpRight } from 'lucide-react';
+import { ArrowDown, ArrowUpRight, ArrowRight } from 'lucide-react';
 import { useLocale } from '../locale';
 
 export function SceneArt({ name, priority = false }: { name: string; priority?: boolean }) {
@@ -22,14 +22,18 @@ export function ThreadLink({
   to,
   children,
   down = false,
+  arrow = false,
 }: {
   to: string;
   children: ReactNode;
   down?: boolean;
+  arrow?: boolean;
 }) {
   return (
     <Link className="thread-link" to={to}>
-      <span className="thread-eye" aria-hidden="true" />
+      <span className={`thread-eye ${arrow ? 'thread-eye-arrow' : ''}`} aria-hidden="true">
+        {arrow && <ArrowRight size={23} />}
+      </span>
       <span>{children}</span>
       {down ? <ArrowDown aria-hidden="true" /> : <ArrowUpRight aria-hidden="true" />}
     </Link>
@@ -91,12 +95,12 @@ export function ExchangeScene({ heading = false }: { heading?: boolean }) {
               </Link>
             ))}
           </div>
-          <ThreadLink to="/apply?category=Exchange">
+          <ThreadLink to="/apply?category=Exchange" arrow>
             {t('Discuss a partnership', 'Обсудить партнёрство')}
           </ThreadLink>
         </div>
       </div>
-      <SceneFoot number="05" label="THE OTHER SIDE">
+      <SceneFoot number="05" label={t('THE OTHER SIDE', 'ДРУГАЯ СТОРОНА')}>
         <a href="mailto:hello@vladdos.com">hello@vladdos.com</a>
       </SceneFoot>
     </section>

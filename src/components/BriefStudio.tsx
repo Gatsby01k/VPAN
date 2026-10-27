@@ -4,6 +4,7 @@ import { ArrowUpRight, Check, Copy, Download, Plus } from 'lucide-react';
 import { markets, roles, type RoleId } from '../data';
 import { useLocale } from '../locale';
 import { CategoryPicker } from './FormControls';
+import { CountryPicker } from './CountryPicker';
 import { partnerProfileQuery, restorePartnerProfile, savePartnerProfile } from './partner-profile';
 
 const questions: Record<RoleId, [string, string][]> = {
@@ -55,7 +56,10 @@ export function BriefStudio({ role, onRole }: { role: RoleId; onRole: (id: RoleI
   const [noticeFor, setNoticeFor] = useState('');
   const [restored, setRestored] = useState(false);
   const current = roles.find((r) => r.id === role)!;
-  const chosen = markets.filter((m) => selected.includes(m.slug));
+  const chosen = selected.flatMap((slug) => {
+    const country = markets.find((m) => m.slug === slug);
+    return country ? [country] : [];
+  });
   const available = [...new Set(chosen.flatMap((m) => m.methods))];
   useEffect(() => {
     const saved = restorePartnerProfile(new URLSearchParams(profileQuery));
@@ -98,10 +102,10 @@ export function BriefStudio({ role, onRole }: { role: RoleId; onRole: (id: RoleI
       '',
       `${t('Role', 'Роль')}: ${t(current.title, current.ru)}`,
       `${t('Business category', 'Категория бизнеса')}: ${category === 'other' ? t('Other', 'Другая') : category}`,
-      `${t('Markets', 'Рынки')}: ${chosen.map((m) => `${t(m.name, m.ru)} (${m.currency})`).join(', ')}`,
+      `${t('Countries', 'Страны')}: ${chosen.map((m) => `${t(m.name, m.ru)} (${m.currency})`).join(', ')}`,
       `${t('Methods to discuss', 'Методы для обсуждения')}: ${methods.length ? methods.join(', ') : t('To be discussed', 'Требуют обсуждения')}`,
       '',
-      t('MARKET CONTEXT', 'КОНТЕКСТ РЫНКОВ'),
+      t('COUNTRY CONTEXT', 'КОНТЕКСТ СТРАН'),
       ...chosen.map((m) => `${t(m.name, m.ru)} / ${m.currency}: ${m.methods.join(', ')}`),
       '',
       t('BEFORE AN INTRODUCTION', 'ДО ЗНАКОМСТВА'),
@@ -143,7 +147,7 @@ export function BriefStudio({ role, onRole }: { role: RoleId; onRole: (id: RoleI
     <section className="partner-studio" id="partner-brief">
       <div className="wrap">
         <div className="chapter-line">
-          <span>01 / {t('YOUR PARTNER PROFILE', 'ВАШ ПАРТНЁРСКИЙ ПРОФИЛЬ')}</span>
+          <span>04 / {t('YOUR PARTNER PROFILE', 'ВАШ ПАРТНЁРСКИЙ ПРОФИЛЬ')}</span>
           <span>{t('A CONCRETE STARTING POINT', 'КОНКРЕТНАЯ ОСНОВА ДЛЯ РАЗГОВОРА')}</span>
         </div>
         <div className="profile-heading">
@@ -185,33 +189,9 @@ export function BriefStudio({ role, onRole }: { role: RoleId; onRole: (id: RoleI
             </fieldset>
             <fieldset>
               <legend>
-                02 / {t('WHICH MARKETS?', 'КАКИЕ РЫНКИ?')} <span>{selected.length} / 3 GEO</span>
+                02 / {t('WHICH COUNTRIES?', 'КАКИЕ СТРАНЫ?')} <span>{selected.length} / 3</span>
               </legend>
-              <div
-                className="profile-market-picker"
-                role="group"
-                aria-label={t('Choose up to three markets', 'Выберите до трёх рынков')}
-              >
-                {markets.map((m) => (
-                  <button
-                    key={m.slug}
-                    onClick={() => toggleMarket(m.slug)}
-                    aria-pressed={selected.includes(m.slug)}
-                    disabled={!selected.includes(m.slug) && selected.length === 3}
-                  >
-                    <b>{m.code}</b>
-                    <span>{t(m.name, m.ru)}</span>
-                    <small>{m.currency}</small>
-                    {selected.includes(m.slug) ? <Check size={16} /> : <Plus size={16} />}
-                  </button>
-                ))}
-              </div>
-              <p className="profile-help">
-                {t(
-                  'Choose 1–3 markets where you have experience or a business need.',
-                  'Выберите 1–3 рынка, где у вас есть опыт или бизнес-задача.',
-                )}
-              </p>
+              <CountryPicker selected={selected} onToggle={toggleMarket} />
             </fieldset>
             <CategoryPicker
               value={category}
@@ -270,11 +250,11 @@ export function BriefStudio({ role, onRole }: { role: RoleId; onRole: (id: RoleI
               <h3>{role === 'provider' ? 'PSP' : t(current.title, current.ru)}</h3>
               <dl>
                 <div>
-                  <dt>{t('Markets', 'Рынки')}</dt>
+                  <dt>{t('Countries', 'Страны')}</dt>
                   <dd>
                     {chosen.length
                       ? chosen.map((m) => t(m.name, m.ru)).join(' / ')
-                      : t('Choose your GEO', 'Выберите рынок')}
+                      : t('Choose a country', 'Выберите страну')}
                   </dd>
                 </div>
                 <div>
@@ -298,7 +278,11 @@ export function BriefStudio({ role, onRole }: { role: RoleId; onRole: (id: RoleI
               </div>
               <div className="pass-bottom">
                 <span>{chosen.map((m) => m.code).join(' · ') || 'GEO / —'}</span>
-                <span>{t('READY TO TALK', 'ГОТОВЫ ОБСУЖДАТЬ')}</span>
+                <span>
+                  {chosen.length
+                    ? t('READY TO TALK', 'ГОТОВЫ ОБСУЖДАТЬ')
+                    : t('CHOOSE A COUNTRY', 'ВЫБЕРИТЕ СТРАНУ')}
+                </span>
               </div>
             </div>
             <Link
@@ -334,7 +318,7 @@ export function BriefStudio({ role, onRole }: { role: RoleId; onRole: (id: RoleI
                         'Your choices will carry over. Add your contact details in the application.',
                         'Выбор перенесётся в заявку. Контактные данные добавите на следующем шаге.',
                       )
-                    : t('Choose a market to continue.', 'Выберите рынок, чтобы продолжить.'))}
+                    : t('Choose a country to continue.', 'Выберите страну, чтобы продолжить.'))}
             </p>
           </div>
         </div>

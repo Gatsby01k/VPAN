@@ -30,7 +30,8 @@ export function LocaleProvider({
       return;
     }
     try {
-      if (localStorage.getItem('pan-language') === 'ru') setLanguage('ru');
+      const saved = localStorage.getItem('pan-language');
+      if (saved === 'en' || saved === 'ru') setLanguage(saved);
     } catch {
       /* Browser storage can be unavailable. */
     }

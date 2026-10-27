@@ -50,11 +50,15 @@ npm start
 
 ## Persistence and deployment
 
+Geography is shared across the catalogue, brief and application: **region → country → currency and local methods**. Africa contains Ghana, Kenya, Nigeria, Tanzania, Uganda and South Africa; Asia contains India; Latin America contains Colombia, Mexico and Peru. Region filters use stable URL IDs (`africa`, `asia`, `latam`). A new application does not preselect a country or sector. Explicit brief choices preserve country order and remain visible when carried into the application.
+
 `server.mjs` uses Node's HTTP and SQLite APIs. It validates applications, limits submissions, enforces a configured origin, preserves retry idempotency, authenticates admin requests and changes application status together with its audit record in one transaction. Existing databases are upgraded automatically to include the business category. Missing assets return 404 instead of HTML.
 
 Deploy as a persistent Node service or with `docker compose up --build -d`. The multi-stage image builds the frontend and runs as the `node` user. Mount and back up the SQLite volume. Configure `ADMIN_TOKEN`, `DB_PATH` and the production `ALLOWED_ORIGIN`. Enable `TRUST_PROXY=1` only behind a trusted reverse proxy.
 
-The partner desk uses one operations key, held only in browser memory. Applications and audit history are stored on the server; the session draft contains application fields and is cleared on successful submission. The partner profile is held in session storage without contacts. Language preference is stored locally. Optional campaign/referral identifiers are retained for the browser session and submitted with an application. Cookie-free page counts store page/source/day totals, without visitor IDs or persisted IP addresses, and respect DNT/GPC. For a larger operations team, the next system work is individual staff identity and permissions.
+A static Vite/Vercel publication does **not** run the SQLite intake service or content worker. The contact page checks `/health`; when the intake service is unavailable it prepares a reviewable email with the selected countries, role, sector and contact details. The visitor must send that email from their own mail app, or copy the introduction. This mode never claims that an application was saved. Automatic intake and the partner desk still require the persistent Node service above.
+
+The partner desk uses one operations key, held only in browser memory. Applications and audit history are stored on the server; the session draft contains application fields and is cleared on successful submission. A contact-free receipt retains the reference and selected role/countries/sector for confirmation after reload. Editing a draft creates a fresh retry ID; repeating an identical failed request keeps its ID. The API rejects changed details under an already-used ID. The partner profile is held in session storage without contacts. Language preference is stored locally. Optional campaign/referral identifiers are retained for the browser session and submitted with an application. Cookie-free page counts store page/source/day totals, without visitor IDs or persisted IP addresses, and respect DNT/GPC. For a larger operations team, the next system work is individual staff identity and permissions.
 
 ## Autonomous content and acquisition
 

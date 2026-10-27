@@ -7,6 +7,7 @@ import { BriefStudio } from '../components/BriefStudio';
 import { partnerProfileQuery, restorePartnerProfile } from '../components/partner-profile';
 import { SceneArt, SceneFoot, ThreadLink, ExchangeScene } from '../components/Editorial';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
+import { regions } from '../geography';
 
 export default function Home() {
   const { t } = useLocale();
@@ -77,14 +78,29 @@ export default function Home() {
             aria-label={t('Your place in the network', 'Ваше место в сети')}
           >
             {entries.map((entry, i) => (
-              <div key={entry.id} className={role === entry.id ? 'is-selected' : ''}>
-                <button aria-pressed={role === entry.id} onClick={() => setRole(entry.id)}>
+              <div
+                key={entry.id}
+                className={
+                  role === entry.id ||
+                  (entry.id === 'provider' && ['team', 'regional'].includes(role))
+                    ? 'is-selected'
+                    : ''
+                }
+              >
+                <button
+                  aria-pressed={
+                    role === entry.id ||
+                    (entry.id === 'provider' && ['team', 'regional'].includes(role))
+                  }
+                  onClick={() => setRole(entry.id)}
+                >
                   <small>0{i + 1}</small>
                   {entry.title}
                   <ArrowUpRight size={17} />
                 </button>
                 <p>{entry.text}</p>
-                {role === entry.id && (
+                {(role === entry.id ||
+                  (entry.id === 'provider' && ['team', 'regional'].includes(role))) && (
                   <Link to={`/apply?role=${role}`}>
                     {t('Continue', 'Продолжить')}
                     <ArrowUpRight size={16} />
@@ -97,8 +113,14 @@ export default function Home() {
         <span className="connection-you folio" aria-hidden="true">
           {t('YOU', 'ВЫ')}
         </span>
-        <SceneFoot number="02" label="THE CONNECTION">
-          <span className="folio">AFRICA / LATAM / ASIA</span>
+        <SceneFoot number="02" label={t('THE CONNECTION', 'СВЯЗЬ')}>
+          <nav className="scene-regions" aria-label={t('Regions', 'Регионы')}>
+            {regions.map((region) => (
+              <Link key={region.id} to={`/markets?region=${region.id}`}>
+                {t(region.name, region.ru)}
+              </Link>
+            ))}
+          </nav>
           <Link to="/markets">
             {t('Explore markets', 'Изучить рынки')}
             <ArrowUpRight size={17} />
@@ -174,7 +196,7 @@ export default function Home() {
           <ThreadLink to="/#forge">{t('Build my brief', 'Собрать бриф')}</ThreadLink>
           <small>{t('Terms come before introductions.', 'Условия согласуем до знакомства.')}</small>
         </aside>
-        <SceneFoot number="03" label="THE PEOPLE">
+        <SceneFoot number="03" label={t('THE PEOPLE', 'ЛЮДИ')}>
           <Link to="/markets">
             {t('Explore markets', 'Изучить рынки')}
             <ArrowUpRight size={17} />
@@ -182,15 +204,15 @@ export default function Home() {
           <a href="mailto:hello@vladdos.com">hello@vladdos.com</a>
         </SceneFoot>
       </section>
-      <ExchangeScene />
       <div id="forge" className="editorial-brief">
         <BriefStudio role={role} onRole={setRole} />
       </div>
+      <ExchangeScene />
       <div className="editorial-guides">
         <KnowledgeTeaser />
       </div>
       <section className="editorial-invitation wrap">
-        <span className="folio">06 / YOUR NEXT CONNECTION</span>
+        <span className="folio">06 / {t('YOUR NEXT CONNECTION', 'ВАША СЛЕДУЮЩАЯ СВЯЗЬ')}</span>
         <h2>
           {t('Take the', 'Возьмите')} <em>{t('other end.', 'другой конец.')}</em>
         </h2>

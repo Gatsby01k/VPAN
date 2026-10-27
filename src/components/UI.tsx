@@ -36,7 +36,7 @@ export function Action({
     <Link to={to} className={`action ${secondary ? 'action-secondary' : ''} ${className}`}>
       <span>{children}</span>
       <span className="action-icon">
-        <ArrowUpRight size={19} strokeWidth={1.7} />
+        <ArrowUpRight size={20} strokeWidth={1.75} aria-hidden="true" />
       </span>
     </Link>
   );
@@ -83,9 +83,6 @@ export function PageHeading({
       </h1>
       <div className="page-heading-bottom">
         <p>{description}</p>
-        <span className="heading-orbit" aria-hidden="true">
-          <ArrowUpRight size={38} strokeWidth={1} />
-        </span>
       </div>
     </section>
   );
