@@ -430,3 +430,25 @@ test('legacy brief URLs and drafts retain countries, sector and relevant methods
     scope,
   );
 });
+
+test('static hosting keeps EN/RU documents behind public routes so filesystem precedence cannot shadow language selection', () => {
+  const dist = path.resolve('dist');
+  assert.equal(
+    fs.existsSync(path.join(dist, 'index.html')),
+    false,
+    'root index would shadow the RU rewrite',
+  );
+  for (const route of ['', 'join', 'markets/mozambique']) {
+    assert.equal(
+      fs.existsSync(path.join(dist, route, 'index.html')),
+      false,
+      'public route must be resolved through the language rewrite',
+    );
+    const en = fs.readFileSync(path.join(dist, '__pages/en', route, 'index.html'), 'utf8');
+    const ru = fs.readFileSync(path.join(dist, '__pages/ru', route, 'index.html'), 'utf8');
+    assert.match(en, /<html lang="en"/);
+    assert.match(ru, /<html lang="ru"/);
+    assert.match(ru, /hreflang="en"/);
+    assert.match(ru, /href="https:\/\/www.vladdos.com/);
+  }
+});

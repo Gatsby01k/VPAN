@@ -65,7 +65,7 @@
           "value": "ru"
         }
       ],
-      "destination": "/ru/index.html"
+      "destination": "/__pages/ru/index.html"
     },
     {
       "source": "/:page*",
@@ -76,7 +76,15 @@
           "value": "ru"
         }
       ],
-      "destination": "/ru/:page*/index.html"
+      "destination": "/__pages/ru/:page*/index.html"
+    },
+    {
+      "source": "/",
+      "destination": "/__pages/en/index.html"
+    },
+    {
+      "source": "/:page*",
+      "destination": "/__pages/en/:page*/index.html"
     }
   ],
   "headers": [

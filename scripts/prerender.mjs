@@ -22,19 +22,21 @@ for (const route of [...staticRoutes, '/admin', '/404']) {
         noindex: route === '/admin' || route === '/404',
       },
     );
-    const directory =
-      language === 'ru'
-        ? path.join(root, 'ru', route)
-        : route === '/'
-          ? root
-          : path.join(root, route.slice(1));
+    // Keep public route paths absent from the filesystem so Vercel can evaluate
+    // the language rewrite before serving a static file. Node uses shell.html for SSR.
+    const directory = path.join(root, '__pages', language, route);
     fs.mkdirSync(directory, { recursive: true });
     fs.writeFileSync(path.join(directory, 'index.html'), html);
   }
 }
+// The Vite entry is now a rendering input; a root index would shadow language rewrites.
+fs.unlinkSync(path.join(root, 'index.html'));
+fs.mkdirSync(path.join(root, '404'), { recursive: true });
+fs.copyFileSync(path.join(root, '__pages/en/404/index.html'), path.join(root, '404/index.html'));
+fs.copyFileSync(path.join(root, '__pages/en/404/index.html'), path.join(root, '404.html'));
 fs.writeFileSync(
   path.join(root, 'robots.txt'),
-  'User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nDisallow: /shell.html\nSitemap: ' +
+  'User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nDisallow: /shell.html\nDisallow: /__pages/\nSitemap: ' +
     origin +
     '/sitemap.xml\n',
 );
