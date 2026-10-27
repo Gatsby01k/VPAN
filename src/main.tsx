@@ -7,6 +7,7 @@ import './styles.css';
 import './editorial-controls.css';
 import './growth.css';
 import './editorial.css';
+import './audit.css';
 import { emptyGrowth, type GrowthData } from './growth';
 
 const root = document.getElementById('root')!;

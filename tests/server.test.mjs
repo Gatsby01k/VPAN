@@ -233,3 +233,25 @@ test('editorial contact form accepts a Telegram-only introduction and rejects in
     422,
   );
 });
+
+test('retry IDs cannot confirm a different application and messages are never silently truncated', async (t) => {
+  const { base } = await setup(t);
+  const body = { ...payload(), message: 'Original introduction' };
+  const response = await submit(base, body);
+  assert.equal(response.status, 201);
+  const { reference } = await response.json();
+  const retry = await submit(base, body);
+  assert.equal((await retry.json()).reference, reference);
+  const changed = await submit(base, {
+    ...body,
+    message: 'Changed introduction',
+    markets: ['India'],
+  });
+  assert.equal(changed.status, 409);
+  const rows = await inbox(base);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].message, 'Original introduction');
+  const tooLong = await submit(base, { ...payload(), message: 'Д'.repeat(1501) });
+  assert.equal(tooLong.status, 422);
+  assert.equal((await inbox(base)).length, 1);
+});

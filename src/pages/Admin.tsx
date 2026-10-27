@@ -359,7 +359,7 @@ export default function AdminPage() {
           <div className="inbox-list" aria-busy={loading || Boolean(savingId)}>
             <div className="inbox-list-header">
               <span>{t('Introduction / contact', 'Заявка / контакт')}</span>
-              <span>{t('Role / markets', 'Роль / рынки')}</span>
+              <span>{t('Role / countries', 'Роль / страны')}</span>
               <span>{t('Status', 'Статус')}</span>
               <span>{t('Received', 'Получена')}</span>
             </div>
@@ -435,7 +435,7 @@ export default function AdminPage() {
                 [t('Company / team', 'Компания / команда'), selected.company],
                 [t('Email', 'Почта'), selected.email],
                 ['Telegram', selected.telegram],
-                [t('Markets', 'Рынки'), selected.markets],
+                [t('Countries', 'Страны'), selected.markets],
                 [t('Category', 'Категория'), selected.category],
                 [t('Payment methods', 'Платёжные методы'), selected.methods],
                 [t('Team / network size', 'Размер команды / сети'), selected.size],

@@ -6,9 +6,10 @@ import { useLocale } from '../locale';
 import { markets, pageMeta } from '../data';
 import { useGrowth } from '../growth';
 import { recordPage } from './acquisition';
+import { regions, regionName } from '../geography';
 
 function CommandMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { t } = useLocale();
+  const { language, t } = useLocale();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const items = [
@@ -19,7 +20,7 @@ function CommandMenu({ open, onClose }: { open: boolean; onClose: () => void }) 
     },
     {
       title: t('Build your partner profile', 'Собрать партнёрский профиль'),
-      subtitle: t('Role, markets and payment methods', 'Роль, рынки и методы'),
+      subtitle: t('Role, countries and payment methods', 'Роль, страны и методы'),
       path: '/#forge',
     },
     {
@@ -29,7 +30,7 @@ function CommandMenu({ open, onClose }: { open: boolean; onClose: () => void }) 
     },
     {
       title: t('Markets', 'Рынки'),
-      subtitle: t('Explore GEOs and local methods', 'GEO и локальные методы'),
+      subtitle: t('Regions, countries and local methods', 'Регионы, страны и локальные методы'),
       path: '/markets',
     },
     {
@@ -62,14 +63,19 @@ function CommandMenu({ open, onClose }: { open: boolean; onClose: () => void }) 
       subtitle: t('Our principles', 'Наши принципы'),
       path: '/about',
     },
+    ...regions.map((region) => ({
+      title: t(region.name, region.ru),
+      subtitle: t('Region / browse countries', 'Регион / страны'),
+      path: `/markets?region=${region.id}`,
+    })),
     ...markets.map((m) => ({
       title: t(m.name, m.ru),
-      subtitle: `${m.currency} / ${m.methods.join(' · ')}`,
+      subtitle: `${t('Country', 'Страна')} / ${regionName(m.region, language)} / ${m.currency}`,
       path: `/markets/${m.slug}`,
     })),
   ];
   const filtered = items.filter((i) =>
-    `${i.title} ${i.subtitle}`.toLowerCase().includes(query.toLowerCase()),
+    `${i.title} ${i.subtitle}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()),
   );
   useEffect(() => {
     if (open) setQuery('');
@@ -95,7 +101,7 @@ function CommandMenu({ open, onClose }: { open: boolean; onClose: () => void }) 
             if (e.key === 'Enter' && filtered[0]) go(filtered[0].path);
           }}
           placeholder={t('Where would you like to go?', 'Куда хотите перейти?')}
-          aria-label={t('Search pages and markets', 'Поиск страниц и рынков')}
+          aria-label={t('Search pages, regions and countries', 'Поиск страниц, регионов и стран')}
         />
         <kbd>ESC</kbd>
       </div>
