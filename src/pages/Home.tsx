@@ -5,6 +5,7 @@ import { NLink as Link } from '../components/NetworkLayout';
 import { ConnectionStudio } from '../components/ConnectionStudio';
 import { SceneArt, SceneFoot, ThreadLink, ExchangeScene } from '../components/Editorial';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
+import { ConnectionThread } from '../components/ConnectionThread';
 import { regions, positioning } from '../network';
 import { scenarioLink } from '../brief';
 
@@ -87,7 +88,7 @@ export default function Home() {
         id="connection"
         aria-labelledby="connection-title"
       >
-        <SceneArt name="connection" />
+        <ConnectionThread side={side} explicit={intentExplicit} />
         <div className="scene-copy connection-copy">
           <h2 className="editorial-title" id="connection-title">
             {t('A clear brief.', 'Понятная задача.')}
@@ -119,9 +120,6 @@ export default function Home() {
             ))}
           </div>
         </div>
-        <span className="connection-you folio" aria-hidden="true">
-          {t('YOU', 'ВЫ')}
-        </span>
         <SceneFoot number="02" label={t('THE CONNECTION', 'СВЯЗЬ')}>
           <nav className="scene-regions" aria-label={t('Regions', 'Регионы')}>
             {regions.map((region) => (

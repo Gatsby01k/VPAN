@@ -1,0 +1,51 @@
+.connection-thread-canvas {
+  position: absolute;
+  display: block;
+  max-width: none;
+  pointer-events: none;
+  opacity: 0;
+}
+.connection-thread-art[data-thread-motion='ready'] .connection-thread-canvas {
+  opacity: 1;
+}
+.connection-thread-end {
+  position: absolute;
+  left: 91.17%;
+  top: 69.05%;
+  width: var(--end-size, 4.3vw);
+  height: var(--end-size, 4.3vw);
+  min-width: 44px;
+  min-height: 44px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: auto;
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+}
+.connection-thread-art[data-dragging='true'] .connection-thread-end {
+  cursor: grabbing;
+}
+.connection-thread-end:focus-visible {
+  outline: 2px solid var(--pink);
+  outline-offset: 5px;
+}
+.connection-thread-you {
+  position: absolute;
+  left: calc(100% + 5px);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 10px;
+  pointer-events: none;
+}
+@media (max-width: 900px) {
+  /* The supplied mobile composition crops off the endpoint. Keep it out of tab order. */
+  .connection-thread-end {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .connection-thread-canvas {
+    display: none;
+  }
+}
