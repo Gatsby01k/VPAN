@@ -1,0 +1,181 @@
+{
+  "india": {
+    "en": "UPI merchant acceptance involves an acquiring relationship. A business category and payment method alone do not establish merchant eligibility.",
+    "ru": "Приём UPI для мерчанта связан с эквайером. Категория бизнеса и название метода сами по себе не подтверждают допустимость подключения.",
+    "focus": "Define the acquiring entity, merchant category, INR collection and settlement responsibility. Discuss refunds and reconciliation separately.",
+    "focusRu": "Укажите эквайера, категорию мерчанта и ответственность за приём и расчёты в INR. Отдельно обсудите возвраты и сверку.",
+    "sources": [
+      { "name": "NPCI · UPI merchant FAQ", "url": "https://www.npci.org.in/what-we-do/upi/faqs" }
+    ]
+  },
+  "indonesia": {
+    "en": "Bank Indonesia distinguishes QRIS, the common QR payment standard, from the country's retail transfer infrastructure, including BI-FAST.",
+    "ru": "Bank Indonesia выделяет QRIS как общий стандарт QR-платежей и отдельно описывает инфраструктуру розничных переводов, включая BI-FAST.",
+    "focus": "Specify QR acceptance or account transfers, the IDR recipient and the local provider's operating responsibility. Confirm the required flow with that provider.",
+    "focusRu": "Укажите QR-приём или переводы на счета, получателя IDR и ответственность локального провайдера. Подтвердите нужный поток с этим провайдером.",
+    "sources": [
+      {
+        "name": "Bank Indonesia · Retail payment system",
+        "url": "https://www.bi.go.id/id/fungsi-utama/sistem-pembayaran/ritel/default.aspx"
+      }
+    ]
+  },
+  "philippines": {
+    "en": "BSP's retail payment framework lists PESONet, InstaPay and QRPh merchant participation separately. A general bank-transfer offer needs a more precise operating scope.",
+    "ru": "В системе розничных платежей BSP отдельно представлены PESONet, InstaPay и участники QRPh для мерчантов. Предложению банковских переводов нужны точные операционные границы.",
+    "focus": "Identify the required PHP collection or payout rail, participating institution and reconciliation process. Ask which business categories the provider can actually serve.",
+    "focusRu": "Определите нужный метод приёма или выплат в PHP, участвующую организацию и процесс сверки. Уточните допустимые для провайдера категории бизнеса.",
+    "sources": [
+      {
+        "name": "BSP · Payments and settlements",
+        "url": "https://www.bsp.gov.ph/SitePages/PaymentsAndSettlements/PaymentsAndSettlements.aspx"
+      }
+    ]
+  },
+  "thailand": {
+    "en": "The Bank of Thailand describes PromptPay as payment infrastructure using account-linked identifiers. Its business and QR use cases require their own provider discussion.",
+    "ru": "Банк Таиланда описывает PromptPay как инфраструктуру платежей с идентификаторами, привязанными к счетам. Бизнес-сценарии и QR-приём требуют отдельного обсуждения с провайдером.",
+    "focus": "Separate domestic THB collection, payouts and any cross-border requirement. Specify the merchant entity and whether the task concerns QR acceptance or account transfers.",
+    "focusRu": "Разделите локальный приём THB, выплаты и трансграничную задачу. Укажите юрлицо мерчанта и сценарий: QR-приём или переводы на счета.",
+    "sources": [
+      {
+        "name": "Bank of Thailand · PromptPay",
+        "url": "https://www.bot.or.th/th/financial-innovation/digital-finance/digital-payment/promptpay.html"
+      }
+    ]
+  },
+  "brazil": {
+    "en": "Pix is Brazil's instant payment system. A domestic payment method and an international merchant's settlement arrangement are separate parts of a partnership.",
+    "ru": "Pix — система мгновенных платежей Бразилии. Локальный метод и схема расчётов международного мерчанта — отдельные части партнёрства.",
+    "focus": "Describe the BRL payment lifecycle, recipient entity, refund handling and settlement arrangement. Establish the provider's role before discussing a commercial launch.",
+    "focusRu": "Опишите цикл платежа в BRL, юрлицо получателя, возвраты и схему расчётов. Определите роль провайдера до обсуждения коммерческого запуска.",
+    "sources": [
+      {
+        "name": "Banco Central do Brasil · Pix FAQ",
+        "url": "https://www.bcb.gov.br/en/financialstability/pixfaqen/1000"
+      }
+    ]
+  },
+  "mexico": {
+    "en": "Banco de México operates SPEI for interbank transfers. Payment references and tracking information are part of investigating and reconciling a transfer.",
+    "ru": "Banco de México управляет SPEI для межбанковских переводов. Референсы и данные отслеживания помогают разбирать и сверять переводы.",
+    "focus": "Describe MXN collection or payouts, beneficiary verification and reference-level reconciliation. Confirm the local institution and responsibility for exceptions.",
+    "focusRu": "Опишите приём или выплаты в MXN, проверку получателя и сверку по референсам. Уточните локальную организацию и ответственность за исключения.",
+    "sources": [
+      {
+        "name": "Banco de México · SPEI",
+        "url": "https://www.banxico.org.mx/services/interbanking-electronic-payme.html"
+      }
+    ]
+  },
+  "colombia": {
+    "en": "Banco de la República describes Bre-B as domestic interoperable instant payments through participating financial institutions. This is distinct from a provider's PSE or cross-border offer.",
+    "ru": "Banco de la República описывает Bre-B как локальные совместимые мгновенные платежи через участвующие финансовые организации. Это отдельный контекст от PSE и трансграничного предложения провайдера.",
+    "focus": "Identify PSE, Bre-B or another required COP flow explicitly. Review the participating entity, recipient identification, reconciliation and any separate settlement relationship.",
+    "focusRu": "Явно укажите PSE, Bre-B или другой нужный поток COP. Проверьте участвующее юрлицо, идентификацию получателя, сверку и отдельную схему расчётов.",
+    "sources": [
+      {
+        "name": "Banco de la República · Bre-B FAQ",
+        "url": "https://www.banrep.gov.co/es/bre-b/preguntas-frecuentes"
+      }
+    ]
+  },
+  "peru": {
+    "en": "BCRP's retail-payment interoperability research discusses Yape and Plin. Wallet interoperability does not by itself establish a provider's merchant API or business-category support.",
+    "ru": "Исследование BCRP о совместимости розничных платежей рассматривает Yape и Plin. Совместимость кошельков сама по себе не подтверждает API провайдера или поддержку категории мерчанта.",
+    "focus": "Define PEN collection, the wallet or account flow, merchant identification and payout needs. Ask for a demonstrable business integration and a settlement report.",
+    "focusRu": "Определите приём PEN, поток через кошелёк или счёт, идентификацию мерчанта и выплаты. Запросите демонстрацию бизнес-интеграции и отчёт по расчётам.",
+    "sources": [
+      {
+        "name": "BCRP · Retail payment interoperability",
+        "url": "https://www.bcrp.gob.pe/docs/Sistema-Pagos/articulos/estrategia-de-interoperabilidad-2024.pdf"
+      }
+    ]
+  },
+  "mozambique": {
+    "en": "Vodacom's M-Pesa API distinguishes C2B collection, B2C disbursement, B2B transfers, reversals and status queries. Movitel separately offers the e-Mola wallet.",
+    "ru": "В API M-Pesa от Vodacom выделены приём C2B, выплаты B2C, переводы B2B, возвраты и запросы статуса. Movitel отдельно предлагает кошелёк e-Mola.",
+    "focus": "Specify M-Pesa, e-Mola and bank-transfer support separately, then collection, payouts and MZN settlement. Record the local entity, operating role and interest in international PSP distribution.",
+    "focusRu": "Отдельно укажите поддержку M-Pesa, e-Mola и банковских переводов, затем приём, выплаты и расчёты в MZN. Уточните локальное юрлицо, операционную роль и интерес к международным PSP.",
+    "sources": [
+      {
+        "name": "Vodacom Mozambique · M-Pesa API",
+        "url": "https://www.vm.co.mz/m-pesa/artigo/api-aberta-do-m-pesa"
+      },
+      { "name": "Movitel · e-Mola", "url": "https://www.movitel.co.mz/digital-services/emola" }
+    ]
+  },
+  "kenya": {
+    "en": "Safaricom's M-Pesa business services distinguish customer collections and business disbursements. Daraja provides the integration context; each requested service needs confirmation.",
+    "ru": "Бизнес-сервисы M-Pesa от Safaricom разделяют приём от клиентов и выплаты получателям. Daraja задаёт контекст интеграции; каждый нужный сервис требует подтверждения.",
+    "focus": "Describe KES collection, business shortcodes, payout responsibility and reconciliation. Distinguish a local merchant service from an international distribution or settlement requirement.",
+    "focusRu": "Опишите приём KES, бизнес-коды, ответственность за выплаты и сверку. Разделите локальный сервис мерчанта и международную дистрибуцию или расчёты.",
+    "sources": [
+      { "name": "Safaricom · Daraja", "url": "https://developer.safaricom.co.ke/apis" },
+      {
+        "name": "Safaricom · M-Pesa business payments",
+        "url": "https://www.safaricom.co.ke/images/Downloads/M-PESA-bulk-payment-b2c.pdf"
+      }
+    ]
+  },
+  "ghana": {
+    "en": "Bank of Ghana distinguishes electronic money issuers, payment service providers and payment support roles. A mobile-money relationship must identify which entity performs each role.",
+    "ru": "Bank of Ghana различает эмитентов электронных денег, платёжных провайдеров и вспомогательные роли. В партнёрстве по мобильным деньгам нужно определить ответственное юрлицо для каждой роли.",
+    "focus": "Define GHS wallet and bank flows, collection or payout responsibility, and the participant's operating category. Confirm reconciliation and any off-network payment requirements.",
+    "focusRu": "Укажите потоки GHS между кошельками и банками, ответственность за приём или выплаты и операционную категорию участника. Уточните сверку и платежи вне сети оператора.",
+    "sources": [
+      {
+        "name": "Bank of Ghana · FinTech and innovation",
+        "url": "https://www.bog.gov.gh/fintech-innovation/"
+      }
+    ]
+  },
+  "nigeria": {
+    "en": "CBN identifies NIBSS Instant Payment among Nigeria's electronic payment channels. Account-transfer infrastructure and a provider's merchant-facing service require separate assessment.",
+    "ru": "CBN указывает NIBSS Instant Payment среди электронных платёжных каналов Нигерии. Инфраструктуру переводов и сервис провайдера для мерчантов нужно оценивать отдельно.",
+    "focus": "Describe NGN collection, beneficiary checks, payout execution and reconciliation references. Identify the responsible institution and the business categories it accepts.",
+    "focusRu": "Опишите приём NGN, проверку получателей, исполнение выплат и референсы сверки. Укажите ответственную организацию и допустимые категории бизнеса.",
+    "sources": [
+      {
+        "name": "Central Bank of Nigeria · Payment modes",
+        "url": "https://www.cbn.gov.ng/PaymentsSystem/modes.html"
+      }
+    ]
+  },
+  "tanzania": {
+    "en": "Bank of Tanzania describes TIPS as infrastructure for interoperability between participating digital financial service providers. A local wallet offer still needs service-specific verification.",
+    "ru": "Банк Танзании описывает TIPS как инфраструктуру совместимости участвующих цифровых финансовых провайдеров. Локальное предложение кошельков всё равно требует проверки конкретных услуг.",
+    "focus": "Separate TZS collection, wallet payouts and bank flows. Ask which participant owns the integration, how statuses are reconciled and who handles settlement exceptions.",
+    "focusRu": "Разделите приём TZS, выплаты на кошельки и банковские потоки. Уточните ответственного за интеграцию, сверку статусов и исключения при расчётах.",
+    "sources": [
+      {
+        "name": "Bank of Tanzania · Payment systems annual report 2025",
+        "url": "https://www.bot.go.tz/Publications/Regular/Annual%20Report/en/2026060211494565.pdf"
+      }
+    ]
+  },
+  "uganda": {
+    "en": "Bank of Uganda publishes a directory of supervised payment providers and operators, including mobile-money entities. Provider identity and the exact operating role matter for a proposed partnership.",
+    "ru": "Банк Уганды публикует каталог поднадзорных платёжных провайдеров и операторов, включая мобильные деньги. Для партнёрства важны юрлицо провайдера и точная операционная роль.",
+    "focus": "Specify MTN MoMo or Airtel Money, UGX collection and payouts, the contracting entity and settlement responsibility. Verify each service rather than assuming wallet access covers every use case.",
+    "focusRu": "Укажите MTN MoMo или Airtel Money, приём и выплаты UGX, сторону договора и ответственность за расчёты. Проверяйте каждую услугу отдельно от общего доступа к кошелькам.",
+    "sources": [
+      {
+        "name": "Bank of Uganda · Financial infrastructure",
+        "url": "https://bou.or.ug/financial_infrastructure_innovation"
+      }
+    ]
+  },
+  "south-africa": {
+    "en": "SARB separates end-user access from clearing, settlement and third-party payment-provider roles in the national payment system. A bank-transfer proposition needs a clear chain of responsibility.",
+    "ru": "SARB различает доступ конечных пользователей, клиринг, расчёты и роли сторонних платёжных провайдеров. Предложению банковских переводов нужна понятная цепочка ответственности.",
+    "focus": "Define the ZAR payment flow, local institution, collection or payout role and reporting. Treat any regional or foreign-currency settlement need as a separate scope.",
+    "focusRu": "Определите поток ZAR, локальную организацию, роль в приёме или выплатах и отчётность. Региональные или валютные расчёты рассматривайте как отдельную задачу.",
+    "sources": [
+      {
+        "name": "SARB · Payments and settlements",
+        "url": "https://www.resbank.co.za/en/home/what-we-do/payments-and-settlements"
+      }
+    ]
+  }
+}

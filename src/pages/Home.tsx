@@ -6,10 +6,16 @@ import { ConnectionStudio } from '../components/ConnectionStudio';
 import { SceneArt, SceneFoot, ThreadLink, ExchangeScene } from '../components/Editorial';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
 import { regions } from '../network';
+import { scenarioLink } from '../brief';
 
 export default function Home() {
   const { t } = useLocale();
   const [side, setSide] = useState<'need' | 'offer'>('need');
+  const [intentExplicit, setIntentExplicit] = useState(false);
+  const chooseSide = (next: 'need' | 'offer', explicit = true) => {
+    setSide(next);
+    if (explicit) setIntentExplicit(true);
+  };
   const entries = [
     {
       id: 'need' as const,
@@ -26,16 +32,20 @@ export default function Home() {
     },
   ];
   const participants = [
-    { id: 'psp', title: t('PSPs & aggregators', 'PSP и агрегаторы'), path: '/join' },
+    {
+      id: 'psp',
+      title: t('PSPs & aggregators', 'PSP и агрегаторы'),
+      path: scenarioLink('psp', 'offer'),
+    },
     {
       id: 'merchant',
       title: t('Merchants & operators', 'Мерчанты и операторы'),
-      path: '/find-a-partner',
+      path: scenarioLink('merchant', 'need'),
     },
     {
       id: 'local-partner',
       title: t('Local payment partners', 'Локальные партнёры'),
-      path: '/join',
+      path: scenarioLink('local-partner', 'offer'),
     },
   ];
   return (
@@ -47,11 +57,13 @@ export default function Home() {
             <span>{t('The other', 'Другая')}</span>
             <em>{t('side.', 'сторона.')}</em>
           </h1>
-          <p className="hero-subtitle">{t('Independent B2B network.', 'Независимая B2B-сеть.')}</p>
+          <p className="hero-subtitle">
+            {t('Independent B2B partnership network.', 'Независимая B2B-партнёрская сеть.')}
+          </p>
           <p className="hero-network-context">
             {t(
-              'Partners, local expertise and commercial introductions.',
-              'Партнёры, локальная экспертиза и деловые знакомства.',
+              'Connecting international businesses with payment providers, local operators and commercial partners across Asia, LATAM and Africa.',
+              'Соединяем международный бизнес с платёжными провайдерами, локальными операторами и коммерческими партнёрами в Азии, LATAM и Африке.',
             )}
             <span>ASIA / LATAM / AFRICA</span>
           </p>
@@ -69,7 +81,7 @@ export default function Home() {
           <span className="folio">VlaDDoS Network</span>
           <i>/</i>
           <Link to="/#connection">
-            {t('Follow the thread', 'Следуйте за нитью')}
+            {t('How it works', 'Как это работает')}
             <ArrowDown size={16} />
           </Link>
         </div>
@@ -82,10 +94,9 @@ export default function Home() {
         <SceneArt name="connection" />
         <div className="scene-copy connection-copy">
           <h2 className="editorial-title" id="connection-title">
-            {t('Every connection', 'У каждой связи')}
+            {t('A clear brief.', 'Понятная задача.')}
             <span>
-              {t('has ', 'есть ')}
-              <em>{t('another end.', 'другой конец.')}</em>
+              <em>{t('A relevant partner.', 'Подходящий партнёр.')}</em>
             </span>
           </h2>
           <p className="scene-subtitle">{t('What brings you here?', 'С чем вы приходите?')}</p>
@@ -96,7 +107,7 @@ export default function Home() {
           >
             {entries.map((entry, i) => (
               <div key={entry.id} className={side === entry.id ? 'is-selected' : ''}>
-                <button aria-pressed={side === entry.id} onClick={() => setSide(entry.id)}>
+                <button aria-pressed={side === entry.id} onClick={() => chooseSide(entry.id)}>
                   <small>0{i + 1}</small>
                   {entry.title}
                   <ArrowUpRight size={17} />
@@ -202,7 +213,7 @@ export default function Home() {
         </SceneFoot>
       </section>
       <div id="forge" className="editorial-brief">
-        <ConnectionStudio side={side} onSide={setSide} />
+        <ConnectionStudio side={side} onSide={chooseSide} intentExplicit={intentExplicit} />
       </div>
       <ExchangeScene />
       <div className="editorial-guides">

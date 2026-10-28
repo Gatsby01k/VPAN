@@ -153,6 +153,14 @@ export function createApp({
   deskOptions = {},
   gatewayToken = process.env.INTAKE_GATEWAY_TOKEN || '',
 } = {}) {
+  if (process.env.NODE_ENV === 'production') {
+    if (adminToken.length < 32 || /replace-with|example|change-me/i.test(adminToken))
+      throw new Error('Configure a strong ADMIN_TOKEN before starting production.');
+    if (!/^https:\/\//.test(publicSiteUrl) || allowedOrigin !== publicSiteUrl)
+      throw new Error('Configure matching PUBLIC_SITE_URL and ALLOWED_ORIGIN HTTPS origins.');
+    if (gatewayToken && gatewayToken.length < 32)
+      throw new Error('INTAKE_GATEWAY_TOKEN must contain at least 32 characters.');
+  }
   const db = openDatabase(dbPath);
   const growth = createGrowth(db, {
     publicSiteUrl,
@@ -231,10 +239,9 @@ export function createApp({
       '/teams': '/join',
       '/payment-partners': '/join',
       '/merchants': '/find-a-partner',
-      '/apply':
-        url.searchParams.get('role') && url.searchParams.get('role') !== 'merchant'
-          ? '/join'
-          : '/find-a-partner',
+      '/apply': ['affiliate', 'team', 'provider', 'regional'].includes(url.searchParams.get('role'))
+        ? '/join'
+        : '/find-a-partner',
     };
     if ((req.method === 'GET' || req.method === 'HEAD') && legacy[pathname]) {
       res.writeHead(308, { Location: legacy[pathname] + url.search });
@@ -244,8 +251,19 @@ export function createApp({
       'Content-Security-Policy',
       "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self' mailto:",
     );
-    if (req.method === 'GET' && pathname === '/health')
-      return reply(res, 200, { status: 'ok', intake: 'durable', taxonomyVersion: 1 });
+    if (['GET', 'HEAD'].includes(req.method) && pathname === '/health') {
+      db.prepare('SELECT 1').get();
+      if (req.method === 'HEAD') {
+        res.writeHead(200, { 'Cache-Control': 'no-store' });
+        return res.end();
+      }
+      return reply(res, 200, {
+        status: 'ok',
+        intake: 'durable',
+        taxonomyVersion: 1,
+        notifications: desk.notificationConfigured ? 'configured' : 'unconfigured',
+      });
+    }
     if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/sitemap.xml') {
       const xml = growth.sitemap();
       if (!xml)
@@ -295,6 +313,8 @@ export function createApp({
       );
     }
     // The build shell is an internal rendering artifact, not a public duplicate homepage.
+    if (pathname === '/__pages' || pathname.startsWith('/__pages/'))
+      return reply(res, 404, { error: 'Not found' });
     if (pathname === '/shell.html') return reply(res, 404, { error: 'Not found' });
     if (pathname === '/api/opportunities' || pathname.startsWith('/api/admin/desk')) {
       if (
@@ -358,7 +378,7 @@ export function createApp({
       if (!rate || rate.until < Date.now()) rate = { count: 0, until: Date.now() + 3600000 };
       attempts.set(key, rate);
       const body = await jsonBody(req);
-      if (rate.count >= 12)
+      if (rate.count >= 12 && !desk.received(body.requestId))
         return reply(res, 429, { error: 'Too many requests. Please try again later.' });
       rate.count++;
       if (attempts.size > 5000)
@@ -370,6 +390,14 @@ export function createApp({
       });
     }
     if (pathname.startsWith('/api/')) {
+      if (
+        pathname.startsWith('/api/admin/') &&
+        !['GET', 'HEAD'].includes(req.method) &&
+        allowedOrigin &&
+        req.headers.origin &&
+        req.headers.origin !== allowedOrigin
+      )
+        return reply(res, 403, { error: 'This request origin is not allowed.' });
       if (req.method === 'GET' && pathname === '/api/content')
         return reply(res, 200, growth.publicData(safeText(url.searchParams.get('article'), 100)));
       if (req.method === 'POST' && pathname === '/api/events') {

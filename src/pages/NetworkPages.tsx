@@ -251,6 +251,15 @@ export function Contact() {
           <a href="mailto:hello@vladdos.com">
             hello@vladdos.com <Arrow />
           </a>
+          <a href="https://t.me/vladdos_network" target="_blank" rel="noreferrer">
+            {t('Telegram community', 'Telegram-сообщество')} <Arrow />
+          </a>
+          <p className="community-note">
+            {t(
+              'The group is public. Use the private brief or email for commercial details. An official channel and Connect Bot are not connected yet.',
+              'Группа публичная. Коммерческие сведения передавайте через конфиденциальный бриф или email. Официальный канал и Connect Bot пока не подключены.',
+            )}
+          </p>
         </div>
       </div>
     </section>
@@ -287,8 +296,8 @@ export function Legal({ type }: { type: 'privacy' | 'terms' }) {
               [
                 'What we collect',
                 'Какие данные собираем',
-                'We store the contact you supply, optional company name and introduction, selected industry, countries, capabilities and methods, consent version and submission reference. Campaign or referral identifiers may be stored for attribution.',
-                'Сохраняем указанный контакт, необязательные название компании и сообщение, индустрию, страны, возможности и методы, версию согласия и номер обращения. Можем сохранять идентификаторы кампании и рекомендации для учёта источника.',
+                'We store the contact you supply, optional company name and introduction, selected industry, countries, capabilities and methods, optional operating and commercial context, consent version and submission reference. Campaign or referral identifiers may be stored for attribution.',
+                'Сохраняем указанный контакт, необязательные название компании и сообщение, индустрию, страны, возможности и методы, необязательные операционные и коммерческие сведения, версию согласия и номер обращения. Можем сохранять идентификаторы кампании и рекомендации для учёта источника.',
               ],
               [
                 'Why we use it',

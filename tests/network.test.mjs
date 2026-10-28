@@ -351,7 +351,7 @@ test('Vercel gateway fails closed without a durable service and only forwards al
     assert.equal(r.statusCode, 503);
     assert.match(r.body, /No enquiry has been saved/);
     process.env.INTAKE_SERVICE_ORIGIN = 'https://backend.example';
-    process.env.INTAKE_GATEWAY_TOKEN = 'gateway-test-secret';
+    process.env.INTAKE_GATEWAY_TOKEN = 'gateway-test-secret-at-least-32-characters';
     r = await run({
       url: '/api/service?_route=https://attacker.example',
       method: 'GET',
@@ -375,7 +375,10 @@ test('Vercel gateway fails closed without a durable service and only forwards al
     assert.equal(r.statusCode, 201);
     assert.equal(r.headers['Cache-Control'], 'no-store');
     assert.equal(sent.url, 'https://backend.example/api/opportunities');
-    assert.equal(sent.headers['x-intake-gateway-key'], 'gateway-test-secret');
+    assert.equal(
+      sent.headers['x-intake-gateway-key'],
+      'gateway-test-secret-at-least-32-characters',
+    );
     assert.equal(sent.headers['x-forwarded-for'], '192.0.2.1');
     globalThis.fetch = async () => {
       throw new Error('Unreachable');

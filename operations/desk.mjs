@@ -65,6 +65,18 @@ export function validateOpportunity(body) {
         capabilities.some((c) => ['local-methods', 'collections', 'payouts'].includes(c))
       ? 'local-partner'
       : 'strategic';
+  const optional = {};
+  for (const key of ['licensingContext', 'commercialIntent']) {
+    if (typeof body[key] === 'string' && body[key].length > 600)
+      throw error('Keep operating and commercial context within 600 characters.');
+    const value = str(body[key], 600);
+    if (value) optional[key] = value;
+  }
+  if (body.licensingStatus) {
+    if (!['licensed', 'agent', 'not-required', 'unsure'].includes(body.licensingStatus))
+      throw error('Choose a valid operating role.');
+    optional.licensingStatus = body.licensingStatus;
+  }
   return {
     side: body.side,
     industry: body.industry,
@@ -85,9 +97,16 @@ export function validateOpportunity(body) {
       source: str(body.attribution?.source, 100),
       campaign: str(body.attribution?.campaign, 100),
       ref: str(body.attribution?.ref, 100),
+      ...Object.fromEntries(
+        ['medium', 'landing', 'referrer'].flatMap((key) => {
+          const value = str(body.attribution?.[key], key === 'landing' ? 180 : 120);
+          return value ? [[key, value]] : [];
+        }),
+      ),
     },
     language: body.language === 'ru' ? 'ru' : 'en',
     consentVersion: '2026-10-27',
+    ...optional,
   };
 }
 function transaction(db, fn) {
@@ -287,7 +306,15 @@ export function createDesk(
           other.profile.countries?.some((c) => item.profile.countries?.includes(c)) &&
           other.profile.capabilities?.some((c) => item.profile.capabilities?.includes(c)) &&
           (!item.profile.targetType || item.profile.targetType === other.profile.companyType) &&
-          (!other.profile.targetType || other.profile.targetType === item.profile.companyType),
+          (!other.profile.targetType || other.profile.targetType === item.profile.companyType) &&
+          (!item.profile.methods?.length ||
+            !other.profile.methods?.length ||
+            item.profile.methods.some((m) => other.profile.methods.includes(m))) &&
+          (!item.profile.settlementCurrencies?.length ||
+            !other.profile.settlementCurrencies?.length ||
+            item.profile.settlementCurrencies.some((c) =>
+              other.profile.settlementCurrencies.includes(c),
+            )),
       )
       .map((other) => ({
         id: other.id,
@@ -297,6 +324,10 @@ export function createDesk(
         countries: other.profile.countries.filter((c) => item.profile.countries.includes(c)),
         capabilities: other.profile.capabilities.filter((c) =>
           item.profile.capabilities.includes(c),
+        ),
+        methods: (other.profile.methods || []).filter((m) => item.profile.methods?.includes(m)),
+        settlementCurrencies: (other.profile.settlementCurrencies || []).filter((c) =>
+          item.profile.settlementCurrencies?.includes(c),
         ),
         notice: 'Candidate for manual review; not a confirmed match.',
       }));
@@ -387,6 +418,10 @@ export function createDesk(
             status: item.status,
             verification: item.verification,
             share_consent: item.share_consent,
+            owner: item.owner,
+            follow_up: item.follow_up,
+            expires_at: item.expires_at,
+            evidence: item.evidence,
             profile: item.profile,
           },
           after: { ...next, profile },
@@ -620,7 +655,11 @@ export function createDesk(
           const delay = Math.min(6 * 3600000, 30000 * 2 ** Math.min(job.attempts, 10));
           db.prepare(
             "UPDATE notification_outbox SET attempts=attempts+1,next_at=?,lease_until='',last_error=? WHERE id=?",
-          ).run(new Date(Date.now() + delay).toISOString(), str(e.message, 160), job.id);
+          ).run(
+            new Date(Date.now() + delay).toISOString(),
+            /^HTTP \d{3}$/.test(e.message) ? e.message : 'Delivery unavailable; retry scheduled.',
+            job.id,
+          );
         }
       }
     } finally {
@@ -631,6 +670,11 @@ export function createDesk(
   timer.unref();
   queueMicrotask(() => void flush());
   return {
+    notificationConfigured: configured,
+    received: (key) =>
+      !!db
+        .prepare('SELECT 1 FROM opportunities WHERE request_key=?')
+        .get(typeof key === 'string' ? key : ''),
     submit,
     patch,
     candidates,
@@ -712,6 +756,18 @@ export function createDesk(
         throw error('Unknown introduction state.');
       const evidence = str(body.evidence, 1500);
       if (evidence.length < 10) throw error('Record supporting evidence.');
+      if (['introduced', 'discussion', 'agreed', 'won'].includes(body.status)) {
+        const demand = get(row.demand_id),
+          supply = get(row.supply_id);
+        if (
+          !demand?.share_consent ||
+          !supply?.share_consent ||
+          !candidates(row.demand_id).some((c) => c.id === row.supply_id)
+        )
+          throw error(
+            'Reconfirm both parties’ current scope, verification and permission before proceeding.',
+          );
+      }
       transaction(db, () => {
         db.prepare('UPDATE introductions SET status=?,evidence=?,updated_at=? WHERE id=?').run(
           body.status,
@@ -719,7 +775,16 @@ export function createDesk(
           now(),
           id,
         );
-        event(row.demand_id, 'introduction-status', id + ': ' + body.status + ' — ' + evidence);
+        event(
+          row.demand_id,
+          'introduction-status',
+          id + ': ' + row.status + ' → ' + body.status + ' — ' + evidence,
+        );
+        event(
+          row.supply_id,
+          'introduction-status',
+          id + ': ' + row.status + ' → ' + body.status + ' — ' + evidence,
+        );
       });
       return { ok: true };
     },
@@ -746,6 +811,11 @@ export function createDesk(
           .all(),
         notifications: {
           configured,
+          jobs: db
+            .prepare(
+              'SELECT reference,attempts,next_at,delivered_at,last_error FROM notification_outbox ORDER BY next_at DESC LIMIT 50',
+            )
+            .all(),
           pending: db
             .prepare("SELECT COUNT(*) AS count FROM notification_outbox WHERE delivered_at=''")
             .get().count,

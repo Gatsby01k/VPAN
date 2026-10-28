@@ -23,10 +23,16 @@ export function renderHead(
       /(<meta property="og:title" content=")[^"]*("\s*\/?>)/,
       `$1${escapeHtml(title).replaceAll('$', '$$$$')}$2`,
     );
-  let tags = noindex ? '<meta name="robots" content="noindex, follow" />' : '';
+  html = html.replace(
+    /(<meta property="og:type" content=")[^"]*("\s*\/?>)/,
+    `$1${article ? 'article' : 'website'}$2`,
+  );
+  let tags =
+    noindex || metadata.noindex ? '<meta name="robots" content="noindex, nofollow" />' : '';
   if (origin) {
     const canonical = origin + pathname + (language === 'ru' ? '?lang=ru' : '');
-    tags += `<link rel="canonical" href="${escapeHtml(canonical)}"/><link rel="alternate" hreflang="en" href="${escapeHtml(origin + pathname)}"/><link rel="alternate" hreflang="ru" href="${escapeHtml(origin + pathname + '?lang=ru')}"/><link rel="alternate" hreflang="x-default" href="${escapeHtml(origin + pathname)}"/><meta property="og:url" content="${escapeHtml(canonical)}"/><meta property="og:image" content="${escapeHtml(origin + '/assets/editorial/exchange.webp')}"/>`;
+    tags += `<link rel="canonical" href="${escapeHtml(canonical)}"/><link rel="alternate" hreflang="en" href="${escapeHtml(origin + pathname)}"/><link rel="alternate" hreflang="ru" href="${escapeHtml(origin + pathname + '?lang=ru')}"/><link rel="alternate" hreflang="x-default" href="${escapeHtml(origin + pathname)}"/><meta property="og:url" content="${escapeHtml(canonical)}"/><meta property="og:image" content="${escapeHtml(origin + '/assets/editorial/hero.webp')}"/>`;
+    tags += `<meta property="og:locale" content="${language === 'ru' ? 'ru_RU' : 'en_US'}"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="${escapeHtml(title)}"/><meta name="twitter:description" content="${escapeHtml(description)}"/>`;
     const graph = [
       {
         '@type': 'Organization',
@@ -44,6 +50,15 @@ export function renderHead(
         publisher: { '@id': origin + '/#organization' },
       },
     ];
+    graph.push({
+      '@type': 'WebPage',
+      '@id': canonical + '#page',
+      name: title,
+      description,
+      url: canonical,
+      inLanguage: language,
+      isPartOf: { '@id': origin + '/#website' },
+    });
     if (article) {
       graph.push({
         '@type': 'Article',

@@ -1,0 +1,23 @@
+
+> vladdos-network@1.0.0 release:check
+> node scripts/release-check.mjs http://127.0.0.1:3100
+
+PASS / en SSR
+PASS /network en SSR
+PASS /industries en SSR
+PASS /markets/mozambique en SSR
+PASS /join en SSR
+PASS /find-a-partner en SSR
+PASS /contact en SSR
+PASS / ru SSR
+PASS /network ru SSR
+PASS /industries ru SSR
+PASS /markets/mozambique ru SSR
+PASS /join ru SSR
+PASS /find-a-partner ru SSR
+PASS /contact ru SSR
+PASS intake service health
+PASS private API rejects unauthenticated access
+PASS legacy URL retains its context
+PASS admin and unknown routes stay non-indexable
+Release still requires a designated test enquiry → reference → authenticated Deal Desk row → acknowledged notification, plus backup/rollback verification. No write was made by this check.
