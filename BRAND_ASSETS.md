@@ -9,7 +9,8 @@ The active website preserves the original editorial artwork and compositions in 
 - `contact.webp`: the original character holding the thread on Contact.
 - `paper.webp`: the repeating paper substrate.
 - `public/assets/vladdos-signature-v2.webp`: the original signature used as the header's mask, with the NETWORK caption in HTML.
-- `public/icons/thread.svg` and `public/favicon.svg`: the thread seal.
+- `public/favicon.svg`: the gold V monogram with the fuchsia thread on black, matching the editorial V-and-thread motif. `public/icons/thread.svg` keeps the former icon URL compatible.
+- `public/favicon.ico`, `public/icons/vladdos-network-{16,32}.png` and `public/apple-touch-icon.png`: raster exports of the same native SVG for small browser icons and saved shortcuts. The HTML uses a versioned favicon URL to refresh the former circular icon.
 
 Text, controls and forms remain live HTML. New content is integrated into the original page structures; no replacement hero, new generated imagery, invented clients or implied commercial coverage are introduced. Other historical identity assets remain in `research/legacy-assets`. Historical notes record provenance, not current business claims.
 
