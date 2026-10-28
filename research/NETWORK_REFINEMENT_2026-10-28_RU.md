@@ -133,3 +133,18 @@ Industries доступны в основном desktop-меню и мобиль
 8. Восстановление базы из backup — отдельная аварийная операция с остановленным writer и сверкой заявок после времени backup. Не заменять живую базу старой копией: это потеряет новые обращения. Сохранить текущую базу приватным recovery artifact.
 
 Прежний production deployment тоже имеет неработающий intake. Rollback возвращает прежний frontend, но сам по себе не устраняет отсутствие backend.
+
+## Опубликованный кандидат для review
+
+Draft PR: [Gatsby01k/VPAN #5](https://github.com/Gatsby01k/VPAN/pull/5).
+
+Проверенный код: `d9ab80cc6c45a239aa1de7d92078cfea5a66ab6a`.
+
+Vercel preview: [vpan-c4kioqase](https://vpan-c4kioqase-vbms-projects-f484b1c6.vercel.app), deployment `dpl_6rYh4rQgNzQzQzpNerRbRmgrmqWP`, состояние **READY**. Авторизованные HTTP-проверки через Vercel подтвердили:
+
+- Home EN и RU: 200, соответствующий `html lang`, title и canonical.
+- Industries RU и Mozambique RU: 200, правильные title/canonical и alternates.
+- Неизвестная страница: 404 с noindex.
+- `/api/opportunities`: 503 с честным сообщением об отсутствии конфигурации intake.
+
+Preview остаётся за существующей Vercel Authentication и содержит ответ `X-Robots-Tag: noindex`. Защита не отключалась. Публичные production-страницы проверены отдельно; существующий production deployment и SHA не изменились. Полная cloud E2E пока не подтверждена. HTTP-проверки preview не заменяют браузерный прогон в облаке.
