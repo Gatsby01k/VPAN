@@ -5,11 +5,12 @@ import { NLink as Link } from '../components/NetworkLayout';
 import { ConnectionStudio } from '../components/ConnectionStudio';
 import { SceneArt, SceneFoot, ThreadLink, ExchangeScene } from '../components/Editorial';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
-import { regions } from '../network';
+import { regions, positioning } from '../network';
 import { scenarioLink } from '../brief';
 
 export default function Home() {
-  const { t } = useLocale();
+  const { t, language } = useLocale();
+  const intro = positioning[language];
   const [side, setSide] = useState<'need' | 'offer'>('need');
   const [intentExplicit, setIntentExplicit] = useState(false);
   const chooseSide = (next: 'need' | 'offer', explicit = true) => {
@@ -57,15 +58,10 @@ export default function Home() {
             <span>{t('The other', 'Другая')}</span>
             <em>{t('side.', 'сторона.')}</em>
           </h1>
-          <p className="hero-subtitle">
-            {t('Independent B2B partnership network.', 'Независимая B2B-партнёрская сеть.')}
-          </p>
+          <p className="hero-subtitle">{intro.headline}</p>
           <p className="hero-network-context">
-            {t(
-              'Connecting international businesses with payment providers, local operators and commercial partners across Asia, LATAM and Africa.',
-              'Соединяем международный бизнес с платёжными провайдерами, локальными операторами и коммерческими партнёрами в Азии, LATAM и Африке.',
-            )}
-            <span>ASIA / LATAM / AFRICA</span>
+            {intro.focus}
+            <span>{intro.markets}</span>
           </p>
           <ThreadLink to="/#connection">{t('Meet the network', 'Знакомьтесь с сетью')}</ThreadLink>
           <div className="hero-network-actions">

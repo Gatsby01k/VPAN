@@ -1,6 +1,21 @@
 import taxonomy from '../shared/taxonomy.json' with { type: 'json' };
 export const { regions, industries, capabilities, companyTypes, countries } = taxonomy;
 export type Language = 'en' | 'ru';
+export const positioning = {
+  en: {
+    headline: 'Global B2B Partnerships & Affiliate Network',
+    focus: 'Payments & High-Risk Industries',
+    markets: 'Asia, LATAM & Africa',
+  },
+  ru: {
+    headline: 'Глобальная сеть B2B-партнёрств и аффилиатов',
+    focus: 'Платежи и high-risk индустрии',
+    markets: 'Азия, LATAM и Африка',
+  },
+};
+export const projectDescription = (language: Language) =>
+  Object.values(positioning[language]).join(' | ');
+
 export const label = (item: { en: string; ru: string } | undefined, language: Language) =>
   item?.[language] || '';
 export const publicRoutes = [
@@ -21,7 +36,7 @@ export function networkMeta(path: string, language: Language = 'en') {
   path = path.replace(/\/+$/, '') || '/';
   const ru = language === 'ru';
   const titles: Record<string, [string, string]> = {
-    '/': ['Partnerships beyond borders', 'Партнёрства без границ'],
+    '/': [positioning.en.headline, positioning.ru.headline],
     '/network': ['How the network works', 'Как работает сеть'],
     '/industries': ['Industries', 'Индустрии'],
     '/markets': ['Asia · Latin America · Africa', 'Азия · Латинская Америка · Африка'],
@@ -42,9 +57,7 @@ export function networkMeta(path: string, language: Language = 'en') {
         ? `${country.ru}: ${country.currency}, ${country.methods.join(', ')} и поиск B2B-партнёров. Сведения об инфраструктуре; возможности провайдеров проверяются отдельно.`
         : `${country.en}: ${country.currency}, ${country.methods.join(', ')} and B2B partner sourcing. Infrastructure research; provider capabilities require individual verification.`
       : {
-          '/': ru
-            ? 'Соединяем международный бизнес с платёжными провайдерами, локальными операторами и коммерческими партнёрами в Азии, LATAM и Африке.'
-            : 'Connecting international businesses with payment providers, local operators and commercial partners across Asia, LATAM and Africa.',
+          '/': projectDescription(language),
           '/find-a-partner': ru
             ? 'I NEED: опишите задачу, страну и нужные возможности. Конфиденциальный бриф для проверки и знакомства с подходящим B2B-партнёром.'
             : 'I NEED: define your business task, country and required capabilities. One private brief for qualification and a relevant B2B introduction.',
