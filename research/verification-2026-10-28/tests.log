@@ -1,0 +1,101 @@
+
+> vladdos-network@1.0.0 pretest
+> npm run build
+
+
+> vladdos-network@1.0.0 build
+> tsc --noEmit && vite build && vite build --ssr src/entry-server.tsx --outDir dist-server && node scripts/prerender.mjs
+
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 1933 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                                      1.15 kB │ gzip:   0.57 kB
+dist/assets/cormorant-garamond-cyrillic-700-italic-Cdx03uAH.woff2   12.49 kB
+dist/assets/cormorant-garamond-cyrillic-700-normal-SLG_-a_c.woff2   12.53 kB
+dist/assets/cormorant-garamond-cyrillic-500-italic-DVnfXoMy.woff2   12.70 kB
+dist/assets/cormorant-garamond-cyrillic-600-italic-Bp4BYShX.woff2   12.86 kB
+dist/assets/cormorant-garamond-cyrillic-500-normal-CyAY5ZLS.woff2   12.92 kB
+dist/assets/cormorant-garamond-cyrillic-600-normal-C2atO-64.woff2   13.01 kB
+dist/assets/manrope-cyrillic-wght-normal-Dvxsihut.woff2             14.50 kB
+dist/assets/oswald-cyrillic-wght-normal-C8sJyxwB.woff2              15.68 kB
+dist/assets/inter-cyrillic-wght-normal-DqGufNeO.woff2               18.74 kB
+dist/assets/manrope-latin-wght-normal-DHIcAJRg.woff2                24.83 kB
+dist/assets/bodoni-moda-latin-wght-normal-BIFT5Qnz.woff2            25.88 kB
+dist/assets/oswald-latin-wght-normal-CzS3kehr.woff2                 28.48 kB
+dist/assets/bodoni-moda-latin-wght-italic-B5SVoS-R.woff2            30.32 kB
+dist/assets/inter-latin-wght-normal-Dx4kXJAl.woff2                  48.25 kB
+dist/assets/index-D8xg-LLV.css                                     180.12 kB │ gzip:  34.55 kB
+dist/assets/index-CHjfNtk2.mjs                                     426.24 kB │ gzip: 130.12 kB
+
+✓ built in 311ms
+vite v8.3.4 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+computing gzip size...
+dist-server/entry-server.mjs  218.35 kB │ gzip: 53.73 kB
+
+✓ built in 26ms
+Prerendered 28 routes in EN and RU.
+
+> vladdos-network@1.0.0 test
+> node --experimental-strip-types --test tests/*.test.mjs
+
+✔ regions contain countries consistently: Ghana belongs to Africa, India to Asia (11.690042ms)
+✔ a new introduction never silently chooses Ghana, a region or a sector (0.24775ms)
+✔ brief countries preserve selection order and carry only relevant methods into the form (0.1165ms)
+✔ draft migration keeps contact details; a new country entry clears stale methods and retry ID (0.29925ms)
+✔ the form validates region, country and contact as one consistent introduction (0.24475ms)
+✔ the static-host email carries the full introduction without request IDs or hidden fields (0.300625ms)
+✔ public research is SSR in both languages; canonical, schema, RSS and sitemap follow publication state (3239.639125ms)
+✔ scheduled publishing is capped, durable, respects pause, and leaves existing content intact on source errors (33.522791ms)
+✔ database lease prevents two workers publishing concurrently (12.739167ms)
+✔ an expired interrupted run recovers before the normal schedule delay (9.839625ms)
+✔ invalid AI content is not published and a retry cannot bypass the daily generation limit (12.44525ms)
+✔ a scheduled publication becomes a real indexable route without a new build (29.522ms)
+✔ source attribution reaches SQLite and qualified results without leaking contacts to public endpoints (24.792208ms)
+✔ quality gates reject duplicate intent, unsafe markup, unknown sources, commercial promises and malformed model results (0.714833ms)
+✔ source fetches are bounded and reject redirects and challenge pages (1.410583ms)
+✔ Search Console connector signs a read-only service-account request and reuses its token (32.252709ms)
+✔ AI connector uses the configured gateway, registered evidence and structured output (0.318292ms)
+✔ one taxonomy keeps industries, participant types, countries, capabilities and local methods distinct (2.304209ms)
+✔ Mozambique supply persists, retries are idempotent, contact deduplication is conservative, and the public API stays private (64.692ms)
+✔ matching uses actual qualified opposite sides and requires bilateral permission; expiry and closed records are excluded (36.9405ms)
+✔ agreement attribution, dates and evidenced revenue remain separate from proposed introductions and forecasts (57.459584ms)
+✔ qualification and history commit atomically; failed audit leaves verification unchanged (16.891ms)
+✔ additive migration preserves original applications and imports them as unclassified, unverified records (6.155208ms)
+✔ notification failures persist and recover with no contact data in webhook payloads (75.634417ms)
+✔ bilingual SSR, market deep links, permanent legacy redirects and privacy controls are indexable and coherent (184.606416ms)
+✔ Vercel gateway fails closed without a durable service and only forwards allowlisted paths (1.182792ms)
+✔ scope refinement invalidates verification and sharing permission until the new scope is reviewed (10.414833ms)
+✔ legacy brief URLs and drafts retain countries, sector and relevant methods during the brand migration (26.246542ms)
+✔ static hosting keeps EN/RU documents behind public routes so filesystem precedence cannot shadow language selection (0.52525ms)
+✔ the retained editorial homepage keeps its original artwork and identity while adding the two-sided business paths (51.074709ms)
+✔ six role entries carry explicit context; language and attribution do not reset a brief (1.291334ms)
+✔ one metadata source covers every public route and country research is distinct and sourced (5.045375ms)
+✔ operating context and full source attribution persist privately and remain self-declared (47.081833ms)
+✔ consent revocation or a changed scope blocks an actual introduction after proposal (57.646125ms)
+✔ a real local notification receiver gets one durable event after failure and restart (10.990958ms)
+✔ gateway rejects weak setup, ambiguous routes, oversized buffers and upstream redirects without caching (1.561333ms)
+✔ private SSR artifacts are inaccessible; unknown routes stay noindex and legacy links retain context (53.785459ms)
+✔ production refuses placeholder credentials before opening a database (0.248542ms)
+✔ an already saved request can recover its receipt even after the new-intake rate limit (21.308417ms)
+✔ explicitly incompatible method declarations cannot become matching candidates (15.132583ms)
+✔ all public routes have prerendered content, assets and a real 404 (401.879542ms)
+✔ applications save all merchant fields, are idempotent, and validate input/origin (17.89725ms)
+✔ legacy intake never returns a saved reference for a rejected honeypot (8.413917ms)
+✔ multibyte names survive UTF-8 split across HTTP chunks (26.388959ms)
+✔ admin access and status history remain consistent if an audit write fails (13.348417ms)
+✔ old persistent databases upgrade without losing applications (10.546916ms)
+✔ editorial contact form accepts a Telegram-only introduction and rejects invalid handles (10.649625ms)
+✔ retry IDs cannot confirm a different application and messages are never silently truncated (11.896709ms)
+ℹ tests 48
+ℹ suites 0
+ℹ pass 48
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3477.643875

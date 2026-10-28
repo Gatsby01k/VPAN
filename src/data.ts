@@ -227,53 +227,5 @@ export interface Application {
   attribution: string;
 }
 
-export function pageMeta(path: string, language: 'en' | 'ru' = 'en') {
-  const market = markets.find((m) => path === `/markets/${m.slug}`);
-  const role = roles.find((r) => path === r.path);
-  const names: Record<string, string> = {
-    '/': 'VlaDDoS Network',
-    '/markets': 'Markets — VlaDDoS Network',
-    '/knowledge': 'Payment partner guides and checklists — VlaDDoS Network',
-    '/apply': 'Join the network — VlaDDoS Network',
-    '/about': 'About VlaDDoS Network',
-    '/privacy': 'Privacy — VlaDDoS Network',
-    '/terms': 'Terms — VlaDDoS Network',
-    '/admin': 'Partner desk — VlaDDoS Network',
-  };
-  const namesRu: Record<string, string> = {
-    '/': 'VlaDDoS Network — Частная партнёрская сеть',
-    '/markets': 'Рынки партнёрства — VlaDDoS Network',
-    '/knowledge': 'Руководства и чек-листы платёжных партнёров — VlaDDoS Network',
-    '/apply': 'Заявка на партнёрство — VlaDDoS Network',
-    '/about': 'О VlaDDoS Network',
-    '/privacy': 'Конфиденциальность — VlaDDoS Network',
-    '/terms': 'Условия — VlaDDoS Network',
-    '/admin': 'Партнёрский отдел — VlaDDoS Network',
-  };
-  const ru = language === 'ru';
-  return {
-    title: market
-      ? ru
-        ? `${market.ru}: партнёрство — VlaDDoS Network`
-        : `${market.name} partnerships — VlaDDoS Network`
-      : role
-        ? `${ru ? role.ru : role.title} — VlaDDoS Network`
-        : (ru ? namesRu[path] : names[path]) ||
-          (ru ? 'Страница не найдена — VlaDDoS Network' : 'Page not found — VlaDDoS Network'),
-    description: market
-      ? ru
-        ? `${market.ru}: знакомства с партнёрами и методы ${market.methods.join(', ')}. ${market.focusRu}. Доступность рассматривается отдельно.`
-        : `Explore ${market.name} partner introductions: ${market.methods.join(', ')}. ${market.focus}. Availability is reviewed individually.`
-      : role
-        ? ru
-          ? role.descriptionRu
-          : role.description
-        : path === '/knowledge'
-          ? ru
-            ? 'Практические руководства и чек-листы для знакомства, оценки и подключения PSP, платёжных команд и мерчантов. Первоисточники и подготовка к разговору.'
-            : 'Practical guides and checklists for introducing, evaluating and connecting PSPs, payment teams and merchants. Primary sources and preparation for a first conversation.'
-          : ru
-            ? 'VlaDDoS Network объединяет аффилиатов, платёжные команды, PSP и мерчантов через частные бизнес-партнёрства на выбранных рынках.'
-            : 'VlaDDoS Network connects affiliates, payment teams, PSPs and merchants through private business partnerships across selected markets.',
-  };
-}
+// Kept as a compatibility export; all routes use the active network catalogue.
+export { networkMeta as pageMeta } from './network.ts';

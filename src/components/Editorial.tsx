@@ -70,7 +70,7 @@ export function ExchangeScene({ heading = false }: { heading?: boolean }) {
     >
       <SceneArt name="exchange" priority={heading} />
       <div className="scene-copy exchange-copy">
-        <p className="folio">EXCHANGE / OTC / LOCAL PAYMENTS</p>
+        <p className="folio">PAYMENTS / LOCAL OPERATIONS / COMMERCIAL PARTNERS</p>
         <Title id="exchange-title" className="editorial-title">
           {t('Value moves.', 'Ценность движется.')}
           <em>{t('People connect.', 'Люди объединяют.')}</em>
@@ -78,21 +78,24 @@ export function ExchangeScene({ heading = false }: { heading?: boolean }) {
         <div className="exchange-details">
           <p>
             {t(
-              'Find exchange, OTC and settlement counterparties. Operating scope and eligibility are reviewed before an introduction.',
-              'Находите контрагентов по обмену, OTC и расчётам. Границы работы и допустимость проверяем до знакомства.',
+              'Find payment providers, local operators and commercial counterparties. Each industry has its own requirements; every introduction starts with qualification.',
+              'Находите платёжных провайдеров, локальных операторов и коммерческих контрагентов. У каждой индустрии свои требования; каждое знакомство начинается с проверки.',
             )}
           </p>
           <div className="editorial-rows">
             {[
               [
-                '/find-a-partner?industry=exchange&capabilities=liquidity',
-                t('Liquidity relationships', 'Партнёры по ликвидности'),
+                '/find-a-partner?industry=payments&capabilities=local-methods',
+                t('Local payment infrastructure', 'Локальная платёжная инфраструктура'),
               ],
               [
-                '/find-a-partner?industry=exchange&capabilities=settlement',
-                t('Settlement relationships', 'Партнёры по расчётам'),
+                '/find-a-partner?industry=commerce&capabilities=collections,payouts',
+                t('Merchant acceptance & payouts', 'Приём и выплаты для мерчантов'),
               ],
-              ['/join?industry=exchange', t('Introduce your offer', 'Представить предложение')],
+              [
+                '/find-a-partner?industry=exchange',
+                t('Exchange & OTC relationships', 'Партнёрства для обмена и OTC'),
+              ],
             ].map(([to, label], i) => (
               <Link to={to} key={to}>
                 <small>0{i + 1}</small>
@@ -101,7 +104,7 @@ export function ExchangeScene({ heading = false }: { heading?: boolean }) {
               </Link>
             ))}
           </div>
-          <ThreadLink to="/find-a-partner?industry=exchange" arrow>
+          <ThreadLink to="/industries" arrow>
             {t('Discuss a partnership', 'Обсудить партнёрство')}
           </ThreadLink>
         </div>

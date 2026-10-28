@@ -34,7 +34,7 @@ const emptyReport = {
   agreements: [] as Row[],
   revenue: [] as Row[],
   totals: [] as Row[],
-  notifications: { configured: false, pending: 0, failed: 0 },
+  notifications: { configured: false, pending: 0, failed: 0, jobs: [] as Row[] },
 };
 const money = (minor: number, currency: string) => {
   try {
@@ -55,11 +55,42 @@ export default function DealDesk() {
   const [tab, setTab] = useState('opportunities');
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('');
+  const [source, setSource] = useState('');
+  const [dueOnly, setDueOnly] = useState(false);
   const [selected, setSelected] = useState<Row | null>(null);
   const [detail, setDetail] = useState<Row | null>(null);
   const [note, setNote] = useState('');
   const [notice, setNotice] = useState('');
   const state = (s: string) => (language === 'ru' ? statusRu[s] || s : s.replaceAll('-', ' '));
+  const eventText = (event: Row) => {
+    if (event.kind !== 'qualification') return event.detail;
+    try {
+      const { before, after } = JSON.parse(event.detail);
+      const fields = [
+        ['status', t('Stage', 'Этап')],
+        ['verification', t('Verification', 'Проверка')],
+        ['share_consent', t('Sharing permission', 'Разрешение на передачу')],
+        ['owner', t('Owner', 'Ответственный')],
+        ['follow_up', t('Follow-up', 'Следующий контакт')],
+        ['expires_at', t('Expiry', 'Актуально до')],
+        ['evidence', t('Evidence', 'Подтверждения')],
+      ];
+      const value = (key: string, v: unknown) =>
+        key === 'share_consent' ? (v ? t('yes', 'да') : t('no', 'нет')) : String(v || '—');
+      const changes = fields
+        .filter(([key]) => key in before && before[key] !== after[key])
+        .map(
+          ([key, name]) => name + ': ' + value(key, before[key]) + ' → ' + value(key, after[key]),
+        );
+      if (JSON.stringify(before.profile) !== JSON.stringify(after.profile))
+        changes.push(
+          t('Scope updated; verification reset.', 'Задача изменена; проверка сброшена.'),
+        );
+      return changes.join(' · ') || t('Qualification record saved.', 'Запись проверки сохранена.');
+    } catch {
+      return event.detail;
+    }
+  };
   const request = async (path = '', method = 'GET', body?: unknown, auth = token) => {
     const r = await fetch('/api/admin/desk' + path, {
       method,
@@ -160,7 +191,22 @@ export default function DealDesk() {
           <h1>Deal Desk.</h1>
         </div>
         <div>
-          <button className="text-link" onClick={() => void perform(() => load())} disabled={busy}>
+          <button
+            className="text-link"
+            onClick={async () => {
+              setBusy(true);
+              setError('');
+              setNotice('');
+              try {
+                await load();
+              } catch {
+                setError(t('Unable to refresh the desk.', 'Не удалось обновить Deal Desk.'));
+              } finally {
+                setBusy(false);
+              }
+            }}
+            disabled={busy}
+          >
             <RefreshCw size={17} />
             {t('Refresh', 'Обновить')}
           </button>
@@ -203,6 +249,7 @@ export default function DealDesk() {
           ['agreements', 'Agreements', 'Соглашения'],
           ['revenue', 'Revenue', 'Доход'],
           ['companies', 'Companies', 'Компании'],
+          ['notifications', 'Notifications', 'Уведомления'],
         ].map(([id, en, ru]) => (
           <button
             key={id}
@@ -245,6 +292,29 @@ export default function DealDesk() {
                 ))}
               </select>
             </label>
+            <label>
+              {t('Source', 'Источник')}
+              <select value={source} onChange={(e) => setSource(e.target.value)}>
+                <option value="">{t('All sources', 'Все источники')}</option>
+                {[
+                  ...new Set(
+                    report.opportunities.map((o) => o.attribution?.source || '').filter(Boolean),
+                  ),
+                ].map((s: string) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="consent">
+              <input
+                type="checkbox"
+                checked={dueOnly}
+                onChange={(e) => setDueOnly(e.target.checked)}
+              />
+              {t('Follow-up due', 'Пора связаться')}
+            </label>
           </div>
           <div className="desk-table-scroll">
             <table>
@@ -277,6 +347,11 @@ export default function DealDesk() {
                   .filter(
                     (o) =>
                       (!filter || o.status === filter) &&
+                      (!source || o.attribution?.source === source) &&
+                      (!dueOnly ||
+                        (o.follow_up &&
+                          o.follow_up <= new Date().toLocaleDateString('en-CA') &&
+                          !['closed', 'unsuitable'].includes(o.status))) &&
                       JSON.stringify(o).toLowerCase().includes(query.toLowerCase()),
                   )
                   .map((o) => (
@@ -315,7 +390,11 @@ export default function DealDesk() {
                         <span className={'status-tag ' + o.status}>{state(o.status)}</span>
                         <small>{state(o.verification)}</small>
                       </td>
-                      <td>{o.follow_up || '—'}</td>
+                      <td>
+                        {o.follow_up || '—'}
+                        <small>{o.owner || '—'}</small>
+                        <small>{o.attribution?.source || t('Unattributed', 'Без источника')}</small>
+                      </td>
                     </tr>
                   ))}
               </tbody>
@@ -389,6 +468,18 @@ export default function DealDesk() {
                     .map(([k, v]) => k + ': ' + v)
                     .join(' / ') || '—'}
                 </dd>
+                <dt>
+                  {t('Operating role · self-declared', 'Операционная роль · со слов заявителя')}
+                </dt>
+                <dd>
+                  {[selected.profile.licensingStatus, selected.profile.licensingContext]
+                    .filter(Boolean)
+                    .join(' / ') || '—'}
+                </dd>
+                <dt>
+                  {t('Commercial interest · unagreed', 'Коммерческий интерес · не согласован')}
+                </dt>
+                <dd>{selected.profile.commercialIntent || '—'}</dd>
               </dl>
               <form
                 className="desk-edit"
@@ -442,8 +533,12 @@ export default function DealDesk() {
                     'Подтверждения: юрлицо, границы работы, источник и разрешение на передачу',
                   )}
                   <textarea
-                    required
-                    minLength={10}
+                    required={selected.verification === 'verified' || !!selected.share_consent}
+                    minLength={
+                      selected.verification === 'verified' || selected.share_consent
+                        ? 10
+                        : undefined
+                    }
                     maxLength={1500}
                     rows={3}
                     value={selected.evidence}
@@ -582,7 +677,7 @@ export default function DealDesk() {
                   <li key={ev.id}>
                     <time>{new Date(ev.at).toLocaleString(language)}</time>
                     <strong>{ev.kind}</strong>
-                    <pre>{ev.detail}</pre>
+                    <p>{eventText(ev)}</p>
                   </li>
                 ))}
               </ol>
@@ -878,6 +973,62 @@ export default function DealDesk() {
             </button>
           </form>
         </>
+      )}
+      {tab === 'notifications' && (
+        <section className="desk-notifications">
+          <h2>{t('Durable delivery queue', 'Постоянная очередь доставки')}</h2>
+          <p>
+            {t(
+              'Only event IDs and references leave the desk. Delivery is at least once; the receiver must deduplicate Idempotency-Key. Retry processes due jobs and respects backoff.',
+              'За пределы Deal Desk передаются только идентификатор события и номер обращения. Доставка — минимум один раз; получатель обязан устранять дубли по Idempotency-Key. Повтор обрабатывает задания, срок которых наступил.',
+            )}
+          </p>
+          <button
+            className="action"
+            disabled={busy || !report.notifications.configured}
+            onClick={() => void perform(() => request('/notifications/retry', 'POST', {}))}
+          >
+            {t('Process due notifications', 'Обработать ожидающие уведомления')}
+          </button>
+          <div className="desk-table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  {[
+                    t('Reference', 'Номер'),
+                    t('Delivery', 'Доставка'),
+                    t('Failed attempts / next retry', 'Неудачные попытки / следующий повтор'),
+                    t('Last error', 'Последняя ошибка'),
+                  ].map((h) => (
+                    <th key={h}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {(report.notifications.jobs || []).map((job: Row) => (
+                  <tr key={job.reference}>
+                    <td>{job.reference}</td>
+                    <td>
+                      {job.delivered_at
+                        ? t('Delivered', 'Доставлено')
+                        : job.attempts
+                          ? t('Retry scheduled', 'Повтор запланирован')
+                          : t('Pending', 'Ожидает')}
+                    </td>
+                    <td>
+                      {job.attempts}
+                      {!job.delivered_at && <small>{job.next_at}</small>}
+                    </td>
+                    <td>{job.last_error || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {!report.notifications.jobs?.length && (
+            <p>{t('No notification jobs yet.', 'Заданий пока нет.')}</p>
+          )}
+        </section>
       )}
       {tab === 'companies' && (
         <>

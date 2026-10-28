@@ -61,7 +61,7 @@ function Pages() {
 function LegacyApply() {
   const { search } = useLocation();
   const role = new URLSearchParams(search).get('role');
-  return <LegacyRoute offer={role !== null && role !== 'merchant'} />;
+  return <LegacyRoute offer={['affiliate', 'team', 'provider', 'regional'].includes(role || '')} />;
 }
 export default function App({ initialGrowth }: { initialGrowth?: GrowthData }) {
   return (

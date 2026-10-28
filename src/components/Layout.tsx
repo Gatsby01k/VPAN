@@ -4,7 +4,7 @@ import { NLink as Link } from './NetworkLayout';
 import { ArrowUpRight, Command, Menu, Search } from 'lucide-react';
 import { Brand, Dialog } from './UI';
 import { useLocale } from '../locale';
-import { countries, regions, networkMeta as pageMeta } from '../network';
+import { countries, regions, networkMeta } from '../network';
 import { useGrowth } from '../growth';
 import { recordPage } from './acquisition';
 
@@ -154,6 +154,7 @@ export function Header() {
   }, []);
   const links = [
     ['/network', t('Network', 'Сеть')],
+    ['/industries', t('Industries', 'Индустрии')],
     ['/markets', t('Markets', 'Рынки')],
     ['/about', t('About', 'О нас')],
     ['/contact', t('Contact', 'Обсудим')],
@@ -288,7 +289,8 @@ export function RouteEffects() {
   const { data } = useGrowth();
   const previousScrollLocation = useRef<typeof location | null>(null);
   useEffect(() => {
-    const metadata = pageMeta(location.pathname.replace(/\/$/, '') || '/', language);
+    const path = location.pathname.replace(/\/+$/, '') || '/';
+    const metadata = networkMeta(path, language);
     const article = data.articles.find((g) => '/knowledge/' + g.slug === location.pathname);
     if (article) {
       metadata.title = (language === 'ru' ? article.titleRu : article.title) + ' — VlaDDoS Network';
@@ -298,15 +300,24 @@ export function RouteEffects() {
     for (const selector of ['meta[name="description"]', 'meta[property="og:description"]'])
       document.querySelector(selector)?.setAttribute('content', metadata.description);
     document.querySelector('meta[property="og:title"]')?.setAttribute('content', metadata.title);
+    document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', metadata.title);
+    document
+      .querySelector('meta[name="twitter:description"]')
+      ?.setAttribute('content', metadata.description);
+    document
+      .querySelector('meta[property="og:locale"]')
+      ?.setAttribute('content', language === 'ru' ? 'ru_RU' : 'en_US');
+    document
+      .querySelector('meta[property="og:type"]')
+      ?.setAttribute('content', article ? 'article' : 'website');
     if (data.origin) {
-      const url = data.origin + location.pathname + (language === 'ru' ? '?lang=ru' : '');
+      const url = data.origin + path + (language === 'ru' ? '?lang=ru' : '');
       document.querySelector('link[rel="canonical"]')?.setAttribute('href', url);
       document.querySelector('meta[property="og:url"]')?.setAttribute('content', url);
       for (const alternate of document.querySelectorAll<HTMLLinkElement>(
         'link[rel="alternate"][hreflang]',
       ))
-        alternate.href =
-          data.origin + location.pathname + (alternate.hreflang === 'ru' ? '?lang=ru' : '');
+        alternate.href = data.origin + path + (alternate.hreflang === 'ru' ? '?lang=ru' : '');
       // Server JSON-LD belongs to the full document and must not describe a previous SPA route.
       const structured = document.querySelector('script[type="application/ld+json"]');
       if (structured)
@@ -328,7 +339,7 @@ export function RouteEffects() {
         });
     }
     document.querySelector('meta[name="robots"]')?.remove();
-    if (location.pathname === '/admin') {
+    if (metadata.noindex && !article) {
       const meta = document.createElement('meta');
       meta.name = 'robots';
       meta.content = 'noindex, nofollow';
@@ -350,6 +361,8 @@ export function RouteEffects() {
     )
       return;
     const scroll = () => {
+      if (previous && previous.pathname !== location.pathname)
+        document.getElementById('main')?.focus({ preventScroll: true });
       if (location.hash)
         document.getElementById(location.hash.slice(1))?.scrollIntoView({
           behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches

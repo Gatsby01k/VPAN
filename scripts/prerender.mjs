@@ -56,6 +56,9 @@ fs.writeFileSync(
               r +
               '"/><xhtml:link rel="alternate" hreflang="ru" href="' +
               esc(origin + r + '?lang=ru') +
+              '"/><xhtml:link rel="alternate" hreflang="x-default" href="' +
+              origin +
+              r +
               '"/></url>',
           )
           .join(''),

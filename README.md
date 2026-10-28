@@ -24,7 +24,7 @@ npm start
 npm test
 ```
 
-`npm test` builds first, then tests HTTP → SQLite → response, legacy database migration, privacy boundaries, retry conflicts, qualification, matching, bilateral permission, commercial terms, statement accounting, outbox recovery and existing editorial behavior. The current suite has 38 passing tests and uses disposable databases. Browser QA also uses a separate database; fixture companies are never production seed data.
+`npm test` builds first, then tests HTTP → SQLite → response, legacy database migration, privacy boundaries, retry conflicts, qualification, matching, bilateral permission, commercial terms, statement accounting, outbox recovery and existing editorial behavior. The current suite has 48 passing tests and uses disposable databases. Browser QA also uses a separate database; fixture companies are never production seed data.
 
 ## Product architecture
 
@@ -32,9 +32,9 @@ npm test
 - `src/network.ts`: shared frontend labels and route metadata.
 - `src/pages/Home.tsx`, `src/components/Editorial.tsx`, `src/components/Layout.tsx`: original artwork, compositions, signature, navigation and footer with the updated positioning.
 - `src/pages/RetainedExplore.tsx`: original market cards, country compositions and About layout, populated from the shared catalogue and new business copy.
-- `src/components/ConnectionStudio.tsx`: original homepage brief layout, extended with need/offer, industry and capabilities; selections carry into the contact form.
+- `src/components/ConnectionStudio.tsx`: a compact six-role entry to the single brief; explicit intent is retained and scenario context carries into the form.
 - `src/pages/NetworkPages.tsx`: network, industries, contact, legal and field-note content.
-- `src/pages/ConnectionEngine.tsx`: open connection loom and live private brief. Contact plus scope is sufficient; company, message and operational context are optional.
+- `src/pages/ConnectionEngine.tsx`: one two-step private brief (scope → context/contact), role-specific guidance and progressive operational details. Company, message and operating context are optional.
 - `operations/desk.mjs`: validation, additive migration, CRM, qualifications, matching candidates, introductions, agreements, revenue records and notification outbox.
 - `server.mjs`: persistent Node HTTP service, SQLite, authenticated operations endpoints and bilingual SSR.
 - `api/service.mjs`: optional Vercel same-origin gateway to that persistent service.
@@ -60,7 +60,7 @@ Open `/admin` with the server's `ADMIN_TOKEN`.
 1. Review real received opportunities and preserved legacy applications. Old briefs enter as `unclassified / unverified`; manually classify their scope before matching.
 2. Record entity, operating-scope and source evidence, owner, next follow-up and expiry. Qualify after verification. Record evidence of permission to share separately from enquiry consent.
 3. Review candidates derived only from eligible saved opposite-side records with overlapping industry, country and capability, requested company types and different company records. Closed, unsuitable, unverified and expired records are excluded.
-4. Propose an introduction only when both sides have sharing permission. Mark an actual introduction with evidence; no message is sent automatically to either party.
+4. Propose an introduction only when both sides have sharing permission. Mark an actual introduction with evidence; current scope, verification and bilateral permission are rechecked before proceeding. No message is sent automatically to either party.
 5. Record the signed commercial model, payer/fee basis/exclusions in terms, attribution, currency, share if agreed, start/end dates and agreement reference.
 6. Record statement-backed amounts in their agreement currency. Due, invoiced, received and void are separate states. Reporting does not convert currencies or invent revenue from transaction volumes. Immutable statement references prevent retries from creating a second amount after a status change.
 7. Add interaction notes and review the event history. Exact contacts deduplicate automatically; merging company records requires identity evidence. A shared company name or email domain is not sufficient evidence.
@@ -71,11 +71,11 @@ Legacy status updates and Deal Desk updates remain synchronized with the origina
 
 Set `NOTIFICATION_WEBHOOK_URL` to an authenticated HTTPS receiver and `NOTIFICATION_WEBHOOK_SECRET` to its Bearer secret. The receiver should forward the reference to the operator's chosen channel. The implementation does not assume or invent an email, Telegram bot or Slack destination.
 
-The outbox sends JSON `{ event, id, reference, deskPath }`, without applicant contact details. `Idempotency-Key` is stable across retries. A 2xx response acknowledges delivery. Failed requests retry with exponential backoff up to a six-hour interval; pending jobs survive restarts. Delivery is at least once: the receiver must deduplicate event IDs. A lease prevents concurrent workers from delivering the same job at the same time. The desk reports unconfigured, pending and retrying states. A stopped service cannot deliver jobs.
+The outbox sends JSON `{ event, id, reference, deskPath }`, without applicant contact details. `Idempotency-Key` is stable across retries. A 2xx response acknowledges delivery. Failed requests retry with exponential backoff up to a six-hour interval; pending jobs survive restarts. Delivery is at least once: the receiver must deduplicate event IDs. A lease prevents concurrent workers from delivering the same job at the same time. The desk reports unconfigured, pending and retrying states, plus per-reference delivery history and the next retry time. A stopped service cannot deliver jobs.
 
 ## Production deployment and migration
 
-**A static deployment alone does not run SQLite, notifications or dynamic editorial SSR.** The existing `vpan` Vercel project serves vladdos.com. An authorised preview branch is published; production and the persistent backend have not been changed.
+**A static deployment alone does not run SQLite, notifications or dynamic editorial SSR.** The existing `vpan` Vercel project serves vladdos.com. The 28 October audit confirmed production at `edc29b4`, with an unconfigured intake gateway (HTTP 503) and no Vercel project environment variables. This refinement is prepared on `codex/network-production-refinement`; production infrastructure is unchanged.
 
 Preferred Foundation topology: one persistent Node/Docker service with a mounted SQLite volume and HTTPS reverse proxy. It can serve the complete website and API. Alternatively, keep Vercel for the frontend and use the included gateway to the persistent service.
 
@@ -93,7 +93,7 @@ DB_PATH=/path/to/current/partners.sqlite npm run backup -- /private/backup/befor
 5. `docker compose up --build -d` preserves the mounted database. Use one persistent service initially; do not spread SQLite writes over ephemeral serverless instances or independent hosts.
 6. Verify a designated synthetic enquiry → reference → desk row → notification acknowledgement. Remove or clearly mark the synthetic record. Verify auth rejection, EN/RU source, canonical/hreflang, 404, redirect and a backup restore before routing public traffic.
 
-For the split Vercel topology, set `INTAKE_SERVICE_ORIGIN` to the exact HTTPS origin of the persistent backend and the same strong `INTAKE_GATEWAY_TOKEN` on Vercel and the backend. The backend then requires that gateway key for API access and trusts forwarded client IPs only on authenticated gateway requests. `TRUST_PROXY=0` remains the default; enable it separately only behind a trusted reverse proxy. The gateway carries no database or admin key into the public client.
+For the split Vercel topology, set `INTAKE_SERVICE_ORIGIN` to the exact HTTPS origin of the persistent backend and the same strong `INTAKE_GATEWAY_TOKEN` on Vercel and the backend. The backend then requires that gateway key for API access and trusts forwarded client IPs only on authenticated gateway requests. `TRUST_PROXY=0` remains the default; enable it separately only behind a trusted reverse proxy. The gateway requires a token of at least 32 characters and carries no database or admin key into the public client. Production Node startup rejects placeholder admin credentials and mismatched public/allowed origins.
 
 `vercel.json` preserves legacy redirects, serves prebuilt RU HTML for `?lang=ru`, and forwards `/api/*`, `/health`, RSS and dynamic guide pages to the persistent service. An unset/unreachable service returns 503 and cannot produce a false receipt. Preview API routing has been checked for an honest 503 when the persistent service is absent. End-to-end cloud intake still requires that service and its configuration.
 
@@ -106,3 +106,18 @@ Node SSR returns the correct EN/RU HTML and reciprocal alternates using the expl
 The retained growth worker can be disabled with `GROWTH_ENABLED=0`. Its optional AI/Search Console integrations require separate credentials; they are not needed for partner intake. No live AI publication or Search Console access was tested by mocked connector tests.
 
 Read [the strategy and market sources](research/NETWORK_STRATEGY_2026-10-27_RU.md), [release verification](research/NETWORK_VERIFICATION_2026-10-27.md) and [design decisions](research/NETWORK_DESIGN_SYSTEM.md). Commercial, operator and legal particulars must reflect the real operating entity before public launch. The repository supplies no fabricated clients, licences, metrics or partnerships.
+
+## Refinement verification (28 October 2026)
+
+See [the audit and release plan](research/NETWORK_REFINEMENT_2026-10-28_RU.md) and [evidence](research/verification-2026-10-28/).
+
+```bash
+npm test                 # production build, typecheck, 48 tests with disposable databases
+npm run format:check
+npm run qa:serve         # loopback-only disposable SQLite + local notification receiver
+npm run release:check -- https://candidate-host
+```
+
+The QA server prints the path of its private session file, containing a temporary Deal Desk key. It never opens the configured production database. `QA_PORT=3101 QA_INTAKE_DISABLED=1 npm run qa:serve` runs the unavailable-backend scenario. These test keys and databases stay outside the repository. The notification transport uses a real local HTTP sink, not Telegram or a production notification service.
+
+The read-only release check cannot establish production readiness on its own. A designated end-to-end request, authenticated desk inspection, real notification acknowledgement and a recoverable database backup remain release gates.

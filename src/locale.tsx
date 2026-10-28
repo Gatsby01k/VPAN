@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 type Language = 'en' | 'ru';
@@ -10,38 +10,21 @@ const LocaleContext = createContext({
 
 export function LocaleProvider({
   children,
-  initialLanguage = 'en',
+  initialLanguage: _initialLanguage = 'en',
 }: {
   children: ReactNode;
   initialLanguage?: Language;
 }) {
-  const [language, setLanguage] = useState<Language>(initialLanguage);
   const location = useLocation();
   const navigate = useNavigate();
-  useEffect(() => {
-    const explicit = new URLSearchParams(location.search).get('lang');
-    if (explicit === 'ru' || explicit === 'en') {
-      setLanguage(explicit);
-      try {
-        localStorage.setItem('vladdos-language', explicit);
-      } catch {
-        /* The explicit URL still determines this page's language. */
-      }
-      return;
-    }
-    try {
-      const saved =
-        localStorage.getItem('vladdos-language') || localStorage.getItem('pan-language');
-      if (saved === 'en' || saved === 'ru') setLanguage(saved);
-    } catch {
-      /* Browser storage can be unavailable. */
-    }
-  }, [location.search]);
+  // The URL is authoritative on the server and client. Stored preferences must not
+  // silently replace EN content with RU under an EN canonical URL.
+  const language: Language =
+    new URLSearchParams(location.search).get('lang') === 'ru' ? 'ru' : 'en';
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
   const update = (next: Language) => {
-    setLanguage(next);
     const params = new URLSearchParams(location.search);
     if (next === 'ru') params.set('lang', 'ru');
     else params.set('lang', 'en');

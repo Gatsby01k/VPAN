@@ -17,6 +17,6 @@ COPY scripts/growth.mjs ./scripts/growth.mjs
 RUN npm ci --omit=dev
 RUN mkdir -p data && chown -R node:node /app
 USER node
-ENV PORT=3000 HOST=0.0.0.0 DB_PATH=/app/data/partners.sqlite
+ENV NODE_ENV=production PORT=3000 HOST=0.0.0.0 DB_PATH=/app/data/partners.sqlite
 EXPOSE 3000
 CMD ["node", "server.mjs"]

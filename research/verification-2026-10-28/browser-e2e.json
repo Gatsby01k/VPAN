@@ -1,0 +1,50 @@
+{
+  "environment": "Disposable localhost SQLite; synthetic companies only",
+  "opportunities": [
+    {
+      "reference": "VN-2026-32B8E79B3D",
+      "side": "offer",
+      "status": "review",
+      "verification": "in-review",
+      "countries": [
+        "mozambique"
+      ],
+      "methods": [
+        "Bank transfers",
+        "M-Pesa",
+        "e-Mola"
+      ],
+      "settlement": [
+        "MZN"
+      ],
+      "source": "website"
+    },
+    {
+      "reference": "VN-2026-DC4E9FC9FC",
+      "side": "need",
+      "status": "new",
+      "verification": "unverified",
+      "countries": [
+        "mozambique"
+      ],
+      "methods": [],
+      "settlement": [],
+      "source": "linkedin"
+    }
+  ],
+  "notifications": [
+    {
+      "event": "opportunity.received",
+      "id": "9605c43b-8e88-4303-92bf-298322a7d783",
+      "reference": "VN-2026-32B8E79B3D",
+      "deskPath": "/admin"
+    },
+    {
+      "event": "opportunity.received",
+      "id": "5c5cc262-2fb0-4cbc-9644-8916b86e9b49",
+      "reference": "VN-2026-DC4E9FC9FC",
+      "deskPath": "/admin"
+    }
+  ],
+  "unavailableBackendOpportunityCount": 0
+}

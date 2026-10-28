@@ -1,137 +1,71 @@
 import { useState } from 'react';
 import { ArrowUpRight, Check } from 'lucide-react';
 import { useLocale } from '../locale';
-import { regions, countries, industries, capabilities, label } from '../network';
+import { scenarios, scenarioLink } from '../brief';
 import { NLink } from './NetworkLayout';
+
+// This is the entry to the brief, not a second intake form.
 export function ConnectionStudio({
   side,
   onSide,
+  intentExplicit = false,
 }: {
   side: 'need' | 'offer';
-  onSide: (side: 'need' | 'offer') => void;
+  onSide: (side: 'need' | 'offer', explicit?: boolean) => void;
+  intentExplicit?: boolean;
 }) {
-  const { t, language } = useLocale();
-  const [region, setRegion] = useState('');
-  const [selected, setSelected] = useState<string[]>([]);
-  const [industry, setIndustry] = useState('');
-  const [chosenCapabilities, setCapabilities] = useState<string[]>([]);
-  const toggle = (items: string[], id: string) =>
-    items.includes(id) ? items.filter((v) => v !== id) : [...items, id];
-  const chosen = countries.filter((c) => selected.includes(c.id));
-  const query = new URLSearchParams({
-    industry,
-    markets: selected.join(','),
-    capabilities: chosenCapabilities.join(','),
-  });
+  const { t } = useLocale();
+  const [role, setRole] = useState('');
   return (
-    <section className="profile-builder section" aria-labelledby="profile-title">
+    <section className="profile-builder section scenario-entry" aria-labelledby="profile-title">
       <div className="wrap">
         <div className="chapter-line">
-          <span>04 / THE CONNECTION ENGINE</span>
-          <span>{t('A private brief. A human review.', 'Короткий бриф. Личная проверка.')}</span>
+          <span>04 / CONNECTION ENGINE</span>
+          <span>
+            {t('One brief. A qualified introduction.', 'Один бриф. Квалифицированное знакомство.')}
+          </span>
         </div>
         <div className="profile-heading">
           <h2 className="section-title" id="profile-title">
-            {t('Your partner', 'Партнёрский')}
+            {t('Your business.', 'Ваш бизнес.')}
             <br />
-            <span>{t('brief.', 'бриф.')}</span>
+            <span>{t('Your next partner.', 'Ваш следующий партнёр.')}</span>
           </h2>
           <p>
             {t(
-              'Start with what you need or offer. Industry, country and capabilities give an introduction its context. Your choices carry into the contact form.',
-              'Начните с задачи или предложения. Индустрия, страна и возможности задают контекст знакомства. Выбор перенесётся в форму обращения.',
+              'Choose your role. We’ll ask only for the context your partner search needs.',
+              'Выберите роль. В брифе останутся вопросы, которые нужны для вашей задачи.',
             )}
           </p>
         </div>
         <div className="profile-workspace">
           <div className="profile-inputs">
             <fieldset>
-              <legend>01 / {t('I NEED OR I OFFER', 'ЗАДАЧА ИЛИ ПРЕДЛОЖЕНИЕ')}</legend>
-              <div
-                className="profile-role-picker"
-                role="group"
-                aria-label={t('Your intention', 'Ваше намерение')}
-              >
-                {(['need', 'offer'] as const).map((value) => (
-                  <button key={value} aria-pressed={side === value} onClick={() => onSide(value)}>
-                    I {value.toUpperCase()}
-                    {side === value && <Check size={15} />}
+              <legend>{t('YOUR INTENTION', 'ВАШЕ НАМЕРЕНИЕ')}</legend>
+              <div className="profile-role-picker">
+                {(['need', 'offer'] as const).map((s) => (
+                  <button key={s} aria-pressed={side === s} onClick={() => onSide(s)}>
+                    I {s.toUpperCase()}
+                    {side === s && <Check size={15} />}
                   </button>
                 ))}
               </div>
             </fieldset>
             <fieldset>
-              <legend>02 / {t('YOUR INDUSTRY', 'ВАША ИНДУСТРИЯ')}</legend>
-              <div className="profile-role-picker">
-                {industries.map((item) => (
+              <legend>{t('YOUR ROLE', 'ВАША РОЛЬ')}</legend>
+              <div className="scenario-rows">
+                {scenarios.map((s, i) => (
                   <button
-                    key={item.id}
-                    aria-pressed={industry === item.id}
-                    onClick={() => setIndustry(item.id)}
-                  >
-                    {label(item, language)}
-                    {industry === item.id && <Check size={15} />}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-            <fieldset className="country-picker">
-              <legend>03 / {t('REGION → COUNTRY', 'РЕГИОН → СТРАНА')}</legend>
-              <div className="country-region-tabs" role="group" aria-label={t('Region', 'Регион')}>
-                {regions.map((r) => (
-                  <button
-                    key={r.id}
-                    aria-pressed={region === r.id}
+                    key={s.id}
+                    aria-pressed={role === s.id}
                     onClick={() => {
-                      setRegion(r.id);
-                      setSelected([]);
+                      setRole(s.id);
+                      if (!intentExplicit) onSide(s.side, false);
                     }}
                   >
-                    {label(r, language)}
-                  </button>
-                ))}
-              </div>
-              <div className="profile-market-picker">
-                {region ? (
-                  countries
-                    .filter((c) => c.region === region)
-                    .map((c) => (
-                      <button
-                        key={c.id}
-                        aria-pressed={selected.includes(c.id)}
-                        onClick={() => setSelected(toggle(selected, c.id))}
-                      >
-                        <span>{label(c, language)}</span>
-                        <small>{c.currency}</small>
-                        {selected.includes(c.id) && <Check size={14} />}
-                      </button>
-                    ))
-                ) : (
-                  <p className="profile-help">
-                    {t(
-                      'Choose a region to see its countries.',
-                      'Выберите регион, чтобы увидеть страны.',
-                    )}
-                  </p>
-                )}
-              </div>
-            </fieldset>
-            <fieldset>
-              <legend>
-                04 /{' '}
-                {side === 'need'
-                  ? t('WHAT DO YOU NEED?', 'ЧТО ВАМ НУЖНО?')
-                  : t('WHAT CAN YOU OFFER?', 'ЧТО ВЫ ПРЕДЛАГАЕТЕ?')}
-              </legend>
-              <div className="profile-role-picker">
-                {capabilities.map((c) => (
-                  <button
-                    key={c.id}
-                    aria-pressed={chosenCapabilities.includes(c.id)}
-                    onClick={() => setCapabilities(toggle(chosenCapabilities, c.id))}
-                  >
-                    {label(c, language)}
-                    {chosenCapabilities.includes(c.id) && <Check size={14} />}
+                    <small>0{i + 1}</small>
+                    <span>{t(s.en, s.ru)}</span>
+                    {role === s.id ? <Check size={19} /> : <ArrowUpRight size={19} />}
                   </button>
                 ))}
               </div>
@@ -149,65 +83,46 @@ export function ConnectionStudio({
                 <ArrowUpRight size={28} />
               </div>
               <div className="pass-status">
-                {t('OPPORTUNITY PROFILE / FOR DISCUSSION', 'ПРОФИЛЬ ВОЗМОЖНОСТИ / ДЛЯ ОБСУЖДЕНИЯ')}
+                {t('PRIVATE PARTNERSHIP BRIEF', 'КОНФИДЕНЦИАЛЬНЫЙ ПАРТНЁРСКИЙ БРИФ')}
               </div>
               <h3>I {side.toUpperCase()}</h3>
-              <dl>
-                <div>
-                  <dt>{t('Industry', 'Индустрия')}</dt>
-                  <dd>
-                    {label(
-                      industries.find((i) => i.id === industry),
-                      language,
-                    ) || t('Choose your industry', 'Выберите индустрию')}
-                  </dd>
-                </div>
-                <div>
-                  <dt>{t('Countries', 'Страны')}</dt>
-                  <dd>
-                    {chosen.length
-                      ? chosen.map((c) => label(c, language)).join(' / ')
-                      : t('Choose a country', 'Выберите страну')}
-                  </dd>
-                </div>
-                <div>
-                  <dt>{t('Capabilities', 'Возможности')}</dt>
-                  <dd>
-                    {chosenCapabilities.length
-                      ? capabilities
-                          .filter((c) => chosenCapabilities.includes(c.id))
-                          .map((c) => label(c, language))
-                          .join(' / ')
-                      : t('To be discussed', 'Обсудим вместе')}
-                  </dd>
-                </div>
-              </dl>
+              <p className="scenario-purpose">
+                {side === 'need'
+                  ? t(
+                      'Find a provider, local operator or commercial partner for a specific task.',
+                      'Найти провайдера, локального оператора или коммерческого партнёра под конкретную задачу.',
+                    )
+                  : t(
+                      'Put your capabilities in front of relevant businesses after qualification.',
+                      'Представить ваши возможности подходящим компаниям после квалификации.',
+                    )}
+              </p>
               <div className="pass-context">
-                <span>{t('BEFORE AN INTRODUCTION', 'ДО ЗНАКОМСТВА')}</span>
-                <ul>
-                  <li>{t('Company and operating scope', 'Компания и границы работы')}</li>
+                <span>{t('WHAT HAPPENS NEXT', 'СЛЕДУЮЩИЕ ШАГИ')}</span>
+                <ol>
+                  <li>{t('Define the market and scope', 'Укажите рынок и задачу')}</li>
+                  <li>{t('Leave a private business contact', 'Оставьте рабочий контакт')}</li>
                   <li>
-                    {t('Evidence and commercial intent', 'Подтверждения и коммерческая задача')}
+                    {t('Deal Desk reviews the opportunity', 'Deal Desk проверит возможность')}
                   </li>
-                  <li>{t('Permission and agreed terms', 'Разрешение и согласованные условия')}</li>
-                </ul>
+                </ol>
               </div>
               <div className="pass-bottom">
-                <span>{chosen.map((c) => c.code).join(' · ') || 'GEO / —'}</span>
+                <span>ASIA / LATAM / AFRICA</span>
                 <span>{t('HUMAN REVIEW', 'ЛИЧНАЯ ПРОВЕРКА')}</span>
               </div>
             </div>
             <NLink
               className="profile-submit"
-              to={(side === 'need' ? '/find-a-partner' : '/join') + '?' + query.toString()}
+              to={role ? scenarioLink(role, side) : side === 'need' ? '/find-a-partner' : '/join'}
             >
-              {t('Continue the conversation', 'Продолжить разговор')}
+              {t('Build my brief', 'Составить бриф')}
               <ArrowUpRight size={23} />
             </NLink>
             <p className="profile-notice">
               {t(
-                'Your brief is not an available offer or a confirmed match. No contact details are shared at this stage.',
-                'Бриф не является доступным предложением или подтверждённым совпадением. Контакты на этом этапе не передаются.',
+                'No fee obligation on submission. Partner availability, permission to share and commercial terms are reviewed separately.',
+                'Отправка не создаёт обязательств по оплате. Доступность партнёров, разрешение на передачу и коммерческие условия проверяются отдельно.',
               )}
             </p>
           </div>

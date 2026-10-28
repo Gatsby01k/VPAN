@@ -7,6 +7,7 @@ import { useLocale } from '../locale';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
 import { countries, regions } from '../network';
 import type { Language } from '../network';
+import marketContext from '../../shared/market-context.json';
 
 // Preserve the original page structures; derive every market from the shared catalogue.
 const markets = countries.map((c) => ({ ...c, slug: c.id, name: c.en }));
@@ -210,6 +211,7 @@ export function Country() {
   const { slug } = useParams();
   const { language, t } = useLocale();
   const market = markets.find((m) => m.slug === slug);
+  const context = marketContext[slug as keyof typeof marketContext];
   if (!market)
     return (
       <PageHeading
@@ -244,12 +246,7 @@ export function Country() {
               {t('Local connections.', 'Локальные связи.')}
             </span>
           </h1>
-          <p className="country-intro">
-            {t(
-              'Build a specific brief for this market. We review the company, operating scope and commercial intent before arranging an introduction.',
-              'Сформируйте конкретный бриф для этого рынка. До знакомства уточняем компанию, границы работы и коммерческую задачу.',
-            )}
-          </p>
+          <p className="country-intro">{t(context.en, context.ru)}</p>
           <div className="retained-country-actions">
             <Action to={`/find-a-partner?country=${market.slug}`}>
               {t('Find a partner here', 'Найти партнёра здесь')}
@@ -275,12 +272,7 @@ export function Country() {
               <br />
               <span className="display-accent">{t('local edge.', 'местные особенности.')}</span>
             </h2>
-            <p className="section-description">
-              {t(
-                'The right payment relationship starts with practical local experience, clear responsibilities and a relevant business category.',
-                'Подходящее платёжное партнёрство начинается с практического опыта, понятной ответственности и подходящей категории бизнеса.',
-              )}
-            </p>
+            <p className="section-description">{t(context.focus, context.focusRu)}</p>
           </Reveal>
           <div>
             <Reveal className="country-fact">
@@ -299,21 +291,82 @@ export function Country() {
               <span>{t('Partnership status', 'Статус партнёрств')}</span>
               <strong className="country-status">
                 <span className="signal-dot" />
-                {t('Reviewed per enquiry', 'Проверяем по обращению')}
+                {t('Market research', 'Исследование рынка')}
               </strong>
               <p>
                 {t(
-                  'Methods describe local infrastructure, not verified network capabilities. Availability, eligibility and settlement are confirmed with the provider.',
-                  'Методы описывают инфраструктуру, а не проверенные возможности сети. Доступность, допустимость и расчёты подтверждаются у провайдера.',
+                  'This page publishes infrastructure research. No verified partner capability or confirmed commercial opportunity is published here. Availability, eligibility and settlement require an individual review.',
+                  'На странице опубликовано исследование инфраструктуры. Проверенные возможности партнёров и подтверждённые коммерческие предложения здесь не заявлены. Доступность, допустимость и расчёты проверяются индивидуально.',
                 )}
               </p>
-              <a className="text-link" href={market.source} target="_blank" rel="noreferrer">
-                {t('Infrastructure source', 'Источник об инфраструктуре')}{' '}
-                <ArrowUpRight size={16} />
-              </a>
+              {context.sources.map((source) => (
+                <a
+                  key={source.url}
+                  className="text-link country-source"
+                  href={source.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {source.name} <ArrowUpRight size={16} />
+                </a>
+              ))}
             </Reveal>
           </div>
         </div>
+      </section>
+      <section className="section wrap country-coverage">
+        <Eyebrow>{t('How to read coverage', 'Как понимать покрытие')}</Eyebrow>
+        <h2 className="section-title">
+          {t('Evidence has stages.', 'У подтверждения есть этапы.')}
+        </h2>
+        <dl>
+          {[
+            [
+              'Market research',
+              'Исследование рынка',
+              'Public infrastructure context and sourcing questions.',
+              'Открытый контекст инфраструктуры и вопросы для поиска.',
+            ],
+            [
+              'Potential partners',
+              'Потенциальные партнёры',
+              'A sourcing lead; identity and operating scope remain unconfirmed.',
+              'Контакт для поиска; юрлицо и границы работы ещё не подтверждены.',
+            ],
+            [
+              'Under verification',
+              'На проверке',
+              'A private profile being assessed with supporting evidence.',
+              'Конфиденциальный профиль, который проверяется по подтверждениям.',
+            ],
+            [
+              'Verified capabilities',
+              'Проверенные возможности',
+              'Evidence reviewed for a specific entity, scope and validity period.',
+              'Подтверждения проверены для конкретного юрлица, задачи и срока.',
+            ],
+            [
+              'Confirmed opportunity',
+              'Подтверждённая возможность',
+              'Current commercial interest confirmed separately, with permission to introduce.',
+              'Актуальный коммерческий интерес подтверждён отдельно; знакомство разрешено.',
+            ],
+          ].map(([en, ru, copy, copyRu], i) => (
+            <div key={en}>
+              <dt>
+                <span>0{i + 1}</span>
+                {t(en, ru)}
+              </dt>
+              <dd>{t(copy, copyRu)}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="market-disclaimer">
+          {t(
+            'These are evidence stages, not a list of available partners. Private Deal Desk records do not automatically become public coverage claims.',
+            'Это этапы подтверждения, а не перечень доступных партнёров. Конфиденциальные записи Deal Desk автоматически не становятся публичным заявлением о покрытии.',
+          )}
+        </p>
       </section>
       <section className="section wrap">
         <div className="section-title-row">
@@ -334,7 +387,7 @@ export function Country() {
         <div className="country-partners">
           {participants.map((r, i) => (
             <Reveal key={r.id} delay={i * 0.04}>
-              <Link to={`${r.path}?country=${market.slug}`}>
+              <Link to={`${r.path}?country=${market.slug}&companyType=${r.id}&industry=payments`}>
                 <span>0{i + 1}</span>
                 <h3>{t(r.title, r.ru)}</h3>
                 <p>{t(r.short, r.shortRu)}</p>
