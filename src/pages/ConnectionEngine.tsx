@@ -24,8 +24,10 @@ import {
 } from '../network';
 import { briefEntry, scenarioFor } from '../brief';
 import { NLink, Eyebrow, Arrow } from '../components/NetworkLayout';
-import { acquisition } from '../components/acquisition';
+import { acquisition, type Attribution } from '../components/acquisition';
 import { BriefRolePicker } from '../components/BriefRolePicker';
+import { TelegramBriefReview } from '../components/TelegramBriefReview';
+import { telegramBriefEnabled, telegramUsername } from '../telegram';
 import '../components/brief-controls.css';
 
 type BriefField = 'role' | 'industry' | 'country' | 'capability' | 'contact' | 'consent';
@@ -102,6 +104,8 @@ export default function ConnectionEngine() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [offline, setOffline] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [telegramReview, setTelegramReview] = useState(false);
+  const [telegramSource, setTelegramSource] = useState<Attribution>({});
   const retry = useRef({ signature: '', id: '' });
   const complete = (b: Brief) =>
     !!(b.companyType && b.industry && b.countries.length && b.capabilities.length);
@@ -111,6 +115,8 @@ export default function ConnectionEngine() {
     let nextStep: 'scope' | 'contact' = complete(initial) ? 'contact' : 'scope';
     retry.current = { signature: '', id: '' };
     setReceipt('');
+    setTelegramReview(false);
+    setTelegramSource({});
     setError('');
     setFieldErrors({});
     setOffline(false);
@@ -211,6 +217,13 @@ export default function ConnectionEngine() {
   useEffect(() => {
     if (receipt) document.getElementById('engine-result')?.focus();
   }, [receipt]);
+  useEffect(() => {
+    if (telegramReview) {
+      const review = document.getElementById('telegram-brief-review');
+      review?.focus({ preventScroll: true });
+      review?.scrollIntoView({ block: 'start', behavior: 'instant' });
+    }
+  }, [telegramReview]);
   const update = (next: Partial<Brief>) => {
     if (busy) return;
     setBrief((b) => ({ ...b, ...next }));
@@ -229,6 +242,7 @@ export default function ConnectionEngine() {
         const value = next[key];
         if (key in next && (Array.isArray(value) ? value.length > 0 : !!value))
           delete errors[field];
+        if (key === 'contact' && telegramBriefEnabled && value === '') delete errors.contact;
       }
       return errors;
     });
@@ -341,18 +355,42 @@ export default function ConnectionEngine() {
       companyTypes.find((c) => c.id === brief.companyType),
       language,
     )}`,
-    ...scopeSummary,
-    `${t('Methods', 'Методы')}: ${brief.methods.join(', ')}`,
-    `${t('Settlement', 'Расчёты')}: ${brief.settlementCurrencies.join(', ')}`,
-    `${t('Company', 'Компания')}: ${brief.company}`,
-    `${t('Contact', 'Контакт')}: ${brief.contact}`,
-    `${t('Seeking', 'Ищет')}: ${label(
-      companyTypes.find((c) => c.id === brief.targetType),
+    `${t('Industry', 'Индустрия')}: ${label(
+      industries.find((item) => item.id === brief.industry),
       language,
     )}`,
-    `${t('Operating role · self-declared', 'Операционная роль · со слов заявителя')}: ${brief.licensingStatus} ${brief.licensingContext}`,
-    `${t('Commercial interest', 'Коммерческий интерес')}: ${brief.commercialIntent}`,
+    `${t('Countries', 'Страны')}: ${chosen.map((item) => label(item, language)).join(' / ')}`,
+    `${t('Capabilities', 'Возможности')}: ${capabilities
+      .filter((item) => brief.capabilities.includes(item.id))
+      .map((item) => label(item, language))
+      .join(' / ')}`,
+    brief.methods.length ? `${t('Methods', 'Методы')}: ${brief.methods.join(', ')}` : '',
+    brief.settlementCurrencies.length
+      ? `${t('Settlement', 'Расчёты')}: ${brief.settlementCurrencies.join(', ')}`
+      : '',
+    brief.company ? `${t('Company', 'Компания')}: ${brief.company}` : '',
+    brief.contact ? `${t('Contact', 'Контакт')}: ${brief.contact}` : '',
+    brief.targetType
+      ? `${t('Seeking', 'Ищет')}: ${label(
+          companyTypes.find((c) => c.id === brief.targetType),
+          language,
+        )}`
+      : '',
+    brief.licensingStatus || brief.licensingContext
+      ? `${t('Operating role · self-declared', 'Операционная роль · со слов заявителя')}: ${brief.licensingStatus} ${brief.licensingContext}`
+      : '',
+    brief.commercialIntent
+      ? `${t('Commercial interest', 'Коммерческий интерес')}: ${brief.commercialIntent}`
+      : '',
     brief.message,
+  ]
+    .filter(Boolean)
+    .join('\n');
+  const telegramText = [
+    summary,
+    ...Object.entries(telegramSource)
+      .filter(([, value]) => value)
+      .map(([key, value]) => `${key}: ${value}`),
   ].join('\n');
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -370,6 +408,7 @@ export default function ConnectionEngine() {
     setOffline(false);
     const contactErrors: FieldErrors = {};
     if (
+      (!telegramBriefEnabled || brief.contact.trim()) &&
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(brief.contact.trim()) &&
       !/^@[a-z][a-z0-9_]{4,31}$/i.test(brief.contact.trim())
     ) {
@@ -379,6 +418,13 @@ export default function ConnectionEngine() {
     if (Object.keys(contactErrors).length) {
       setFieldErrors(contactErrors);
       focusField(contactErrors.contact ? 'contact' : 'consent');
+      return;
+    }
+    if (telegramBriefEnabled) {
+      if (brief.site.trim()) return;
+      setTelegramSource(acquisition());
+      setFieldErrors({});
+      setTelegramReview(true);
       return;
     }
     const body = { ...brief, language, attribution: { source: 'website', ...acquisition() } };
@@ -497,8 +543,12 @@ export default function ConnectionEngine() {
           </h1>
           <p>
             {t(
-              'One private brief for a specific business opportunity. A person reviews the fit before any introduction.',
-              'Один конфиденциальный бриф под конкретную B2B-задачу. До знакомства соответствие проверяет человек.',
+              telegramBriefEnabled
+                ? `Build your brief, review the message and send it in a private Telegram chat to @${telegramUsername}.`
+                : 'One private brief for a specific business opportunity. A person reviews the fit before any introduction.',
+              telegramBriefEnabled
+                ? `Составьте бриф, проверьте сообщение и отправьте его в личный Telegram @${telegramUsername}.`
+                : 'Один конфиденциальный бриф под конкретную B2B-задачу. До знакомства соответствие проверяет человек.',
             )}
           </p>
           <div className="engine-trust">
@@ -532,6 +582,18 @@ export default function ConnectionEngine() {
             <RotateCcw size={18} />
           </button>
         </div>
+      ) : telegramReview ? (
+        <TelegramBriefReview
+          text={telegramText}
+          onEdit={() => {
+            setTelegramReview(false);
+            setStep('contact');
+            requestAnimationFrame(() => {
+              document.getElementById('engine-contact')?.focus({ preventScroll: true });
+              document.getElementById('engine-contact-step')?.scrollIntoView({ block: 'start' });
+            });
+          }}
+        />
       ) : (
         <>
           <nav className="engine-progress" aria-label={t('Brief progress', 'Этапы брифа')}>
@@ -568,8 +630,12 @@ export default function ConnectionEngine() {
                   'Все четыре раздела обязательны. Стран и возможностей может быть несколько.',
                 )
               : t(
-                  'Only your contact and consent are required. Other details are optional.',
-                  'Обязательны только контакт и согласие. Остальные сведения — по желанию.',
+                  telegramBriefEnabled
+                    ? 'Contact details are optional: you can reply in Telegram. Read the privacy notice, then review your message.'
+                    : 'Only your contact and consent are required. Other details are optional.',
+                  telegramBriefEnabled
+                    ? 'Контакт необязателен: вы сможете общаться в Telegram. Прочитайте условия обработки данных и проверьте сообщение.'
+                    : 'Обязательны только контакт и согласие. Остальные сведения — по желанию.',
                 )}
           </p>
           <form onSubmit={submit} className="engine-form" aria-busy={busy} noValidate>
@@ -835,10 +901,20 @@ export default function ConnectionEngine() {
                       </div>
                       <div className="field-pair">
                         <label htmlFor="engine-contact">
-                          {t('Business email or Telegram', 'Рабочий email или Telegram')}
+                          <span id="engine-contact-label">
+                            {t(
+                              telegramBriefEnabled
+                                ? 'Email or Telegram · optional'
+                                : 'Business email or Telegram',
+                              telegramBriefEnabled
+                                ? 'Email или Telegram · необязательно'
+                                : 'Рабочий email или Telegram',
+                            )}
+                          </span>
                           <input
-                            required
+                            required={!telegramBriefEnabled}
                             id="engine-contact"
+                            aria-labelledby="engine-contact-label"
                             autoComplete="email"
                             inputMode="email"
                             autoCapitalize="none"
@@ -1056,16 +1132,24 @@ export default function ConnectionEngine() {
                             {t('privacy notice', 'условия обработки данных')}
                           </NLink>
                           {t(
-                            ' and may be contacted about this enquiry.',
-                            ' и согласен на связь по этому обращению.',
+                            telegramBriefEnabled
+                              ? ' and choose to share this brief in a private Telegram chat.'
+                              : ' and may be contacted about this enquiry.',
+                            telegramBriefEnabled
+                              ? ' и хочу передать бриф в личный чат Telegram.'
+                              : ' и согласен на связь по этому обращению.',
                           )}
                         </span>
                       </label>
                       {fieldError('consent')}
                       <p className="field-hint" id="engine-privacy-note">
                         {t(
-                          'Private review by the Deal Desk. Sharing with a prospective partner requires separate permission. Submitting a brief creates no fee obligation.',
-                          'Конфиденциальное рассмотрение в Deal Desk. Для передачи партнёру нужно отдельное разрешение. Отправка не создаёт обязательств по оплате.',
+                          telegramBriefEnabled
+                            ? `The next step shows the full message for @${telegramUsername}. Nothing is sent automatically or saved to Deal Desk. Sharing with a prospective partner requires separate permission.`
+                            : 'Private review by the Deal Desk. Sharing with a prospective partner requires separate permission. Submitting a brief creates no fee obligation.',
+                          telegramBriefEnabled
+                            ? `На следующем шаге вы увидите весь текст для @${telegramUsername}. Ничего не отправляется автоматически и не сохраняется в Deal Desk. Для передачи партнёру нужно отдельное разрешение.`
+                            : 'Конфиденциальное рассмотрение в Deal Desk. Для передачи партнёру нужно отдельное разрешение. Отправка не создаёт обязательств по оплате.',
                         )}
                       </p>
                     </div>
@@ -1100,7 +1184,9 @@ export default function ConnectionEngine() {
                       ? t('Saving your brief…', 'Сохраняем бриф…')
                       : step === 'scope'
                         ? t('Continue to contact', 'Перейти к контакту')
-                        : t('Send for human review', 'Отправить на рассмотрение')}
+                        : telegramBriefEnabled
+                          ? t('Review for Telegram', 'Проверить бриф для Telegram')
+                          : t('Send for human review', 'Отправить на рассмотрение')}
                   </span>
                   {!busy && (step === 'scope' ? <ArrowRight size={19} /> : <Send size={18} />)}
                 </button>

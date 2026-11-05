@@ -77,8 +77,8 @@ export function networkMeta(path: string, language: Language = 'en') {
             ? 'VlaDDoS Network: независимая практика B2B-партнёрств и формирования сделок. Локальная экспертиза, проверка и конфиденциальность.'
             : 'VlaDDoS Network: an independent B2B partnership and deal origination practice built on local expertise, qualification and discretion.',
           '/contact': ru
-            ? 'Обсудите B2B-задачу или предложение с VlaDDoS Network. Конфиденциальный бриф, прямой email и публичное Telegram-сообщество.'
-            : 'Discuss a B2B need or offer with VlaDDoS Network. Private briefs, direct business email and the public Telegram community.',
+            ? 'Обсудите B2B-задачу или предложение с VlaDDoS Network. Бриф, личный Telegram, прямой email и публичное сообщество.'
+            : 'Discuss a B2B need or offer with VlaDDoS Network. A partnership brief, private Telegram chat, business email and public community.',
         }[path] ||
         (ru
           ? 'Независимая международная B2B-сеть: поиск партнёров, локальная экспертиза и квалифицированные знакомства в Азии, Латинской Америке и Африке.'

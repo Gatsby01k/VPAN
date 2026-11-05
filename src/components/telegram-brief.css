@@ -1,0 +1,230 @@
+.network-product .telegram-review {
+  max-width: 860px;
+  margin: 20px auto 0;
+  padding: 38px;
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  background: #fffaf4;
+  scroll-margin-top: 16px;
+}
+.telegram-review:focus {
+  outline: none;
+}
+.telegram-review-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+.telegram-review-top .folio {
+  font: 9px/1.6 var(--body);
+  letter-spacing: 0.12em;
+}
+.telegram-review-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+.network-product .telegram-review h2 {
+  font-size: clamp(38px, 4.5vw, 58px);
+  line-height: 1.08;
+  margin-bottom: 22px;
+}
+.network-product .telegram-review h2 em {
+  color: var(--ink);
+}
+.network-product .telegram-review-intro {
+  max-width: 620px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+.telegram-recipient {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  width: fit-content;
+  gap: 14px;
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 1px solid var(--border-soft);
+  border-radius: 9px;
+  background: var(--surface-soft);
+  margin-bottom: 26px;
+}
+.telegram-recipient > span {
+  font: 8px/1.6 var(--body);
+  letter-spacing: 0.12em;
+  color: var(--text-secondary);
+}
+.telegram-recipient > strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.telegram-recipient > svg {
+  color: var(--pink);
+}
+.telegram-preview-label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+.network-product .telegram-review .telegram-preview {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 290px;
+  max-height: 600px;
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  padding: 18px;
+  background: #fffdf9;
+  color: var(--ink);
+  font: 13px/1.8 var(--body);
+  resize: vertical;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.network-product .telegram-review .telegram-preview:focus-visible {
+  outline: 2px solid #ff006d55;
+  outline-offset: 2px;
+}
+.telegram-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 24px;
+  margin-top: 24px;
+}
+.network-product .telegram-review .telegram-open {
+  display: inline-flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  background: var(--surface-ink);
+  border: 0;
+  border-radius: 9px;
+  color: var(--surface);
+  padding: 17px 23px;
+  min-height: 56px;
+  font-size: 14px;
+}
+.network-product .telegram-review .telegram-open:hover {
+  background: #34332d;
+  color: white;
+}
+.telegram-open > svg {
+  color: #ff77ad;
+}
+.telegram-copy,
+.telegram-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 0;
+  font-size: 12px;
+  color: var(--ink);
+}
+.telegram-copy:hover,
+.telegram-edit:hover {
+  color: var(--pink);
+}
+.network-product .telegram-copy-status {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #44634c;
+  margin: 10px 0 16px;
+}
+.network-product .telegram-delivery-note {
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  padding-top: 20px;
+  border-top: 1px solid var(--border-soft);
+  margin-bottom: 14px;
+}
+.network-product .telegram-long-notice {
+  padding: 16px;
+  border-left: 2px solid var(--gold);
+  border-radius: 0 8px 8px 0;
+  background: #f1eadf;
+  font-size: 13px;
+  line-height: 1.8;
+  margin: 20px 0 0;
+}
+@media (max-width: 600px) {
+  .network-product .telegram-review {
+    padding: 24px 20px;
+    border-radius: 12px;
+    margin-top: 10px;
+    scroll-margin-top: 16px;
+  }
+  .telegram-review-top {
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 23px;
+  }
+  .telegram-review-top .folio {
+    font-size: 8px;
+    max-width: 155px;
+  }
+  .telegram-review-badge {
+    padding: 6px 8px;
+    font-size: 9px;
+  }
+  .network-product .telegram-review h2 {
+    font-size: 38px;
+  }
+  .network-product .telegram-review-intro {
+    font-size: 13px;
+  }
+  .telegram-recipient {
+    padding: 11px 12px;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 22px;
+  }
+  .telegram-recipient > svg {
+    margin-left: auto;
+  }
+  .network-product .telegram-review .telegram-preview {
+    padding: 14px;
+    font-size: 16px;
+    line-height: 1.65;
+    min-height: 310px;
+  }
+  .telegram-review-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .network-product .telegram-review .telegram-open {
+    width: 100%;
+    font-size: 13px;
+    padding-inline: 18px;
+  }
+  .telegram-copy {
+    font-size: 12px;
+  }
+  .network-product .telegram-delivery-note {
+    font-size: 11px;
+  }
+  .network-product .telegram-long-notice {
+    font-size: 12px;
+  }
+}
+.footer-evolution .footer-main > nav a {
+  max-width: 100%;
+}
+.footer-telegram > span {
+  min-width: 0;
+}

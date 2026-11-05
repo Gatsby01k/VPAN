@@ -6,6 +6,7 @@ import { industries, label } from '../network';
 import { NLink, Action, Arrow, Eyebrow } from '../components/NetworkLayout';
 import { useGrowth } from '../growth';
 import { SceneArt, ThreadLink } from '../components/Editorial';
+import { telegramUsername, telegramUrl } from '../telegram';
 
 export function Invitation() {
   const { t } = useLocale();
@@ -251,13 +252,17 @@ export function Contact() {
           <a href="mailto:hello@vladdos.com">
             hello@vladdos.com <Arrow />
           </a>
+          <a href={telegramUrl} target="_blank" rel="noopener noreferrer">
+            {t('Private Telegram', 'Личный Telegram')} · @{telegramUsername}
+            <Arrow />
+          </a>
           <a href="https://t.me/vladdos_network" target="_blank" rel="noreferrer">
             {t('Telegram community', 'Telegram-сообщество')} <Arrow />
           </a>
           <p className="community-note">
             {t(
-              'The group is public. Use the private brief or email for commercial details. An official channel and Connect Bot are not connected yet.',
-              'Группа публичная. Коммерческие сведения передавайте через конфиденциальный бриф или email. Официальный канал и Connect Bot пока не подключены.',
+              'The community is public. Send commercial details to the private Telegram chat or by email. The brief prepares a message; you send it in Telegram yourself.',
+              'Сообщество публичное. Коммерческие сведения передавайте в личный Telegram или по email. Бриф подготавливает текст — вы сами отправляете его в Telegram.',
             )}
           </p>
         </div>
@@ -294,10 +299,16 @@ export function Legal({ type }: { type: 'privacy' | 'terms' }) {
         {(privacy
           ? [
               [
+                'Sending through Telegram',
+                'Передача через Telegram',
+                `You can review your complete brief and open a private chat with @${telegramUsername}. Opening the chat does not send the message: you press Send in Telegram. The website cannot confirm delivery or issue a database receipt for this route. Telegram handles the message under its own terms and privacy policy. Do not post business details to the public community.`,
+                `Вы можете проверить весь бриф и открыть личный чат с @${telegramUsername}. Открытие чата не отправляет сообщение: вы нажимаете «Отправить» в Telegram. Сайт не подтверждает доставку и не выдаёт серверный номер для этого способа. Telegram обрабатывает сообщение по собственным условиям и политике конфиденциальности. Не публикуйте деловые сведения в общем сообществе.`,
+              ],
+              [
                 'What we collect',
                 'Какие данные собираем',
-                'We store the contact you supply, optional company name and introduction, selected industry, countries, capabilities and methods, optional operating and commercial context, consent version and submission reference. Campaign or referral identifiers may be stored for attribution.',
-                'Сохраняем указанный контакт, необязательные название компании и сообщение, индустрию, страны, возможности и методы, необязательные операционные и коммерческие сведения, версию согласия и номер обращения. Можем сохранять идентификаторы кампании и рекомендации для учёта источника.',
+                'The brief can contain a contact, company name, business context, selected industry, countries, capabilities and methods, operating and commercial details, and campaign or referral identifiers. You review these details before sending them through Telegram. If database submission is enabled, the service also records consent and a submission reference.',
+                'Бриф может содержать контакт, название компании, контекст задачи, индустрию, страны, возможности и методы, операционные и коммерческие сведения, идентификаторы кампании или рекомендации. Вы проверяете эти сведения перед отправкой через Telegram. Если включена серверная отправка, сервис также сохраняет согласие и номер обращения.',
               ],
               [
                 'Why we use it',
@@ -308,8 +319,8 @@ export function Legal({ type }: { type: 'privacy' | 'terms' }) {
               [
                 'Storage and access',
                 'Хранение и доступ',
-                'Enquiries and the notification queue are stored in the service database. The private Deal Desk requires an operations credential. Notifications contain a reference rather than contact details. Your browser session may retain an unfinished draft; successful submission clears it. Language preference is stored locally.',
-                'Обращения и очередь уведомлений хранятся в базе сервиса. Доступ в Deal Desk требует операционного ключа. Уведомления содержат номер обращения без контактов. В сессии браузера может храниться черновик; после отправки он удаляется. Язык сохраняется локально.',
+                'Your browser session may retain an unfinished draft. Opening Telegram keeps that draft so you can recover it; it does not save the enquiry to Deal Desk. If database submission is enabled, a confirmed server receipt clears the contact-bearing draft and the private Deal Desk requires an operations credential. Language preference is stored locally.',
+                'В сессии браузера может храниться черновик. Открытие Telegram сохраняет его для возврата и не создаёт запись в Deal Desk. Если включена серверная отправка, подтверждённый номер удаляет контактные данные черновика; доступ в Deal Desk требует операционного ключа. Язык сохраняется локально.',
               ],
               [
                 'Your choices',

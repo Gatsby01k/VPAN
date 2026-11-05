@@ -6,6 +6,10 @@ The website preserves the original compositions, character artwork, signature, i
 
 ## Run and verify
 
+The public brief currently uses **direct Telegram delivery to `@V1aDDoS`**. Visitors review the full message, open the private chat, and press Send in Telegram themselves. Preparing or opening a message does not create a database receipt. Long drafts use the complete-text copy fallback; the browser draft remains available. Contact and footer links distinguish this personal chat from the public community.
+
+`VITE_BRIEF_DELIVERY=telegram` is the default public build-time mode. Set `VITE_BRIEF_DELIVERY=desk` before building only after the persistent intake service is configured and verified. This restores the existing durable API submission path. The Telegram route requires neither a bot token nor a backend; it does not repair the separate content API, growth worker, analytics, or Deal Desk deployment.
+
 Node 24 is recommended. The runtime uses Node's SQLite API; no database npm dependency is required.
 
 ```bash
@@ -24,7 +28,7 @@ npm start
 npm test
 ```
 
-`npm test` builds first, then tests HTTP → SQLite → response, legacy database migration, privacy boundaries, retry conflicts, qualification, matching, bilateral permission, commercial terms, statement accounting, outbox recovery and existing editorial behavior. The current suite has 54 passing tests and uses disposable databases. Browser QA also uses a separate database; fixture companies are never production seed data.
+`npm test` builds first, then tests HTTP → SQLite → response, legacy database migration, privacy boundaries, retry conflicts, qualification, matching, bilateral permission, commercial terms, statement accounting, outbox recovery and existing editorial behavior. The current suite has 56 passing tests and uses disposable databases. Browser QA also uses a separate database; fixture companies are never production seed data.
 
 ## Product architecture
 

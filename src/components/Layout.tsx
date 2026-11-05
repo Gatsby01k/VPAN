@@ -7,6 +7,7 @@ import { useLocale } from '../locale';
 import { countries, regions, networkMeta } from '../network';
 import { useGrowth } from '../growth';
 import { recordPage } from './acquisition';
+import { telegramUsername, telegramUrl } from '../telegram';
 
 function CommandMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { language, t } = useLocale();
@@ -384,6 +385,15 @@ export function Footer() {
                 <ArrowUpRight size={14} />
               </Link>
               <Link to="/contact">{t('Contact', 'Контакты')}</Link>
+              <a
+                className="footer-telegram"
+                href={telegramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>Telegram · @{telegramUsername}</span>
+                <ArrowUpRight size={14} aria-hidden="true" />
+              </a>
               <Link to="/knowledge">{t('Field notes', 'Материалы')}</Link>
             </div>
           </nav>

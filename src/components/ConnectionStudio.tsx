@@ -3,6 +3,7 @@ import { ArrowUpRight, Check } from 'lucide-react';
 import { useLocale } from '../locale';
 import { scenarios, scenarioLink } from '../brief';
 import { NLink } from './NetworkLayout';
+import { telegramBriefEnabled } from '../telegram';
 
 // This is the entry to the brief, not a second intake form.
 export function ConnectionStudio({
@@ -107,9 +108,23 @@ export function ConnectionStudio({
                 <span>{t('WHAT HAPPENS NEXT', 'СЛЕДУЮЩИЕ ШАГИ')}</span>
                 <ol>
                   <li>{t('Define the market and scope', 'Укажите рынок и задачу')}</li>
-                  <li>{t('Leave a private business contact', 'Оставьте рабочий контакт')}</li>
                   <li>
-                    {t('Deal Desk reviews the opportunity', 'Deal Desk проверит возможность')}
+                    {t(
+                      telegramBriefEnabled
+                        ? 'Review the complete message'
+                        : 'Leave a private business contact',
+                      telegramBriefEnabled ? 'Проверьте полный текст' : 'Оставьте рабочий контакт',
+                    )}
+                  </li>
+                  <li>
+                    {t(
+                      telegramBriefEnabled
+                        ? 'Send it in a private Telegram chat'
+                        : 'Deal Desk reviews the opportunity',
+                      telegramBriefEnabled
+                        ? 'Отправьте в личный Telegram'
+                        : 'Deal Desk проверит возможность',
+                    )}
                   </li>
                 </ol>
               </div>
