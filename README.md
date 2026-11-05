@@ -24,7 +24,7 @@ npm start
 npm test
 ```
 
-`npm test` builds first, then tests HTTP → SQLite → response, legacy database migration, privacy boundaries, retry conflicts, qualification, matching, bilateral permission, commercial terms, statement accounting, outbox recovery and existing editorial behavior. The current suite has 48 passing tests and uses disposable databases. Browser QA also uses a separate database; fixture companies are never production seed data.
+`npm test` builds first, then tests HTTP → SQLite → response, legacy database migration, privacy boundaries, retry conflicts, qualification, matching, bilateral permission, commercial terms, statement accounting, outbox recovery and existing editorial behavior. The current suite has 54 passing tests and uses disposable databases. Browser QA also uses a separate database; fixture companies are never production seed data.
 
 ## Product architecture
 
@@ -121,3 +121,11 @@ npm run release:check -- https://candidate-host
 The QA server prints the path of its private session file, containing a temporary Deal Desk key. It never opens the configured production database. `QA_PORT=3101 QA_INTAKE_DISABLED=1 npm run qa:serve` runs the unavailable-backend scenario. These test keys and databases stay outside the repository. The notification transport uses a real local HTTP sink, not Telegram or a production notification service.
 
 The read-only release check cannot establish production readiness on its own. A designated end-to-end request, authenticated desk inspection, real notification acknowledgement and a recoverable database backup remain release gates.
+
+## UI/UX evolution (5 November 2026)
+
+The interface now has a stable floating header, direct need/offer entry points, keyboard-operated search with ranked results, an expanded footer, clearer market filters and a quieter brief workspace. The brief has distinct role icons, scope completion, section shortcuts and an expandable mobile summary. The original illustrations, animated connection thread and two-language routes remain in use.
+
+`src/evolution.css` defines the current surface, border, control-radius and motion tokens and is imported after the retained styles. Extend the appropriate section there for new controls instead of introducing a page-specific visual system. Keep transactional behavior in the existing components and service.
+
+See [the design and verification record](research/UI_UX_EVOLUTION_2026-11-05_RU.md) for scope, responsive checks and the disposable browser-to-database test. This UI candidate is prepared on `codex/ui-ux-evolution`.

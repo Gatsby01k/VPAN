@@ -114,13 +114,16 @@ export function Markets() {
           ))}
         </div>
         <div className="market-toolbar">
-          <button
-            className="region-reset"
-            onClick={() => updateFilter('region', '')}
-            aria-pressed={!region}
-          >
-            {t('All regions', 'Все регионы')}
-          </button>
+          <div className="market-filter-heading">
+            <span className="folio">{t('FIND YOUR NEXT MARKET', 'НАЙДИТЕ СВОЙ РЫНОК')}</span>
+            <button
+              className="region-reset"
+              onClick={() => updateFilter('region', '')}
+              aria-pressed={!region}
+            >
+              {t('All regions', 'Все регионы')}
+            </button>
+          </div>
           <label className="search-field country-search">
             <Search size={18} aria-hidden="true" />
             <input
@@ -144,6 +147,35 @@ export function Markets() {
           {region ? t(region.name, region.ru) : t('All regions', 'Все регионы')} <span>/</span>{' '}
           {t('Countries found', 'Найдено стран')}: {filtered.length}
         </p>
+        {(query || region) && (
+          <div
+            className="market-active-filters"
+            aria-label={t('Active filters', 'Активные фильтры')}
+          >
+            {region && (
+              <button
+                onClick={() => updateFilter('region', '')}
+                aria-label={
+                  t('Remove region filter: ', 'Убрать фильтр региона: ') + t(region.en, region.ru)
+                }
+              >
+                {t(region.en, region.ru)}
+                <X size={13} aria-hidden="true" />
+              </button>
+            )}
+            {query && (
+              <button
+                onClick={() => updateFilter('q', '')}
+                aria-label={t('Clear search: ', 'Очистить поиск: ') + query}
+              >
+                “{query}”<X size={13} aria-hidden="true" />
+              </button>
+            )}
+            <button className="market-clear-all" onClick={reset}>
+              {t('Clear all', 'Сбросить всё')}
+            </button>
+          </div>
+        )}
         {groups.map((group) => (
           <section className="country-group" key={group.id} aria-labelledby={`region-${group.id}`}>
             <div className="country-group-heading">
@@ -159,6 +191,9 @@ export function Markets() {
               {group.countries.map((country) => (
                 <article key={country.slug}>
                   <Link to={`/markets/${country.slug}`} className="country-card">
+                    <span className="country-code-art" aria-hidden="true">
+                      {country.code}
+                    </span>
                     <div className="country-card-meta">
                       <span>
                         {country.code} / {country.currency}

@@ -9,6 +9,7 @@ import {
   Copy,
   Send,
   LoaderCircle,
+  LockKeyhole,
 } from 'lucide-react';
 import { useLocale } from '../locale';
 import {
@@ -457,6 +458,7 @@ export default function ConnectionEngine() {
       type="button"
       key={c.id}
       aria-pressed={brief.capabilities.includes(c.id)}
+      aria-label={label(c, language)}
       onClick={() => update({ capabilities: toggle(brief.capabilities, c.id) })}
     >
       {label(c, language)}
@@ -469,6 +471,17 @@ export default function ConnectionEngine() {
       brief.capabilities.includes(c.id),
   );
   const more = capabilities.filter((c) => !relevant.includes(c));
+  const checkpoints: { field: BriefField; title: string; done: boolean }[] = [
+    { field: 'role', title: t('Role', 'Роль'), done: !!brief.companyType },
+    { field: 'industry', title: t('Industry', 'Индустрия'), done: !!brief.industry },
+    { field: 'country', title: t('Markets', 'Рынки'), done: brief.countries.length > 0 },
+    {
+      field: 'capability',
+      title: t('Capabilities', 'Возможности'),
+      done: brief.capabilities.length > 0,
+    },
+  ];
+  const completed = checkpoints.filter((item) => item.done).length;
   return (
     <section className="connection-engine wrap">
       <div className="engine-title">
@@ -488,6 +501,12 @@ export default function ConnectionEngine() {
               'Один конфиденциальный бриф под конкретную B2B-задачу. До знакомства соответствие проверяет человек.',
             )}
           </p>
+          <div className="engine-trust">
+            <LockKeyhole size={14} aria-hidden="true" />
+            <span>{t('Private by default', 'Конфиденциально по умолчанию')}</span>
+            <i />
+            <span>{t('Reviewed by a person', 'Проверяет человек')}</span>
+          </div>
         </div>
         <NLink className="text-link" to="/contact">
           {t('General enquiry', 'Общий вопрос')}
@@ -554,6 +573,33 @@ export default function ConnectionEngine() {
                 )}
           </p>
           <form onSubmit={submit} className="engine-form" aria-busy={busy} noValidate>
+            <details className="brief-mobile-summary">
+              <summary>
+                <span>
+                  {t('Your brief', 'Ваш бриф')}
+                  <small>
+                    I {brief.side.toUpperCase()} · {completed}/4
+                  </small>
+                </span>
+                <ChevronDown size={18} aria-hidden="true" />
+              </summary>
+              <p>
+                {completed
+                  ? [
+                      label(
+                        companyTypes.find((item) => item.id === brief.companyType),
+                        language,
+                      ),
+                      ...scopeSummary,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')
+                  : t(
+                      'Your selections will appear here as you build your brief.',
+                      'Здесь появятся выбранные вами параметры брифа.',
+                    )}
+              </p>
+            </details>
             <div className="engine-main">
               <fieldset className="engine-fields" disabled={busy || !ready}>
                 <legend className="sr-only">
@@ -637,6 +683,7 @@ export default function ConnectionEngine() {
                             type="button"
                             key={i.id}
                             aria-pressed={brief.industry === i.id}
+                            aria-label={label(i, language)}
                             onClick={() => {
                               setIndustryExplicit(true);
                               update({ industry: i.id });
@@ -694,10 +741,10 @@ export default function ConnectionEngine() {
                                 type="button"
                                 key={c.id}
                                 aria-pressed={brief.countries.includes(c.id)}
+                                aria-label={`${label(c, language)} · ${c.currency}`}
                                 onClick={() => changeCountry(c.id)}
                               >
-                                {label(c, language)}
-                                <small>{c.currency}</small>
+                                {label(c, language)} <small>{c.currency}</small>
                               </button>
                             ))
                         ) : (
@@ -758,7 +805,7 @@ export default function ConnectionEngine() {
                         <details className="engine-details">
                           <summary>
                             {t('Other capabilities', 'Другие возможности')}
-                            <span aria-hidden="true">+</span>
+                            <ChevronDown size={18} aria-hidden="true" />
                           </summary>
                           <div className="choice-set">{more.map(capabilityButton)}</div>
                         </details>
@@ -845,7 +892,7 @@ export default function ConnectionEngine() {
                                 'Partner & commercial context · optional',
                                 'Партнёр и коммерческий контекст · необязательно',
                               )}
-                          <span aria-hidden="true">+</span>
+                          <ChevronDown size={18} aria-hidden="true" />
                         </summary>
                         {paymentScope && (
                           <>
@@ -1109,6 +1156,18 @@ export default function ConnectionEngine() {
               aria-label={t('Your opportunity profile', 'Ваш профиль возможности')}
             >
               <Eyebrow>PRIVATE BRIEF / {brief.side.toUpperCase()}</Eyebrow>
+              <div className="brief-completion">
+                <span>{t('Business scope', 'Задача бизнеса')}</span>
+                <strong>
+                  {completed}
+                  <span> / 4</span>
+                </strong>
+                <progress
+                  max={4}
+                  value={completed}
+                  aria-label={t('Completed scope sections', 'Заполнено разделов задачи')}
+                />
+              </div>
               <h2>
                 {t('Your business.', 'Ваш бизнес.')}
                 <em>{t('In context.', 'В контексте.')}</em>
@@ -1154,6 +1213,29 @@ export default function ConnectionEngine() {
                   </>
                 )}
               </dl>
+              <nav
+                className="brief-checkpoints"
+                aria-label={t('Edit brief sections', 'Изменить разделы брифа')}
+              >
+                {checkpoints.map((item, index) => (
+                  <button
+                    type="button"
+                    key={item.field}
+                    disabled={busy}
+                    data-complete={item.done}
+                    onClick={() => {
+                      setStep('scope');
+                      focusField(item.field);
+                    }}
+                  >
+                    <span>
+                      {item.done ? <Check size={12} aria-hidden="true" /> : `0${index + 1}`}
+                    </span>
+                    {item.title}
+                    <ArrowRight size={13} aria-hidden="true" />
+                  </button>
+                ))}
+              </nav>
               <div className="brief-status">
                 <span />
                 {t('Draft · not submitted', 'Черновик · не отправлен')}

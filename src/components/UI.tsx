@@ -109,6 +109,7 @@ export function Dialog({
     const dialog = ref.current;
     if (!open || !dialog) return;
     dialog.showModal();
+    dialog.querySelector<HTMLElement>('[data-autofocus], [autofocus]')?.focus();
     if (modalLocks++ === 0) {
       originalOverflow = document.documentElement.style.overflow;
       document.documentElement.style.overflow = 'hidden';

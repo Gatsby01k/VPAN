@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NLink as Link } from './NetworkLayout';
-import { ArrowUpRight, Command, Menu, Search } from 'lucide-react';
+import { ArrowUpRight, ArrowUp, Command, CornerDownLeft, Menu, Search } from 'lucide-react';
 import { Brand, Dialog } from './UI';
 import { useLocale } from '../locale';
 import { countries, regions, networkMeta } from '../network';
@@ -12,6 +12,8 @@ function CommandMenu({ open, onClose }: { open: boolean; onClose: () => void }) 
   const { language, t } = useLocale();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
+  const [active, setActive] = useState(0);
+  const resultsId = useId();
   const items = [
     {
       title: t('How the network works', 'Как работает сеть'),
@@ -55,12 +57,27 @@ function CommandMenu({ open, onClose }: { open: boolean; onClose: () => void }) 
       path: '/markets/' + c.id,
     })),
   ];
+  const search = query.trim().toLocaleLowerCase();
   const filtered = items.filter((i) =>
-    `${i.title} ${i.subtitle}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()),
+    `${i.title} ${i.subtitle}`.toLocaleLowerCase().includes(search),
   );
+  if (search) {
+    const score = (item: (typeof items)[number]) => {
+      const title = item.title.toLocaleLowerCase();
+      return title === search ? 3 : title.startsWith(search) ? 2 : title.includes(search) ? 1 : 0;
+    };
+    filtered.sort((a, b) => score(b) - score(a));
+  }
   useEffect(() => {
-    if (open) setQuery('');
+    if (open) {
+      setQuery('');
+      setActive(0);
+    }
   }, [open]);
+  useEffect(() => {
+    if (open)
+      document.getElementById(`${resultsId}-${active}`)?.scrollIntoView({ block: 'nearest' });
+  }, [active, query, open, resultsId]);
   const go = (path: string) => {
     onClose();
     navigate(path + (language === 'ru' ? (path.includes('?') ? '&' : '?') + 'lang=ru' : ''));
@@ -72,24 +89,61 @@ function CommandMenu({ open, onClose }: { open: boolean; onClose: () => void }) 
       title={t('Quick navigation', 'Быстрая навигация')}
       className="command-dialog"
     >
+      <p className="command-eyebrow">
+        {t('THE NETWORK, AT YOUR FINGERTIPS', 'ВСЯ СЕТЬ — ПОД РУКОЙ')}
+      </p>
       <div className="command-search">
         <Search size={20} />
         <input
           autoFocus
+          data-autofocus
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && filtered[0]) go(filtered[0].path);
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setActive(0);
           }}
+          onKeyDown={(e) => {
+            if (e.nativeEvent.isComposing) return;
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+              e.preventDefault();
+              setActive((index) =>
+                filtered.length
+                  ? (index + (e.key === 'ArrowDown' ? 1 : -1) + filtered.length) % filtered.length
+                  : 0,
+              );
+            }
+            if (e.key === 'Enter' && filtered[active]) {
+              e.preventDefault();
+              go(filtered[active].path);
+            }
+          }}
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={open}
+          aria-controls={resultsId}
+          aria-activedescendant={filtered[active] ? `${resultsId}-${active}` : undefined}
           placeholder={t('Where would you like to go?', 'Куда хотите перейти?')}
           aria-label={t('Search pages, regions and countries', 'Поиск страниц, регионов и стран')}
         />
         <kbd>ESC</kbd>
       </div>
-      <div className="command-results">
+      <div
+        className="command-results"
+        id={resultsId}
+        role="listbox"
+        aria-label={t('Destinations', 'Разделы')}
+      >
         {filtered.length ? (
-          filtered.map((i) => (
-            <button key={i.path} onClick={() => go(i.path)}>
+          filtered.map((i, index) => (
+            <button
+              key={i.path}
+              id={`${resultsId}-${index}`}
+              role="option"
+              aria-selected={active === index}
+              tabIndex={-1}
+              onMouseEnter={() => setActive(index)}
+              onClick={() => go(i.path)}
+            >
               <span>
                 <strong>{i.title}</strong>
                 <small>{i.subtitle}</small>
@@ -107,7 +161,16 @@ function CommandMenu({ open, onClose }: { open: boolean; onClose: () => void }) 
         )}
       </div>
       <div className="command-footer">
-        <Command size={12} /> K <span>{t('to open anywhere', 'из любого раздела')}</span>
+        <span>
+          <kbd>↑</kbd>
+          <kbd>↓</kbd> {t('Navigate', 'Выбрать')}
+        </span>
+        <span>
+          <CornerDownLeft size={13} /> {t('Open', 'Открыть')}
+        </span>
+        <span className="command-count" role="status">
+          {t('Results:', 'Найдено:')} {filtered.length}
+        </span>
       </div>
     </Dialog>
   );
@@ -119,28 +182,17 @@ export function Header() {
   const [menu, setMenu] = useState(false);
   const [command, setCommand] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [onArtwork, setOnArtwork] = useState(false);
   useEffect(() => {
-    const update = () => {
-      setScrolled(window.scrollY > 24);
-      setOnArtwork(
-        [...document.querySelectorAll('.scene-art')].some((scene) => {
-          const box = scene.getBoundingClientRect();
-          return box.top <= 84 && box.bottom > 84;
-        }),
-      );
-    };
+    const update = () => setScrolled(window.scrollY > 24);
     update();
     window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
     return () => {
       window.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
     };
   }, [location.pathname]);
   useEffect(() => {
     setMenu(false);
-  }, [location.pathname, location.hash]);
+  }, [location.pathname, location.hash, location.search]);
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -169,7 +221,7 @@ export function Header() {
         {t('Skip to content', 'Перейти к содержимому')}
       </a>
       <header
-        className={`site-header ${location.pathname === '/' ? 'is-deck-home' : ''} ${scrolled ? 'is-scrolled' : ''} ${onArtwork ? 'on-artwork' : ''}`}
+        className={`site-header ${location.pathname === '/' ? 'is-deck-home' : ''} ${scrolled ? 'is-scrolled' : ''}`}
       >
         <div className="header-inner wrap">
           <Brand />
@@ -192,7 +244,11 @@ export function Header() {
                 <Link
                   key={path}
                   to={path}
-                  aria-current={location.pathname === path ? 'page' : undefined}
+                  aria-current={
+                    location.pathname === path || location.pathname.startsWith(path + '/')
+                      ? 'page'
+                      : undefined
+                  }
                 >
                   {label}
                   {path === '/contact' && <ArrowUpRight size={17} aria-hidden="true" />}
@@ -201,6 +257,10 @@ export function Header() {
             )}
           </nav>
           <div className="header-tools">
+            <Link className="header-brief" to="/find-a-partner">
+              {t('Start a brief', 'Составить бриф')}
+              <ArrowUpRight size={16} aria-hidden="true" />
+            </Link>
             <button
               className="language-button"
               onClick={() => setLanguage(language === 'en' ? 'ru' : 'en')}
@@ -214,13 +274,17 @@ export function Header() {
               aria-label={t('Open quick navigation', 'Открыть быструю навигацию')}
               aria-keyshortcuts="Meta+K Control+K"
             >
-              <Search size={20} strokeWidth={1.6} />
+              <Search size={18} strokeWidth={1.6} />
+              <kbd>
+                <Command size={11} /> K
+              </kbd>
             </button>
             <button
               className="icon-button mobile-toggle"
               onClick={() => setMenu(true)}
               aria-label={t('Open menu', 'Открыть меню')}
               aria-expanded={menu}
+              aria-controls="mobile-navigation"
             >
               <Menu size={22} />
             </button>
@@ -234,21 +298,40 @@ export function Header() {
         className="mobile-menu"
       >
         <Brand />
-        <div className="mobile-menu-links">
+        <p className="mobile-menu-eyebrow">
+          {t('YOUR NEXT CONNECTION STARTS HERE', 'ВАШЕ СЛЕДУЮЩЕЕ ЗНАКОМСТВО')}
+        </p>
+        <div className="mobile-intents">
+          <Link to="/find-a-partner" onClick={() => setMenu(false)}>
+            <small>I NEED</small>
+            <span>{t('Find a partner', 'Найти партнёра')}</span>
+            <ArrowUpRight size={22} />
+          </Link>
+          <Link to="/join" onClick={() => setMenu(false)}>
+            <small>I OFFER</small>
+            <span>{t('Join the network', 'Стать партнёром')}</span>
+            <ArrowUpRight size={22} />
+          </Link>
+        </div>
+        <nav
+          className="mobile-menu-links"
+          id="mobile-navigation"
+          aria-label={t('Mobile navigation', 'Мобильная навигация')}
+        >
           {links.map(([path, label], index) => (
             <div key={path}>
-              <Link to={path} onClick={() => setMenu(false)}>
+              <Link
+                to={path}
+                aria-current={location.pathname === path ? 'page' : undefined}
+                onClick={() => setMenu(false)}
+              >
                 <small>0{index + 1}</small>
                 {label}
                 <ArrowUpRight size={27} />
               </Link>
             </div>
           ))}
-          <Link to="/contact" onClick={() => setMenu(false)} className="mobile-menu-apply">
-            {t('Take the other end', 'Возьмите другой конец')}
-            <ArrowUpRight size={28} />
-          </Link>
-        </div>
+        </nav>
         <button
           className="mobile-search"
           onClick={() => {
@@ -268,17 +351,68 @@ export function Header() {
 export function Footer() {
   const { t } = useLocale();
   return (
-    <footer className="editorial-footer wrap">
-      <Link to="/" className="folio">
-        VlaDDoS Network
-      </Link>
-      <nav aria-label={t('Footer navigation', 'Навигация в подвале')}>
-        <Link to="/knowledge">{t('Field notes', 'Материалы')}</Link>
-        <Link to="/privacy">{t('Privacy', 'Конфиденциальность')}</Link>
-        <Link to="/terms">{t('Terms', 'Условия')}</Link>
-        <a href="mailto:hello@vladdos.com">hello@vladdos.com</a>
-      </nav>
-      <span>© {new Date().getUTCFullYear()}</span>
+    <footer className="editorial-footer footer-evolution">
+      <div className="wrap">
+        <div className="footer-main">
+          <div className="footer-statement">
+            <Brand />
+            <p>
+              {t('Good business starts', 'Хороший бизнес начинается')}
+              <em>{t('with the right people.', 'с нужных людей.')}</em>
+            </p>
+            <a href="mailto:hello@vladdos.com">
+              hello@vladdos.com
+              <ArrowUpRight size={18} />
+            </a>
+          </div>
+          <nav aria-label={t('Footer navigation', 'Навигация в подвале')}>
+            <div>
+              <span className="folio">{t('EXPLORE', 'ИЗУЧИТЬ')}</span>
+              <Link to="/network">{t('The network', 'Как работает сеть')}</Link>
+              <Link to="/industries">{t('Industries', 'Индустрии')}</Link>
+              <Link to="/markets">{t('Markets', 'Рынки')}</Link>
+              <Link to="/about">{t('About us', 'О нас')}</Link>
+            </div>
+            <div>
+              <span className="folio">{t('CONNECT', 'СВЯЗАТЬСЯ')}</span>
+              <Link to="/find-a-partner">
+                {t('Find a partner', 'Найти партнёра')}
+                <ArrowUpRight size={14} />
+              </Link>
+              <Link to="/join">
+                {t('Join the network', 'Стать партнёром')}
+                <ArrowUpRight size={14} />
+              </Link>
+              <Link to="/contact">{t('Contact', 'Контакты')}</Link>
+              <Link to="/knowledge">{t('Field notes', 'Материалы')}</Link>
+            </div>
+          </nav>
+        </div>
+        <div className="footer-baseline">
+          <span>© {new Date().getUTCFullYear()} VlaDDoS Network</span>
+          <span className="footer-geography">
+            ASIA <i /> LATAM <i /> AFRICA
+          </span>
+          <div>
+            <Link to="/privacy">{t('Privacy', 'Конфиденциальность')}</Link>
+            <Link to="/terms">{t('Terms', 'Условия')}</Link>
+            <button
+              aria-label={t('Back to top', 'Вернуться наверх')}
+              onClick={() => {
+                window.scrollTo({
+                  top: 0,
+                  behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                    ? 'instant'
+                    : 'smooth',
+                });
+                document.getElementById('main')?.focus({ preventScroll: true });
+              }}
+            >
+              <ArrowUp size={17} />
+            </button>
+          </div>
+        </div>
+      </div>
     </footer>
   );
 }

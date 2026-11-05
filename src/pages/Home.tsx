@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { ArrowDown, ArrowUpRight } from 'lucide-react';
+import { ArrowDown, ArrowRight, ArrowUpRight, Globe2 } from 'lucide-react';
 import { useLocale } from '../locale';
 import { NLink as Link } from '../components/NetworkLayout';
 import { ConnectionStudio } from '../components/ConnectionStudio';
 import { SceneArt, SceneFoot, ThreadLink, ExchangeScene } from '../components/Editorial';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
 import { ConnectionThread } from '../components/ConnectionThread';
-import { regions, positioning } from '../network';
+import { regions, countries, positioning } from '../network';
 import { scenarioLink } from '../brief';
 
 export default function Home() {
@@ -55,24 +55,40 @@ export default function Home() {
       <section className="editorial-scene hero-scene" aria-labelledby="hero-title">
         <SceneArt name="hero" priority />
         <div className="scene-copy hero-copy">
+          <p className="hero-eyebrow">
+            <span aria-hidden="true" />
+            {t('INDEPENDENT. INTERNATIONAL. CONNECTED.', 'НЕЗАВИСИМЫЕ. МЕЖДУНАРОДНЫЕ. НА СВЯЗИ.')}
+          </p>
           <h1 className="editorial-title" id="hero-title">
-            <span>{t('The other', 'Другая')}</span>
-            <em>{t('side.', 'сторона.')}</em>
+            <span>{t('The other', 'Другая')}</span> <em>{t('side.', 'сторона.')}</em>
           </h1>
           <p className="hero-subtitle">{intro.headline}</p>
           <p className="hero-network-context">
             {intro.focus}
             <span>{intro.markets}</span>
           </p>
-          <ThreadLink to="/#connection">{t('Meet the network', 'Знакомьтесь с сетью')}</ThreadLink>
           <div className="hero-network-actions">
             <Link to="/find-a-partner">
-              I NEED <ArrowUpRight size={15} />
+              <span>
+                <small>I NEED</small>
+                <strong>{t('Find a partner', 'Найти партнёра')}</strong>
+              </span>
+              <ArrowUpRight size={22} aria-hidden="true" />
             </Link>
             <Link to="/join">
-              I OFFER <ArrowUpRight size={15} />
+              <span>
+                <small>I OFFER</small>
+                <strong>{t('Join the network', 'Стать партнёром')}</strong>
+              </span>
+              <ArrowUpRight size={22} aria-hidden="true" />
             </Link>
           </div>
+          <p className="hero-assurance">
+            {t(
+              'Private brief. Human review. Relevant introductions.',
+              'Конфиденциальный бриф. Личная проверка. Деловые знакомства.',
+            )}
+          </p>
         </div>
         <div className="hero-follow">
           <span className="folio">VlaDDoS Network</span>
@@ -83,6 +99,32 @@ export default function Home() {
           </Link>
         </div>
       </section>
+      <nav
+        className="home-market-strip wrap"
+        aria-label={t('Explore regional directions', 'Изучить региональные направления')}
+      >
+        <div className="market-strip-intro">
+          <Globe2 size={22} strokeWidth={1.3} aria-hidden="true" />
+          <span>
+            {t('LOCAL KNOWLEDGE.', 'ЗНАНИЕ РЫНКА.')}
+            <br />
+            <strong>{t('A wider perspective.', 'Шире горизонт.')}</strong>
+          </span>
+        </div>
+        {regions.map((region, index) => (
+          <Link key={region.id} to={`/markets?region=${region.id}`}>
+            <small>0{index + 1}</small>
+            <span>
+              {t(region.en, region.ru)}
+              <small>
+                {t('Research destinations', 'Стран в обзоре')} ·{' '}
+                {countries.filter((c) => c.region === region.id).length}
+              </small>
+            </span>
+            <ArrowRight size={18} aria-hidden="true" />
+          </Link>
+        ))}
+      </nav>
       <section
         className="editorial-scene connection-scene"
         id="connection"

@@ -10,6 +10,7 @@ import './editorial.css';
 import './audit.css';
 import './network.css';
 import './network-integration.css';
+import './evolution.css';
 import { emptyGrowth, type GrowthData } from './growth';
 
 const root = document.getElementById('root')!;

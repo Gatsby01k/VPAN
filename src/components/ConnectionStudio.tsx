@@ -16,6 +16,7 @@ export function ConnectionStudio({
 }) {
   const { t } = useLocale();
   const [role, setRole] = useState('');
+  const selected = scenarios.find((scenario) => scenario.id === role);
   return (
     <section className="profile-builder section scenario-entry" aria-labelledby="profile-title">
       <div className="wrap">
@@ -86,6 +87,11 @@ export function ConnectionStudio({
                 {t('PRIVATE PARTNERSHIP BRIEF', 'КОНФИДЕНЦИАЛЬНЫЙ ПАРТНЁРСКИЙ БРИФ')}
               </div>
               <h3>I {side.toUpperCase()}</h3>
+              <div className="pass-selected-role" role="status">
+                {selected
+                  ? t(selected.en, selected.ru)
+                  : t('Your next business connection', 'Ваше следующее деловое знакомство')}
+              </div>
               <p className="scenario-purpose">
                 {side === 'need'
                   ? t(
