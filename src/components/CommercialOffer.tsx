@@ -1,4 +1,4 @@
-import { ArrowUpRight } from 'lucide-react';
+import { SignatureArrow } from './ConnectionProtocol';
 import { useLocale } from '../locale';
 import { NLink, Eyebrow } from './NetworkLayout';
 import { scenarioLink } from '../brief';
@@ -60,38 +60,6 @@ const relationships = [
   ],
 ];
 
-export function CommercialPromise() {
-  const { t } = useLocale();
-  return (
-    <section className="commercial-promise wrap" aria-labelledby="commercial-promise-title">
-      <div>
-        <Eyebrow>{t('THE COMMERCIAL CONNECTION', 'КОММЕРЧЕСКАЯ СВЯЗЬ')}</Eyebrow>
-        <h2 id="commercial-promise-title">
-          {t('The right people.', 'Нужные люди.')}
-          <em>{t('A reason to do business.', 'Основа для бизнеса.')}</em>
-        </h2>
-      </div>
-      <div className="commercial-promise-copy">
-        <p>
-          {t(
-            'A merchant needs local payment acceptance. A PSP needs a capable local operator. An introducer knows the right business. VlaDDoS brings the brief, the counterparties and the commercial terms into one conversation.',
-            'Мерчанту нужен локальный приём. PSP — компетентный местный оператор. Рекомендатель знает нужную компанию. VlaDDoS объединяет задачу, контрагентов и коммерческие условия в одном разговоре.',
-          )}
-        </p>
-        <NLink className="text-link" to="/network#commercial-model">
-          {t('Explore the commercial model', 'Как устроена коммерческая модель')}
-          <ArrowUpRight size={18} />
-        </NLink>
-        <div className="commercial-proof-points">
-          <span>{t('01 / Specific scope', '01 / Конкретная задача')}</span>
-          <span>{t('02 / Permission to introduce', '02 / Разрешение на знакомство')}</span>
-          <span>{t('03 / Written commercial terms', '03 / Письменные условия')}</span>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 export function ParticipantEconomics() {
   const { t } = useLocale();
   return (
@@ -109,18 +77,18 @@ export function ParticipantEconomics() {
             <span>0{index + 1}</span>
             <h3>{t(en, ru)}</h3>
             <p>{t(result, resultRu)}</p>
-            <ArrowUpRight size={20} aria-hidden="true" />
+            <SignatureArrow />
           </summary>
           <div>
             <p>{t(copy, copyRu)}</p>
             <nav aria-label={t(`${en} next steps`, `${ru}: следующие шаги`)}>
               <NLink to={scenarioLink(id, 'need')}>
                 I NEED / {t('Find a partner', 'Найти партнёра')}
-                <ArrowUpRight size={17} />
+                <SignatureArrow />
               </NLink>
               <NLink to={scenarioLink(id, 'offer')}>
                 I OFFER / {t('Discuss a partnership', 'Предложить партнёрство')}
-                <ArrowUpRight size={17} />
+                <SignatureArrow />
               </NLink>
             </nav>
           </div>

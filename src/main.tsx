@@ -12,6 +12,7 @@ import './network.css';
 import './network-integration.css';
 import './evolution.css';
 import './commercial-public.css';
+import './counterpart-public.css';
 import { emptyGrowth, type GrowthData } from './growth';
 
 const root = document.getElementById('root')!;

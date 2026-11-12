@@ -1,16 +1,7 @@
+import { IntentStitch, SignatureArrow, ThreadProgress } from '../components/ConnectionProtocol';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useLocation } from 'react-router-dom';
-import {
-  Check,
-  ArrowRight,
-  ArrowLeft,
-  ChevronDown,
-  RotateCcw,
-  Copy,
-  Send,
-  LoaderCircle,
-  LockKeyhole,
-} from 'lucide-react';
+import { Check, ChevronDown, RotateCcw, Copy, LockKeyhole } from 'lucide-react';
 import { useLocale } from '../locale';
 import {
   regions,
@@ -570,9 +561,7 @@ export default function ConnectionEngine() {
       </div>
       {receipt ? (
         <div className="receipt" id="engine-result" tabIndex={-1}>
-          <span className="receipt-mark">
-            <Check size={34} />
-          </span>
+          <ThreadProgress state="resolved" />
           <Eyebrow>{t('SAVED TO THE DEAL DESK', 'СОХРАНЕНО В DEAL DESK')}</Eyebrow>
           <h2>{t('Your brief is received.', 'Ваш бриф получен.')}</h2>
           <p>
@@ -613,7 +602,7 @@ export default function ConnectionEngine() {
             >
               01 / {t('Business scope', 'Задача бизнеса')}
             </button>
-            <span aria-hidden="true">→</span>
+            <SignatureArrow direction="forward" />
             <button
               type="button"
               aria-current={step === 'contact' ? 'step' : undefined}
@@ -643,7 +632,7 @@ export default function ConnectionEngine() {
                     : 'Обязательны только контакт и согласие. Остальные сведения — по желанию.',
                 )}
           </p>
-          <form onSubmit={submit} className="engine-form" aria-busy={busy} noValidate>
+          <form onSubmit={submit} className="engine-form" noValidate>
             <details className="brief-mobile-summary">
               <summary>
                 <span>
@@ -672,7 +661,7 @@ export default function ConnectionEngine() {
               </p>
             </details>
             <div className="engine-main">
-              <fieldset className="engine-fields" disabled={busy || !ready}>
+              <fieldset className="engine-fields" disabled={busy || !ready} aria-busy={busy}>
                 <legend className="sr-only">
                   {step === 'scope'
                     ? t('Business scope', 'Задача бизнеса')
@@ -699,6 +688,7 @@ export default function ConnectionEngine() {
                         </button>
                       ))}
                     </fieldset>
+                    <IntentStitch side={brief.side} />
                     <div
                       className="loom-section"
                       id="engine-role"
@@ -794,7 +784,7 @@ export default function ConnectionEngine() {
                             onClick={() => update({ region: r.id })}
                           >
                             {label(r, language)}
-                            <ArrowRight size={16} />
+                            <SignatureArrow direction="forward" />
                           </button>
                         ))}
                       </fieldset>
@@ -1163,6 +1153,7 @@ export default function ConnectionEngine() {
               </fieldset>
               {error && (
                 <div className="form-error" role="alert">
+                  <ThreadProgress state="error" />
                   {formMessages[error]}
                 </div>
               )}
@@ -1178,23 +1169,30 @@ export default function ConnectionEngine() {
                       focusField('role');
                     }}
                   >
-                    <ArrowLeft size={17} />
+                    <SignatureArrow direction="return" />
                     {t('Back to scope', 'Назад к задаче')}
                   </button>
                 )}
-                <button type="submit" className="action submit-action" disabled={busy || !ready}>
-                  {busy && <LoaderCircle className="spin" size={18} />}
-                  <span>
-                    {busy
-                      ? t('Saving your brief…', 'Сохраняем бриф…')
-                      : step === 'scope'
-                        ? t('Continue to contact', 'Перейти к контакту')
-                        : telegramBriefEnabled
-                          ? t('Review for Telegram', 'Проверить бриф для Telegram')
-                          : t('Send for human review', 'Отправить на рассмотрение')}
-                  </span>
-                  {!busy && (step === 'scope' ? <ArrowRight size={19} /> : <Send size={18} />)}
-                </button>
+                <div className="engine-submit" data-pending={busy}>
+                  <button type="submit" className="action submit-action" disabled={busy || !ready}>
+                    <span>
+                      {busy
+                        ? t('Saving your brief…', 'Сохраняем бриф…')
+                        : step === 'scope'
+                          ? t('Continue to contact', 'Перейти к контакту')
+                          : telegramBriefEnabled
+                            ? t('Review for Telegram', 'Проверить бриф для Telegram')
+                            : t('Send for human review', 'Отправить на рассмотрение')}
+                    </span>
+                    {!busy && <SignatureArrow direction="forward" />}
+                  </button>
+                  {busy && (
+                    <ThreadProgress
+                      state="pending"
+                      label={t('Saving your brief', 'Сохраняем бриф')}
+                    />
+                  )}
+                </div>
               </div>
               {offline && (
                 <div className="offline-actions">
@@ -1323,7 +1321,7 @@ export default function ConnectionEngine() {
                       {item.done ? <Check size={12} aria-hidden="true" /> : `0${index + 1}`}
                     </span>
                     {item.title}
-                    <ArrowRight size={13} aria-hidden="true" />
+                    <SignatureArrow direction="forward" />
                   </button>
                 ))}
               </nav>

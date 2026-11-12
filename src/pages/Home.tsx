@@ -1,276 +1,333 @@
 import { useState } from 'react';
-import { ArrowDown, ArrowRight, ArrowUpRight, Globe2 } from 'lucide-react';
 import { useLocale } from '../locale';
 import { NLink as Link } from '../components/NetworkLayout';
 import { ConnectionStudio } from '../components/ConnectionStudio';
-import { SceneArt, SceneFoot, ThreadLink, ExchangeScene } from '../components/Editorial';
+import { ThreadLink } from '../components/Editorial';
+import { SignatureArrow } from '../components/ConnectionProtocol';
+import { Engraving, HeroImpression } from '../components/CounterpartArt';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
 import { ConnectionThread } from '../components/ConnectionThread';
-import { CommercialPromise } from '../components/CommercialOffer';
-import { regions, countries, positioning } from '../network';
+import { countries, regions } from '../network';
 import { scenarioLink } from '../brief';
+import '../counterpart-home.css';
+
+type Side = 'need' | 'offer';
+
+const intents = [
+  ['need', 'I NEED', 'Find a partner', 'Найти партнёра'],
+  ['offer', 'I OFFER', 'Join the network', 'Стать партнёром'],
+] as const;
+
+const participants = [
+  [
+    'psp',
+    'offer',
+    'PSPs & aggregators',
+    'PSP и агрегаторы',
+    'Local infrastructure and relevant merchant demand.',
+    'Локальная инфраструктура и спрос мерчантов.',
+  ],
+  [
+    'merchant',
+    'need',
+    'Merchants & operators',
+    'Мерчанты и операторы',
+    'Acceptance, payouts and local operating partners.',
+    'Приём, выплаты и локальные операционные партнёры.',
+  ],
+  [
+    'local-partner',
+    'offer',
+    'Local payment partners',
+    'Локальные платёжные партнёры',
+    'Local methods, operating scope and market knowledge.',
+    'Локальные методы, операционные возможности и знание рынка.',
+  ],
+] as const;
+
+const regionNotes = {
+  asia: [
+    'Explore local collection methods, wallets and operating requirements.',
+    'Изучите локальные методы приёма, кошельки и операционные требования.',
+  ],
+  latam: [
+    'Compare local payment rails, settlement and merchant requirements.',
+    'Сравните локальные платёжные системы, расчёты и требования к мерчантам.',
+  ],
+  africa: [
+    'Research mobile money, bank transfers and local operating context.',
+    'Изучите мобильные деньги, банковские переводы и местный контекст.',
+  ],
+} as const;
+
+const milestones = [
+  [
+    'Qualification',
+    'Квалификация',
+    'We clarify the company, the market, the need and the capabilities on offer.',
+    'Уточняем компанию, рынок, задачу и предлагаемые возможности.',
+  ],
+  [
+    'Permission & terms',
+    'Разрешение и условия',
+    'We agree what can be shared, who is responsible and how the work is paid.',
+    'Согласуем, что можно раскрыть, кто за что отвечает и как оплачивается работа.',
+  ],
+  [
+    'Introduction',
+    'Знакомство',
+    'When there is a credible fit and permission on both sides, we connect the people involved.',
+    'При обоснованном соответствии и согласии обеих сторон знакомим участников.',
+  ],
+  [
+    'Follow-through',
+    'Развитие сделки',
+    'We follow the discussion and track agreed milestones and outcomes.',
+    'Следим за обсуждением, согласованными этапами и результатами.',
+  ],
+] as const;
 
 export default function Home() {
-  const { t, language } = useLocale();
-  const intro = positioning[language];
-  const [side, setSide] = useState<'need' | 'offer'>('need');
+  const { t } = useLocale();
+  const [side, setSide] = useState<Side>('need');
   const [intentExplicit, setIntentExplicit] = useState(false);
-  const chooseSide = (next: 'need' | 'offer', explicit = true) => {
+  const [region, setRegion] = useState('asia');
+  const selectedRegion = regions.find((item) => item.id === region) ?? regions[0];
+  const regionNote = regionNotes[selectedRegion.id as keyof typeof regionNotes];
+  const chooseSide = (next: Side, explicit = true) => {
     setSide(next);
     if (explicit) setIntentExplicit(true);
   };
-  const entries = [
-    {
-      id: 'need' as const,
-      title: 'I NEED',
-      text: t(
-        'Find a partner for a specific business need.',
-        'Найдите партнёра под конкретную задачу.',
-      ),
-    },
-    {
-      id: 'offer' as const,
-      title: 'I OFFER',
-      text: t('Introduce your company and capabilities.', 'Представьте компанию и её возможности.'),
-    },
-  ];
-  const participants = [
-    {
-      id: 'psp',
-      title: t('PSPs & aggregators', 'PSP и агрегаторы'),
-      path: scenarioLink('psp', 'offer'),
-    },
-    {
-      id: 'merchant',
-      title: t('Merchants & operators', 'Мерчанты и операторы'),
-      path: scenarioLink('merchant', 'need'),
-    },
-    {
-      id: 'local-partner',
-      title: t('Local payment partners', 'Локальные партнёры'),
-      path: scenarioLink('local-partner', 'offer'),
-    },
-  ];
+  const activePath = side === 'need' ? '/find-a-partner' : '/join';
+  const activeLabel =
+    side === 'need'
+      ? t('Find a partner', 'Найти партнёра')
+      : t('Join the network', 'Стать партнёром');
+
   return (
-    <div className="editorial-home">
-      <section className="editorial-scene hero-scene" aria-labelledby="hero-title">
-        <SceneArt name="hero" priority />
-        <div className="scene-copy hero-copy">
-          <p className="hero-eyebrow">
-            <span aria-hidden="true" />
-            {t('INDEPENDENT. INTERNATIONAL. CONNECTED.', 'НЕЗАВИСИМЫЕ. МЕЖДУНАРОДНЫЕ. НА СВЯЗИ.')}
-          </p>
-          <h1 className="editorial-title" id="hero-title">
-            <span>{t('The other', 'Другая')}</span> <em>{t('side.', 'сторона.')}</em>
-          </h1>
-          <p className="hero-subtitle">
-            {t(
-              'Payment partners. Qualified demand. Commercial introductions.',
-              'Платёжные партнёры. Целевой спрос. Деловые знакомства.',
-            )}
-          </p>
-          <p className="hero-network-context">
-            {intro.focus}
-            <span>{intro.markets}</span>
-          </p>
-          <div className="hero-network-actions">
-            <Link to="/find-a-partner">
-              <span>
-                <small>I NEED</small>
-                <strong>{t('Find a partner', 'Найти партнёра')}</strong>
-              </span>
-              <ArrowUpRight size={22} aria-hidden="true" />
-            </Link>
-            <Link to="/join">
-              <span>
-                <small>I OFFER</small>
-                <strong>{t('Join the network', 'Стать партнёром')}</strong>
-              </span>
-              <ArrowUpRight size={22} aria-hidden="true" />
-            </Link>
+    <div className="counterpart-home">
+      <section className="world-cover" aria-labelledby="hero-title">
+        <Engraving className="cover-engraving" />
+        <HeroImpression />
+        <div className="world-cover-inner">
+          <div className="world-cover-title">
+            <p className="world-label">{t('Independent B2B network', 'Независимая B2B-сеть')}</p>
+            <h1 id="hero-title">
+              <span>{t('The other', 'Другая')} </span>
+              <em>{t('side.', 'сторона.')}</em>
+            </h1>
           </div>
-          <p className="hero-assurance">
-            {t(
-              'Private brief. Human review. Relevant introductions.',
-              'Конфиденциальный бриф. Личная проверка. Деловые знакомства.',
-            )}
+          <div className="world-cover-invitation">
+            <p>
+              {t(
+                'We source payment partners and make qualified commercial introductions.',
+                'Находим платёжных партнёров и организуем деловые знакомства после проверки.',
+              )}
+            </p>
+            <div className="world-cover-choices">
+              {intents.map(([id, code, en, ru]) => (
+                <Link
+                  to={id === 'need' ? '/find-a-partner' : '/join'}
+                  key={id}
+                  className="thread-ticket"
+                  data-intent={id}
+                >
+                  <span>
+                    <small>{code}</small>
+                    <strong>{t(en, ru)}</strong>
+                  </span>
+                  <SignatureArrow />
+                </Link>
+              ))}
+            </div>
+            <ThreadLink
+              to="/#connection"
+              direction="down"
+              variant="utility"
+              className="cover-follow"
+            >
+              {t('Follow the thread', 'Следуйте за нитью')}
+            </ThreadLink>
+          </div>
+          <p className="cover-territories">
+            {t('Asia / Latin America / Africa', 'Азия / Латинская Америка / Африка')}
           </p>
-        </div>
-        <div className="hero-follow">
-          <span className="folio">VlaDDoS Network</span>
-          <i>/</i>
-          <Link to="/#connection">
-            {t('How it works', 'Как это работает')}
-            <ArrowDown size={16} />
-          </Link>
         </div>
       </section>
-      <nav
-        className="home-market-strip wrap"
-        aria-label={t('Explore regional directions', 'Изучить региональные направления')}
-      >
-        <div className="market-strip-intro">
-          <Globe2 size={22} strokeWidth={1.3} aria-hidden="true" />
-          <span>
-            {t('LOCAL KNOWLEDGE.', 'ЗНАНИЕ РЫНКА.')}
-            <br />
-            <strong>{t('A wider perspective.', 'Шире горизонт.')}</strong>
-          </span>
-        </div>
-        {regions.map((region, index) => (
-          <Link key={region.id} to={`/markets?region=${region.id}`}>
-            <small>0{index + 1}</small>
-            <span>
-              {t(region.en, region.ru)}
-              <small>
-                {t('Research destinations', 'Стран в обзоре')} ·{' '}
-                {countries.filter((c) => c.region === region.id).length}
-              </small>
-            </span>
-            <ArrowRight size={18} aria-hidden="true" />
-          </Link>
-        ))}
-      </nav>
-      <CommercialPromise />
-      <section
-        className="editorial-scene connection-scene"
-        id="connection"
-        aria-labelledby="connection-title"
-      >
-        <ConnectionThread side={side} explicit={intentExplicit} />
-        <div className="scene-copy connection-copy">
-          <h2 className="editorial-title" id="connection-title">
-            {t('A clear brief.', 'Понятная задача.')}
-            <span>
-              <em>{t('A relevant partner.', 'Подходящий партнёр.')}</em>
-            </span>
-          </h2>
-          <p className="scene-subtitle">{t('What brings you here?', 'С чем вы приходите?')}</p>
-          <div
-            className="connection-roles"
-            role="group"
-            aria-label={t('Your place in the network', 'Ваше место в сети')}
-          >
-            {entries.map((entry, i) => (
-              <div key={entry.id} className={side === entry.id ? 'is-selected' : ''}>
-                <button aria-pressed={side === entry.id} onClick={() => chooseSide(entry.id)}>
-                  <small>0{i + 1}</small>
-                  {entry.title}
-                  <ArrowUpRight size={17} />
-                </button>
-                <p>{entry.text}</p>
-                {side === entry.id && (
-                  <Link to={side === 'need' ? '/find-a-partner' : '/join'}>
-                    {t('Continue', 'Продолжить')}
-                    <ArrowUpRight size={16} />
-                  </Link>
-                )}
-              </div>
-            ))}
+
+      <section className="world-connection" id="connection" aria-labelledby="object-title">
+        <div className="connection-station">
+          <div className="connection-intro">
+            <p className="world-label">{t('The physical thread', 'Физическая нить')}</p>
+            <h2 id="object-title">
+              {t('Take the', 'Возьмите')} <em>{t('other end.', 'другой конец.')}</em>
+            </h2>
+            <p className="station-instruction">
+              {t(
+                'Pull the ring toward an eyelet, or choose an intent below.',
+                'Потяните кольцо к одному из ушек или выберите намерение ниже.',
+              )}
+            </p>
+          </div>
+          <ConnectionThread side={side} explicit={intentExplicit} onSide={chooseSide} />
+          <div className="station-controls" id="two-sides">
+            <fieldset className="station-choices">
+              <legend className="sr-only">
+                {t('Choose your intention', 'Выберите намерение')}
+              </legend>
+              {intents.map(([id, code, en, ru]) => (
+                <label key={id} className="station-choice">
+                  <input
+                    type="radio"
+                    name="home-intention"
+                    value={id}
+                    checked={side === id}
+                    onChange={() => chooseSide(id)}
+                  />
+                  <i aria-hidden="true" />
+                  <span>
+                    <strong>{code}</strong>
+                    <small>{t(en, ru)}</small>
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+            <div className="station-outcome">
+              <p role="status">
+                {side === 'need'
+                  ? t(
+                      'Describe the capability or local partner you need.',
+                      'Опишите, какие возможности или какой местный партнёр вам нужны.',
+                    )
+                  : t(
+                      'Share your company’s capabilities or commercial opportunity.',
+                      'Расскажите о возможностях компании или деловом предложении.',
+                    )}
+              </p>
+              <ThreadLink to={activePath}>{activeLabel}</ThreadLink>
+            </div>
           </div>
         </div>
-        <SceneFoot number="02" label={t('THE CONNECTION', 'СВЯЗЬ')}>
-          <nav className="scene-regions" aria-label={t('Regions', 'Регионы')}>
-            {regions.map((region) => (
-              <Link key={region.id} to={`/markets?region=${region.id}`}>
-                {t(region.en, region.ru)}
-              </Link>
-            ))}
-          </nav>
-          <Link to="/markets">
-            {t('Explore markets', 'Изучить рынки')}
-            <ArrowUpRight size={17} />
-          </Link>
-          <a href="mailto:hello@vladdos.com">hello@vladdos.com</a>
-        </SceneFoot>
       </section>
-      <section
-        className="editorial-scene people-scene"
-        id="partners"
-        aria-labelledby="people-title"
-      >
-        <SceneArt name="people" />
-        <div className="scene-copy people-copy">
-          <h2 className="editorial-title" id="people-title">
-            <span>{t('Your place', 'Ваше место')}</span>
-            <em>{t('in the network.', 'в сети.')}</em>
-          </h2>
-          <p className="scene-subtitle">
-            {t(
-              'Bring a connection, a payment solution or local expertise.',
-              'Привносите связи, платёжные решения или локальный опыт.',
-            )}
-          </p>
-          <div className="people-links">
-            {participants.map((entry, i) => (
-              <Link to={entry.path} key={entry.id}>
-                <small>0{i + 1}</small>
-                <span>{entry.title}</span>
-                <ArrowUpRight />
-              </Link>
-            ))}
-          </div>
-          <Link className="people-industries" to="/industries">
-            {t('Explore industries', 'Все индустрии')}
-            <ArrowUpRight size={17} />
-          </Link>
+
+      <section className="world-network" id="partners" aria-labelledby="people-title">
+        <div className="network-impression" aria-hidden="true">
+          <img
+            src="/assets/editorial/people.webp"
+            alt=""
+            width="1586"
+            height="992"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
-        <svg className="people-thread" viewBox="0 0 1586 992" fill="none" aria-hidden="true">
-          <path
-            d="M101 532C254 533 367 522 467 526C620 524 710 562 865 612"
-            stroke="#ff006d"
-            strokeWidth="6"
-            strokeLinecap="round"
-          />
-          <path
-            d="M104 530C270 533 371 520 476 525C627 527 716 562 862 609"
-            stroke="#ffafce"
-            strokeWidth="1"
-            strokeLinecap="round"
-          />
-          <circle cx="101" cy="532" r="13" fill="#f6eddf" stroke="#252017" strokeWidth="1.5" />
-          <circle cx="101" cy="530" r="8" fill="#fff9e9" />
-        </svg>
-        <aside className="people-aside">
-          <h3>{t('Before we introduce.', 'До знакомства.')}</h3>
-          <p>
-            {t(
-              'We clarify the company, the market and what each side can provide. We introduce people when there is a credible fit.',
-              'Уточняем компанию, рынок и возможности каждой стороны. Знакомим людей при обоснованном соответствии.',
-            )}
-          </p>
-          <ol>
-            <li>{t('Qualify the opportunity', 'Проверяем возможность')}</li>
-            <li>{t('Agree the terms and permission', 'Согласуем условия и разрешение')}</li>
-            <li>{t('Arrange the introduction', 'Организуем знакомство')}</li>
+        <div className="world-network-inner">
+          <div className="world-network-title">
+            <p className="world-label">{t('The network', 'Сеть')}</p>
+            <h2 id="people-title">
+              {t('Who’s on the', 'Кто на')} <em>{t('other end?', 'другом конце?')}</em>
+            </h2>
+          </div>
+          <ol className="world-network-roles">
+            {participants.map(([id, target, en, ru, description, descriptionRu]) => (
+              <li key={id}>
+                <Link to={scenarioLink(id, target)}>
+                  <span className="role-eyelet" aria-hidden="true" />
+                  <span>
+                    <strong>{t(en, ru)}</strong>
+                    <small>{t(description, descriptionRu)}</small>
+                  </span>
+                  <SignatureArrow />
+                </Link>
+              </li>
+            ))}
           </ol>
-          <ThreadLink to="/#forge">{t('Build my brief', 'Собрать бриф')}</ThreadLink>
-          <small>{t('Terms come before introductions.', 'Условия согласуем до знакомства.')}</small>
-        </aside>
-        <SceneFoot number="03" label={t('THE PEOPLE', 'ЛЮДИ')}>
-          <Link to="/markets">
-            {t('Explore markets', 'Изучить рынки')}
-            <ArrowUpRight size={17} />
-          </Link>
-          <a href="mailto:hello@vladdos.com">hello@vladdos.com</a>
-        </SceneFoot>
+          <ThreadLink to="/network" variant="utility">
+            {t('See all network roles', 'Все роли в сети')}
+          </ThreadLink>
+        </div>
       </section>
-      <div id="forge" className="editorial-brief">
-        <ConnectionStudio side={side} onSide={chooseSide} intentExplicit={intentExplicit} />
-      </div>
-      <ExchangeScene />
-      <div className="editorial-guides">
-        <KnowledgeTeaser />
-      </div>
-      <section className="editorial-invitation wrap">
-        <span className="folio">06 / {t('YOUR NEXT CONNECTION', 'ВАША СЛЕДУЮЩАЯ СВЯЗЬ')}</span>
-        <h2>
-          {t('Take the', 'Возьмите')} <em>{t('other end.', 'другой конец.')}</em>
-        </h2>
-        <ThreadLink to={side === 'need' ? '/find-a-partner' : '/join'}>
-          {t('Start a conversation', 'Начать разговор')}
-        </ThreadLink>
+
+      <section className="world-atlas counter-dark" id="atlas" aria-labelledby="atlas-title">
+        <div className="world-atlas-inner" data-region={selectedRegion.id}>
+          <div className="world-dial">
+            <Engraving className="dial-engraving" />
+            <svg className="dial-needle" viewBox="0 0 300 300" aria-hidden="true">
+              <path d="M150 157V28l-4 9m4-9 4 9" />
+              <circle cx="150" cy="150" r="10" />
+              <circle cx="150" cy="150" r="3" />
+            </svg>
+            <fieldset className="dial-regions">
+              <legend className="sr-only">
+                {t('Preview a research region', 'Выберите регион для просмотра')}
+              </legend>
+              {regions.map((item) => (
+                <label key={item.id} data-region={item.id}>
+                  <input
+                    type="radio"
+                    name="atlas-region"
+                    checked={item.id === selectedRegion.id}
+                    onChange={() => setRegion(item.id)}
+                  />
+                  <i aria-hidden="true" />
+                  {t(item.en, item.ru)}
+                </label>
+              ))}
+            </fieldset>
+          </div>
+          <div className="world-atlas-copy">
+            <p className="world-label">{t('The atlas', 'Атлас')}</p>
+            <h2 id="atlas-title">{t('Local knowledge.', 'Местный контекст.')}</h2>
+            <div className="atlas-reading" role="status">
+              <strong>{t(selectedRegion.en, selectedRegion.ru)}</strong>
+              <span>
+                {countries.filter((country) => country.region === selectedRegion.id).length}{' '}
+                {t('research destinations', 'стран в каталоге')}
+              </span>
+              <p>{t(regionNote[0], regionNote[1])}</p>
+            </div>
+            <ThreadLink to={`/markets?region=${selectedRegion.id}`}>
+              {t(`Explore ${selectedRegion.en}`, `Смотреть регион: ${selectedRegion.ru}`)}
+            </ThreadLink>
+          </div>
+        </div>
       </section>
+
+      <section className="world-procedure" id="how-it-works" aria-labelledby="process-title">
+        <div className="procedure-title">
+          <p className="world-label">{t('The procedure', 'Процедура')}</p>
+          <h2 id="process-title">{t('Before we introduce.', 'До знакомства.')}</h2>
+          <ThreadLink to="/network#commercial-model" variant="utility">
+            {t('Read the commercial terms', 'Как устроена оплата')}
+          </ThreadLink>
+        </div>
+        <ol className="procedure-stitches">
+          {milestones.map(([en, ru, description, descriptionRu], i) => (
+            <li key={en}>
+              <span aria-hidden="true">0{i + 1}</span>
+              <h3>{t(en, ru)}</h3>
+              <p>{t(description, descriptionRu)}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <div className="world-exchange" id="exchange">
+        <div className="exchange-impression" aria-hidden="true">
+          <img
+            src="/assets/editorial/exchange.webp"
+            alt=""
+            width="1586"
+            height="992"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+        <div className="counter-forge" id="forge">
+          <ConnectionStudio side={side} onSide={chooseSide} intentExplicit={intentExplicit} />
+        </div>
+      </div>
+      <KnowledgeTeaser />
     </div>
   );
 }

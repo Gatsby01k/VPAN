@@ -1,5 +1,5 @@
+import { SignatureArrow } from './ConnectionProtocol';
 import { NLink as Link } from './NetworkLayout';
-import { ArrowUpRight } from 'lucide-react';
 import { useGrowth } from '../growth';
 import { useLocale } from '../locale';
 import { Eyebrow } from './UI';
@@ -22,14 +22,14 @@ export function KnowledgeTeaser({ market = '' }: { market?: string }) {
         </Eyebrow>
         <h2>{t('Before the first conversation.', 'До первого разговора.')}</h2>
         <Link className="text-link" to="/knowledge">
-          {t('All partner guides', 'Все материалы')} <ArrowUpRight size={15} aria-hidden="true" />
+          {t('All partner guides', 'Все материалы')} <SignatureArrow />
         </Link>
       </div>
       <div>
         {guides.map((guide) => (
           <Link to={'/knowledge/' + guide.slug} key={guide.slug}>
             <span>{t(guide.title, guide.titleRu)}</span>
-            <ArrowUpRight size={20} aria-hidden="true" />
+            <SignatureArrow />
           </Link>
         ))}
       </div>

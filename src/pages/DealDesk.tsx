@@ -39,7 +39,13 @@ const emptyReport = {
   agreements: [] as Row[],
   revenue: [] as Row[],
   totals: [] as Row[],
-  notifications: { configured: false, pending: 0, failed: 0, jobs: [] as Row[] },
+  notifications: {
+    configured: false,
+    pending: 0,
+    failed: 0,
+    jobs: [] as Row[],
+    telegram: { available: false, connected: false, username: '' },
+  },
 };
 const money = (minor: number, currency: string) => {
   try {
@@ -66,6 +72,7 @@ export default function DealDesk() {
   const [detail, setDetail] = useState<Row | null>(null);
   const [note, setNote] = useState('');
   const [notice, setNotice] = useState('');
+  const [telegramLink, setTelegramLink] = useState<{ code: string; url: string } | null>(null);
   const state = (s: string) => (language === 'ru' ? statusRu[s] || s : s.replaceAll('-', ' '));
   const eventText = (event: Row) => {
     if (event.kind !== 'qualification') return event.detail;
@@ -113,14 +120,17 @@ export default function DealDesk() {
   const load = async (auth = token) => {
     setReport(await request('', 'GET', undefined, auth));
   };
-  const perform = async (fn: () => Promise<unknown>) => {
+  const perform = async (
+    fn: () => Promise<unknown>,
+    success = t('Saved to the Deal Desk.', 'Сохранено в Deal Desk.'),
+  ) => {
     setBusy(true);
     setError('');
     setNotice('');
     try {
       await fn();
       await load();
-      setNotice(t('Saved to the Deal Desk.', 'Сохранено в Deal Desk.'));
+      setNotice(success);
     } catch (e) {
       setError(e instanceof Error ? e.message : t('Unable to save', 'Не удалось сохранить'));
     } finally {
@@ -222,6 +232,7 @@ export default function DealDesk() {
               setReport(emptyReport);
               setSelected(null);
               setDetail(null);
+              setTelegramLink(null);
             }}
           >
             <LogOut size={17} />
@@ -1043,11 +1054,92 @@ export default function DealDesk() {
       )}
       {tab === 'notifications' && (
         <section className="desk-notifications">
+          {report.notifications.telegram?.available && (
+            <div className="desk-telegram">
+              <h2>Telegram</h2>
+              <p>
+                {report.notifications.telegram.connected
+                  ? t('Your private chat is connected.', 'Ваш личный чат подключён.')
+                  : t(
+                      'Connect a private chat to receive new enquiry alerts.',
+                      'Подключите личный чат, чтобы получать уведомления о новых заявках.',
+                    )}
+              </p>
+              {telegramLink ? (
+                <>
+                  <p>
+                    {t(
+                      'Open your one-time link and press Start in Telegram. Then confirm here within 10 minutes.',
+                      'Откройте одноразовую ссылку и нажмите Start в Telegram. Затем подтвердите здесь в течение 10 минут.',
+                    )}
+                  </p>
+                  <div className="desk-telegram-actions">
+                    <a className="action" href={telegramLink.url} target="_blank" rel="noreferrer">
+                      {t('Open Telegram bot', 'Открыть бота в Telegram')}
+                    </a>
+                    <button
+                      className="action"
+                      disabled={busy}
+                      onClick={() =>
+                        void perform(
+                          async () => {
+                            await request('/notifications/telegram/confirm', 'POST', {
+                              code: telegramLink.code,
+                            });
+                            setTelegramLink(null);
+                          },
+                          t('Telegram chat connected.', 'Чат Telegram подключён.'),
+                        )
+                      }
+                    >
+                      {t('Confirm chat', 'Подтвердить чат')}
+                    </button>
+                    <button className="text-link" onClick={() => setTelegramLink(null)}>
+                      {t('Close', 'Закрыть')}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="desk-telegram-actions">
+                  <button
+                    className="action"
+                    disabled={busy}
+                    onClick={() =>
+                      void perform(async () => {
+                        setTelegramLink(await request('/notifications/telegram/start', 'POST', {}));
+                      }, '')
+                    }
+                  >
+                    {report.notifications.telegram.connected
+                      ? t('Change chat', 'Сменить чат')
+                      : t('Connect Telegram', 'Подключить Telegram')}
+                  </button>
+                  {report.notifications.telegram.connected && (
+                    <button
+                      className="text-link"
+                      disabled={busy}
+                      onClick={() =>
+                        void perform(
+                          () => request('/notifications/telegram/test', 'POST', {}),
+                          t(
+                            'Telegram accepted the test message.',
+                            'Telegram принял тестовое сообщение.',
+                          ),
+                        )
+                      }
+                    >
+                      {t('Send test message', 'Отправить тест')}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
           <h2>{t('Durable delivery queue', 'Постоянная очередь доставки')}</h2>
           <p>
             {t(
-              'Only event IDs and references leave the desk. Delivery is at least once; the receiver must deduplicate Idempotency-Key. Retry processes due jobs and respects backoff.',
-              'За пределы Deal Desk передаются только идентификатор события и номер обращения. Доставка — минимум один раз; получатель обязан устранять дубли по Idempotency-Key. Повтор обрабатывает задания, срок которых наступил.',
+              'Alerts include a reference and a link to the private desk. Failed deliveries remain in the queue and retry when due.',
+              'В уведомлении есть номер заявки и ссылка на закрытый Deal Desk. При ошибке уведомление остаётся в очереди до следующей попытки.',
             )}
           </p>
           <button

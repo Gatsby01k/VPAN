@@ -235,24 +235,6 @@
 }
 
 @layer layout {
-  .site-header {
-    position: fixed;
-    inset: 0 0 auto;
-    z-index: 60;
-    background: rgba(16, 16, 17, 0.92);
-    transition: background 0.3s;
-  }
-  .site-header.is-scrolled {
-    background: rgba(16, 16, 17, 0.86);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid #2b2b2d;
-  }
-  .header-inner {
-    display: flex;
-    align-items: center;
-    gap: 26px;
-    min-height: 0;
-  }
   .brand {
     display: inline-flex;
     align-items: center;
@@ -272,52 +254,6 @@
     letter-spacing: 0.13em;
     color: var(--muted);
   }
-  .desktop-nav {
-    display: flex;
-    margin-left: auto;
-    align-items: center;
-    gap: 28px;
-  }
-  .desktop-nav a {
-    font-size: 11px;
-    color: #d0ceca;
-    position: relative;
-    padding-block: 8px;
-  }
-  .desktop-nav a::after {
-    content: '';
-    height: 1px;
-    background: var(--gold);
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.3s;
-  }
-  .desktop-nav a:hover::after,
-  .desktop-nav a.active::after {
-    transform: scaleX(1);
-  }
-  .header-tools {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-  }
-  .language-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 10px;
-    background: transparent;
-    border: 0;
-    padding: 8px 0;
-  }
-  .language-button span {
-    color: #777;
-    font-size: 12px;
-  }
   .icon-button {
     display: inline-flex;
     align-items: center;
@@ -331,10 +267,6 @@
   }
   .icon-button:hover {
     background: rgba(128, 128, 128, 0.12);
-  }
-  .command-trigger {
-    gap: 6px;
-    padding-inline: 3px;
   }
   kbd {
     font: 9px var(--body);
@@ -356,9 +288,6 @@
   }
   .header-apply:hover {
     background: #efce90;
-  }
-  .mobile-toggle {
-    display: none;
   }
   .scroll-progress {
     height: 1px;
@@ -917,11 +846,6 @@
     align-items: center;
     gap: 9px;
   }
-  .market-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-  }
   .market-card {
     background: #191917;
     border: 1px solid #39362e;
@@ -972,19 +896,6 @@
   .market-card:hover .market-country-code {
     color: #343025;
     transform: translateY(-5px);
-  }
-  .market-methods {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    color: #b1a894;
-    font-size: 8px;
-    padding-top: 17px;
-  }
-  .market-methods span {
-    padding: 3px 6px;
-    border: 1px solid #453d2e;
-    border-radius: 2px;
   }
   .market-card-footer {
     display: flex;
@@ -1048,65 +959,6 @@
     line-height: 1.9;
     margin: 30px 0;
     max-width: 500px;
-  }
-  .country-art {
-    height: 380px;
-    position: relative;
-    display: grid;
-    place-items: center;
-    overflow: hidden;
-    background: #201b1c;
-    border: 1px solid #4b3a31;
-    border-radius: 4px;
-  }
-  .country-art::before {
-    content: '';
-    position: absolute;
-    width: 85%;
-    aspect-ratio: 1;
-    background: radial-gradient(ellipse at 50% 50%, #ad7a3b2a, transparent 62%);
-  }
-  .country-art-code {
-    font: 600 185px/0.9 var(--display);
-    letter-spacing: -0.1em;
-    color: #c7a36a;
-    opacity: 0.6;
-    position: relative;
-  }
-  .country-art-orbit {
-    position: absolute;
-    width: 86%;
-    aspect-ratio: 1;
-    border: 1px solid #b28e664f;
-    border-radius: 50%;
-    transform: rotateX(58deg) rotateZ(-40deg);
-  }
-  .country-art-orbit::after {
-    content: '';
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    top: 30%;
-    left: 2%;
-    border-radius: 50%;
-    background: var(--pink);
-    box-shadow: 0 0 25px #ea308388;
-  }
-  .country-art-currency {
-    position: absolute;
-    top: 22px;
-    left: 24px;
-    color: #bd9f7a;
-    letter-spacing: 0.15em;
-    font-size: 9px;
-  }
-  .country-art-label {
-    position: absolute;
-    bottom: 24px;
-    right: 24px;
-    color: #9c8270;
-    font-size: 7px;
-    letter-spacing: 0.12em;
   }
   .country-details {
     background: #191917;
@@ -2269,15 +2121,6 @@
     .wrap {
       width: calc(100% - 56px);
     }
-    .desktop-nav {
-      display: none;
-    }
-    .header-tools {
-      margin-left: auto;
-    }
-    .mobile-toggle {
-      display: inline-flex;
-    }
     .hero-title {
       font-size: clamp(64px, 8.5vw, 98px);
     }
@@ -2412,9 +2255,6 @@
     .section-title-row > .action {
       margin-top: 24px;
     }
-    .market-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
     .market-toolbar {
       flex-wrap: wrap;
     }
@@ -2424,15 +2264,6 @@
     .country-hero {
       grid-template-columns: 1fr;
       gap: 35px;
-    }
-    .country-art {
-      height: 290px;
-    }
-    .country-art-code {
-      font-size: 190px;
-    }
-    .country-art-orbit {
-      width: 310px;
     }
     .country-partners {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2548,10 +2379,6 @@
     main {
       padding-top: 72px;
     }
-    .header-inner {
-      min-height: 0;
-      gap: 12px;
-    }
     .brand-word {
       font-size: 32px;
     }
@@ -2561,16 +2388,8 @@
     .brand {
       gap: 11px;
     }
-    .header-tools {
-      gap: 12px;
-    }
-    .header-apply,
-    .command-trigger {
+    .header-apply {
       display: none;
-    }
-    .language-button {
-      min-height: 44px;
-      padding: 10px 0;
     }
     .icon-button {
       min-width: 44px;
@@ -2884,10 +2703,6 @@
       font-size: 8px;
       padding-block: 19px;
     }
-    .market-grid {
-      grid-template-columns: 1fr;
-      gap: 13px;
-    }
     .market-card > a {
       min-height: 240px;
       padding: 22px;
@@ -2904,9 +2719,6 @@
     .market-country-code {
       font-size: 110px;
       top: 8px;
-    }
-    .market-methods {
-      font-size: 9px;
     }
     .market-card-footer {
       font-size: 9px;
@@ -2925,12 +2737,6 @@
     .country-intro {
       font-size: 12px;
       margin-top: 24px;
-    }
-    .country-art {
-      height: 280px;
-    }
-    .country-art-code {
-      font-size: 160px;
     }
     .country-details .section-description {
       margin-top: 20px;

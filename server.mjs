@@ -199,6 +199,9 @@ export function createApp({
     background: !managed,
     notificationUrl: process.env.NOTIFICATION_WEBHOOK_URL || '',
     notificationSecret: process.env.NOTIFICATION_WEBHOOK_SECRET || '',
+    telegramBotToken: process.env.TELEGRAM_BOT_TOKEN?.trim() || '',
+    telegramBotUsername: process.env.TELEGRAM_BOT_USERNAME?.trim().replace(/^@/, '') || '',
+    publicSiteUrl: publicSiteUrl || 'https://www.vladdos.com',
     aiKey: process.env.AI_GATEWAY_API_KEY || '',
     aiModel: process.env.AI_GATEWAY_MODEL || '',
     ...deskOptions,
@@ -437,6 +440,12 @@ export function createApp({
             return reply(res, 201, desk.agreement(body));
           if (pathname === '/api/admin/desk/revenue') return reply(res, 201, desk.revenue(body));
           if (pathname === '/api/admin/desk/merge') return reply(res, 200, desk.merge(body));
+          if (pathname === '/api/admin/desk/notifications/telegram/start')
+            return reply(res, 200, await desk.telegram.start());
+          if (pathname === '/api/admin/desk/notifications/telegram/confirm')
+            return reply(res, 200, await desk.telegram.confirm(body.code));
+          if (pathname === '/api/admin/desk/notifications/telegram/test')
+            return reply(res, 200, await desk.telegram.send(desk.telegram.chat()));
           if (pathname === '/api/admin/desk/notifications/retry') {
             await desk.flush();
             return reply(res, 200, desk.report().notifications);

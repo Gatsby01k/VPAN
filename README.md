@@ -2,13 +2,23 @@
 
 Independent international B2B partner sourcing and deal origination across Asia, Latin America and Africa. The public product serves two equal paths: **I NEED → Find a Partner** and **I OFFER → Join the Network**. Countries describe sourcing destinations, not verified network coverage.
 
-The website preserves the original compositions, character artwork, signature, ivory paper, torn black fabric, engraved gold and fuchsia thread. The new positioning and two-sided scenarios extend that design. Public copy, navigation, metadata and forms use VlaDDoS Network. Earlier assets and research remain under `research/` for provenance.
+The Counterpart is the public editorial system: two business intentions, one physical thread and a clear next step. It reframes the original character artwork, signature, paper, engraved gold and fuchsia cord in new compositions. See [The Counterpart](research/COUNTERPART.md) for the design system and review notes.
 
 ## Run and verify
 
 The public brief uses **automatic delivery selection**. A successful `/health` response declaring durable intake enables the existing persistent API. Without that verification, visitors review the full message and send it themselves in a private Telegram chat with `@V1aDDoS`. A manual handoff never creates a database receipt. Long drafts have a complete-text copy fallback.
 
 `VITE_BRIEF_DELIVERY=auto` is the default. Explicit `telegram` and `desk` modes remain available. The Telegram route requires neither a bot token nor a backend; it does not enable the private Deal Desk, analytics or growth worker. The three reviewed initial field notes now also have bilingual static pages and a public catalogue fallback; new dynamic publications still require the persistent service.
+
+To review the built site and both intake states without loading production credentials, start the disposable QA server:
+
+```bash
+npm run build
+npm run qa:serve
+# http://127.0.0.1:3100
+```
+
+The QA server uses a temporary SQLite database and a local notification receiver. Set `QA_INTAKE_DISABLED=1` before starting it to exercise the durable submission error. Stop it with Ctrl+C.
 
 Node 24 is recommended. Local and Docker installations use Node's SQLite API. Vercel uses the SQLite-compatible `libsql` driver to connect directly to the approved Turso database; the schema and commercial engine are shared.
 
@@ -84,9 +94,11 @@ Legacy status updates and Deal Desk updates remain synchronized with the origina
 
 ## Reliable notifications
 
-Set `NOTIFICATION_WEBHOOK_URL` to an authenticated HTTPS receiver and `NOTIFICATION_WEBHOOK_SECRET` to its Bearer secret. The receiver should forward the reference to the operator's chosen channel. The implementation does not assume or invent an email, Telegram bot or Slack destination.
+For Telegram, set `TELEGRAM_BOT_TOKEN` as a server secret and optionally `TELEGRAM_BOT_USERNAME` to check the bot's identity. Use a dedicated bot. In **Deal Desk → Notifications**, create a connection link, open it in the intended private chat, press Start and confirm within ten minutes. Send a test from the same screen. A paired chat receives the enquiry reference and a link to the authenticated Deal Desk. [Telegram bot setup](https://core.telegram.org/bots).
 
-The outbox sends JSON `{ event, id, reference, deskPath }`, without applicant contact details. `Idempotency-Key` is stable across retries. A 2xx response acknowledges delivery. Failed requests retry with exponential backoff up to a six-hour interval; pending jobs survive restarts. Delivery is at least once: the receiver must deduplicate event IDs. A lease prevents concurrent workers from delivering the same job at the same time. The desk reports unconfigured, pending and retrying states, plus per-reference delivery history and the next retry time. A stopped service cannot deliver jobs.
+For an HTTPS receiver, set `NOTIFICATION_WEBHOOK_URL` and `NOTIFICATION_WEBHOOK_SECRET`. When a Telegram chat is paired, it becomes the delivery destination. The same outbox tracks both transports. Deployment verification records are omitted from notification delivery.
+
+The HTTPS receiver gets JSON `{ event, id, reference, deskPath }` and a stable `Idempotency-Key`. A 2xx response acknowledges the webhook. The Telegram Bot API acknowledges `sendMessage` with `ok: true`. Failed requests retry with exponential backoff up to a six-hour interval, and pending jobs survive restarts. Delivery is at least once. Deduplicate webhook events by their IDs. A Telegram message may repeat if its acknowledgement is lost. A lease coordinates concurrent delivery, and the desk shows the state and next retry for each reference.
 
 ## Production deployment and migration
 

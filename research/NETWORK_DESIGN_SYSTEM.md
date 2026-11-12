@@ -1,5 +1,7 @@
 # VlaDDoS Network — preserved editorial design
 
+Historical implementation notes. For the current public design, see [The Counterpart](COUNTERPART.md).
+
 ## Mandate
 
 Extend the existing website with the new B2B strategy and two-sided product. Preserve its visual identity and compositions. The original styles (`styles.css`, `editorial-controls.css`, `growth.css`, `editorial.css`, `audit.css`, `fonts.css`) remain authoritative for the established pages. `network-integration.css` adds small adaptations; `network.css` is scoped under `.network-product` for the new product and operations screens.

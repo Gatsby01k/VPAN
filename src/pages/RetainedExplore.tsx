@@ -1,7 +1,10 @@
+import { Engraving } from '../components/CounterpartArt';
+import { SignatureArrow } from '../components/ConnectionProtocol';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { NLink as Link } from '../components/NetworkLayout';
-import { ArrowRight, ArrowUpRight, ChevronDown, Globe2, Search, X } from 'lucide-react';
+import { ChevronDown, Globe2, Search, X } from 'lucide-react';
+import { ThreadLink } from '../components/Editorial';
 import { Action, Eyebrow, PageHeading, Reveal } from '../components/UI';
 import { useLocale } from '../locale';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
@@ -111,7 +114,7 @@ export function Markets() {
               <span>
                 {t('Countries', 'Страны')}: {group.countries.length}
               </span>
-              <ArrowUpRight size={22} aria-hidden="true" />
+              <SignatureArrow />
             </button>
           ))}
         </div>
@@ -189,33 +192,20 @@ export function Markets() {
                 {t('Countries', 'Страны')}: {group.countries.length}
               </span>
             </div>
-            <div className="market-grid">
+            <ul className="market-ledger">
               {group.countries.map((country) => (
-                <article key={country.slug}>
-                  <Link to={`/markets/${country.slug}`} className="country-card">
-                    <span className="country-code-art" aria-hidden="true">
-                      {country.code}
+                <li key={country.slug}>
+                  <Link to={`/markets/${country.slug}`}>
+                    <span className="market-ledger-code">
+                      {country.code} / {country.currency}
                     </span>
-                    <div className="country-card-meta">
-                      <span>
-                        {country.code} / {country.currency}
-                      </span>
-                      <ArrowUpRight size={20} aria-hidden="true" />
-                    </div>
                     <h3>{t(country.name, country.ru)}</h3>
-                    <div className="market-methods">
-                      {country.methods.map((method) => (
-                        <span key={method}>{method}</span>
-                      ))}
-                    </div>
-                    <span className="country-card-action">
-                      {t('View country', 'Подробнее о стране')}{' '}
-                      <ArrowRight size={19} aria-hidden="true" />
-                    </span>
+                    <span className="market-ledger-methods">{country.methods.join(' / ')}</span>
+                    <SignatureArrow direction="forward" />
                   </Link>
-                </article>
+                </li>
               ))}
-            </div>
+            </ul>
           </section>
         ))}
         {!filtered.length && (
@@ -285,20 +275,28 @@ export function Country() {
           </h1>
           <p className="country-intro">{t(context.en, context.ru)}</p>
           <div className="retained-country-actions">
-            <Action to={`/find-a-partner?country=${market.slug}`}>
+            <ThreadLink to={`/find-a-partner?country=${market.slug}`}>
               {t('Find a partner here', 'Найти партнёра здесь')}
-            </Action>
-            <Action to={`/join?country=${market.slug}`}>
+            </ThreadLink>
+            <ThreadLink to={`/join?country=${market.slug}`}>
               {t('Offer local capabilities', 'Предложить возможности')}
-            </Action>
+            </ThreadLink>
           </div>
         </div>
-        <div className="country-art" aria-hidden="true">
-          <span className="country-art-code">{market.code}</span>
-          <span className="country-art-orbit" />
-          <span className="country-art-currency">{market.currency}</span>
-          <div className="country-art-label">VLADDOS NETWORK / LOCAL KNOWLEDGE</div>
-        </div>
+        <figure className="country-plate">
+          <Engraving className="country-engraving" />
+          <img
+            src="/assets/editorial/exchange.webp"
+            alt=""
+            width="1586"
+            height="992"
+            fetchPriority="high"
+          />
+          <figcaption>
+            <strong>{market.code}</strong>
+            <span>{market.currency}</span>
+          </figcaption>
+        </figure>
       </section>
       <section className="country-details section">
         <div className="wrap country-details-grid">
@@ -344,7 +342,7 @@ export function Country() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  {source.name} <ArrowUpRight size={16} />
+                  {source.name} <SignatureArrow />
                 </a>
               ))}
             </Reveal>
@@ -417,9 +415,9 @@ export function Country() {
               </span>
             </h2>
           </div>
-          <Action to={`/join?country=${market.slug}`}>
+          <ThreadLink to={`/join?country=${market.slug}`}>
             {t('Offer local capabilities', 'Предложить локальные возможности')}
-          </Action>
+          </ThreadLink>
         </div>
         <div className="country-partners">
           {participants.map((r, i) => (
@@ -428,7 +426,7 @@ export function Country() {
                 <span>0{i + 1}</span>
                 <h3>{t(r.title, r.ru)}</h3>
                 <p>{t(r.short, r.shortRu)}</p>
-                <ArrowUpRight size={23} aria-hidden="true" />
+                <SignatureArrow />
               </Link>
             </Reveal>
           ))}
@@ -487,32 +485,29 @@ export function About() {
         )}
       />
       <section className="about-statement wrap">
-        <Reveal>
+        <div className="about-impression" aria-hidden="true">
+          <Engraving />
           <img
             className="about-brand-art"
             src="/assets/editorial/connection.webp"
-            width="900"
-            height="900"
+            width="1586"
+            height="992"
             loading="lazy"
             alt=""
           />
-          <p>
-            {t('Your expertise matters.', 'Ваш опыт важен.')}
-            <br />
-            <span className="display-accent">
-              {t('Let’s put it into context.', 'Обсудим, где он полезен.')}
-            </span>
-          </p>
-        </Reveal>
-        <Reveal className="about-statement-note">
+        </div>
+        <div className="about-statement-note">
+          <h2>{t('Your expertise matters.', 'Ваш опыт важен.')}</h2>
           <p>
             {t(
               'Companies seeking specific partners. Companies with useful capabilities. We qualify the opportunity and agree terms before an introduction.',
               'Компании с конкретной задачей. Компании с полезными возможностями. Проверяем задачу и согласуем условия до знакомства.',
             )}
           </p>
-          <Action to="/contact">{t('Be part of the conversation', 'Начать разговор')}</Action>
-        </Reveal>
+          <ThreadLink to="/contact">
+            {t('Be part of the conversation', 'Начать разговор')}
+          </ThreadLink>
+        </div>
       </section>
       <section className="about-principles section">
         <div className="wrap about-principles-grid">
@@ -565,7 +560,7 @@ export function About() {
             <Link to={`/markets/${m.slug}`} key={m.slug}>
               <span>{m.code}</span>
               {t(m.name, m.ru)}
-              <ArrowUpRight size={15} aria-hidden="true" />
+              <SignatureArrow />
             </Link>
           ))}
         </div>
