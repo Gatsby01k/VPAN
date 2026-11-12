@@ -84,9 +84,11 @@ Legacy status updates and Deal Desk updates remain synchronized with the origina
 
 ## Reliable notifications
 
-Set `NOTIFICATION_WEBHOOK_URL` to an authenticated HTTPS receiver and `NOTIFICATION_WEBHOOK_SECRET` to its Bearer secret. The receiver should forward the reference to the operator's chosen channel. The implementation does not assume or invent an email, Telegram bot or Slack destination.
+For Telegram, set `TELEGRAM_BOT_TOKEN` as a server secret and optionally `TELEGRAM_BOT_USERNAME` to check the bot's identity. Use a dedicated bot. In **Deal Desk → Notifications**, create a connection link, open it in the intended private chat, press Start and confirm within ten minutes. Send a test from the same screen. A paired chat receives the enquiry reference and a link to the authenticated Deal Desk. [Telegram bot setup](https://core.telegram.org/bots).
 
-The outbox sends JSON `{ event, id, reference, deskPath }`, without applicant contact details. `Idempotency-Key` is stable across retries. A 2xx response acknowledges delivery. Failed requests retry with exponential backoff up to a six-hour interval; pending jobs survive restarts. Delivery is at least once: the receiver must deduplicate event IDs. A lease prevents concurrent workers from delivering the same job at the same time. The desk reports unconfigured, pending and retrying states, plus per-reference delivery history and the next retry time. A stopped service cannot deliver jobs.
+For an HTTPS receiver, set `NOTIFICATION_WEBHOOK_URL` and `NOTIFICATION_WEBHOOK_SECRET`. When a Telegram chat is paired, it becomes the delivery destination. The same outbox tracks both transports. Deployment verification records are omitted from notification delivery.
+
+The HTTPS receiver gets JSON `{ event, id, reference, deskPath }` and a stable `Idempotency-Key`. A 2xx response acknowledges the webhook. The Telegram Bot API acknowledges `sendMessage` with `ok: true`. Failed requests retry with exponential backoff up to a six-hour interval, and pending jobs survive restarts. Delivery is at least once. Deduplicate webhook events by their IDs. A Telegram message may repeat if its acknowledgement is lost. A lease coordinates concurrent delivery, and the desk shows the state and next retry for each reference.
 
 ## Production deployment and migration
 

@@ -222,6 +222,64 @@ test('consent revocation or a changed scope blocks an actual introduction after 
     );
 });
 
+test('Telegram alerts bind one private chat through the authenticated desk and deliver reference-only messages', async (t) => {
+  const updates = [],
+    deliveries = [];
+  let botUsername = 'wrong_alert_bot';
+  const f = await fixture(t, {
+    deskOptions: {
+      telegramBotToken: '123456789:abcdefghijklmnopqrstuvwxyz_fixture',
+      telegramBotUsername: 'test_alert_bot',
+      fetcher: async (url, init) => {
+        const endpoint = new URL(url);
+        assert.equal(endpoint.origin, 'https://api.telegram.org');
+        assert.equal(init.redirect, 'error');
+        const method = endpoint.pathname.split('/').at(-1);
+        if (method === 'getMe')
+          return Response.json({ ok: true, result: { is_bot: true, username: botUsername } });
+        if (method === 'getUpdates') return Response.json({ ok: true, result: updates });
+        assert.equal(method, 'sendMessage');
+        deliveries.push(JSON.parse(init.body));
+        return Response.json({ ok: true, result: { message_id: 2 } });
+      },
+    },
+  });
+  const telegram = '/api/admin/desk/notifications/telegram/';
+  assert.equal((await f.request(telegram + 'start', 'POST', {}, false)).status, 401);
+  assert.equal((await f.request(telegram + 'start', 'POST', {})).status, 409);
+  botUsername = 'test_alert_bot';
+  const link = await f.request(telegram + 'start', 'POST', {});
+  assert.equal(link.status, 200);
+  assert.equal(link.data.url, 'https://t.me/test_alert_bot?start=' + link.data.code);
+  const start = '/start ' + link.data.code;
+  updates.push({ message: { chat: { type: 'group', id: -42 }, from: { id: 42 }, text: start } });
+  updates.push({
+    message: { chat: { type: 'private', id: 11 }, from: { id: 11 }, text: '/start' },
+  });
+  const confirm = () => f.request(telegram + 'confirm', 'POST', { code: link.data.code });
+  assert.equal((await confirm()).status, 409);
+  assert.equal((await f.request('/health')).data.notifications, 'unconfigured');
+  updates.push({ message: { chat: { type: 'private', id: 42 }, from: { id: 42 }, text: start } });
+  assert.equal((await confirm()).status, 200);
+  assert.equal((await confirm()).status, 409);
+  assert.equal((await f.request('/health')).data.notifications, 'configured');
+  assert.equal((await f.request(telegram + 'test', 'POST', {})).status, 200);
+  const brief = payload();
+  const saved = await f.request('/api/opportunities', 'POST', brief, false);
+  assert.equal(saved.status, 201);
+  const outbox = '/api/admin/desk/notifications/retry';
+  const result = await f.request(outbox, 'POST', {});
+  assert.equal(result.data.pending, 0);
+  assert.ok(result.data.jobs[0].delivered_at);
+  await f.request(outbox, 'POST', {});
+  assert.equal(deliveries.length, 2);
+  assert.deepEqual(deliveries[1], {
+    chat_id: '42',
+    text: 'Новая заявка ' + saved.data.reference,
+    reply_markup: { inline_keyboard: [[{ text: 'Открыть Deal Desk', url: origin + '/admin' }]] },
+  });
+});
+
 test('a real local notification receiver gets one durable event after failure and restart', async (t) => {
   const events = [],
     keys = [],

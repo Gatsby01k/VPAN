@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import taxonomy from '../shared/taxonomy.json' with { type: 'json' };
 import { createCommercial } from './commercial.mjs';
+import { createTelegramAlerts } from './telegram-alerts.mjs';
 
 const error = (message, status = 422) => Object.assign(new Error(message), { status });
 const str = (value, max = 180) => (typeof value === 'string' ? value.trim().slice(0, max) : '');
@@ -20,6 +21,10 @@ const states = new Set([
 const verificationStates = new Set(['unverified', 'in-review', 'verified', 'rejected']);
 const digest = (value) => crypto.createHash('sha256').update(value).digest('hex');
 const now = () => new Date().toISOString();
+const notifyReal = `NOT EXISTS (
+  SELECT 1 FROM opportunities o
+  WHERE o.id=notification_outbox.opportunity_id AND o.owner='deployment-verification'
+)`;
 const validDate = (value) =>
   /^\d{4}-\d{2}-\d{2}$/.test(value || '') &&
   Number.isFinite(Date.parse(value)) &&
@@ -145,6 +150,7 @@ export function migrateDesk(db) {
       CREATE TABLE IF NOT EXISTS agreements (id TEXT PRIMARY KEY, introduction_id TEXT REFERENCES introductions(id), model TEXT NOT NULL, terms TEXT NOT NULL, attribution TEXT NOT NULL, currency TEXT NOT NULL, rate_bps INTEGER, starts_on TEXT NOT NULL, ends_on TEXT NOT NULL, evidence TEXT NOT NULL, created_at TEXT NOT NULL, opportunity_id TEXT REFERENCES opportunities(id), CHECK(introduction_id IS NOT NULL OR (model='sourcing-project' AND opportunity_id IS NOT NULL)));
       CREATE TABLE IF NOT EXISTS revenue_entries (id TEXT PRIMARY KEY, agreement_id TEXT NOT NULL REFERENCES agreements(id), period TEXT NOT NULL, amount_minor INTEGER NOT NULL, currency TEXT NOT NULL, status TEXT NOT NULL, evidence TEXT NOT NULL, created_at TEXT NOT NULL, UNIQUE(agreement_id,period,evidence));
       CREATE TABLE IF NOT EXISTS notification_outbox (id TEXT PRIMARY KEY, opportunity_id TEXT NOT NULL UNIQUE REFERENCES opportunities(id), reference TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0, next_at TEXT NOT NULL, lease_until TEXT NOT NULL DEFAULT '', delivered_at TEXT NOT NULL DEFAULT '', last_error TEXT NOT NULL DEFAULT '');
+      CREATE TABLE IF NOT EXISTS telegram_alerts (id INTEGER PRIMARY KEY CHECK(id=1), token_digest TEXT NOT NULL, chat_id TEXT NOT NULL DEFAULT '', pairing_digest TEXT NOT NULL DEFAULT '', pairing_expires INTEGER NOT NULL DEFAULT 0);
     `);
     if (
       !db
@@ -275,6 +281,9 @@ export function createDesk(
     notificationUrl = '',
     notificationSecret = '',
     send = fetch,
+    telegramBotToken = '',
+    telegramBotUsername = '',
+    publicSiteUrl = 'https://www.vladdos.com',
     aiKey = '',
     aiModel = '',
     fetcher = fetch,
@@ -289,7 +298,13 @@ export function createDesk(
   const commercial = createCommercial(db, { aiKey, aiModel, fetcher, initialize });
   let sending = false,
     stopped = false;
-  const configured = /^https:\/\//.test(notificationUrl) && !!notificationSecret;
+  const webhookConfigured = /^https:\/\//.test(notificationUrl) && !!notificationSecret;
+  const telegram = createTelegramAlerts(db, {
+    token: telegramBotToken,
+    username: telegramBotUsername,
+    publicSiteUrl,
+    fetcher,
+  });
   const event = (id, kind, detail) =>
     db
       .prepare('INSERT INTO desk_events(opportunity_id,at,kind,detail) VALUES(?,?,?,?)')
@@ -698,14 +713,17 @@ export function createDesk(
     return { ok: true };
   }
   async function flush() {
-    if (!configured || sending || stopped) return;
+    if (sending || stopped) return;
+    const chatId = telegram.chat();
+    if (!chatId && !webhookConfigured) return;
     sending = true;
     try {
       for (let n = 0; n < 10 && !stopped; n++) {
         const job = transaction(db, () => {
           const job = db
             .prepare(
-              "SELECT * FROM notification_outbox WHERE delivered_at='' AND next_at<=? AND lease_until<? ORDER BY next_at LIMIT 1",
+              `SELECT * FROM notification_outbox WHERE delivered_at='' AND ${notifyReal}
+               AND next_at<=? AND lease_until<? ORDER BY next_at LIMIT 1`,
             )
             .get(now(), now());
           if (job)
@@ -717,23 +735,27 @@ export function createDesk(
         });
         if (!job) break;
         try {
-          const response = await send(notificationUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: 'Bearer ' + notificationSecret,
-              'Idempotency-Key': job.id,
-            },
-            body: JSON.stringify({
-              event: 'opportunity.received',
-              id: job.id,
-              reference: job.reference,
-              deskPath: '/admin',
-            }),
-            signal: AbortSignal.timeout(10000),
-            redirect: 'error',
-          });
-          if (!response.ok) throw new Error('HTTP ' + response.status);
+          if (chatId) {
+            await telegram.send(chatId, job.reference);
+          } else {
+            const response = await send(notificationUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: 'Bearer ' + notificationSecret,
+                'Idempotency-Key': job.id,
+              },
+              body: JSON.stringify({
+                event: 'opportunity.received',
+                id: job.id,
+                reference: job.reference,
+                deskPath: '/admin',
+              }),
+              signal: AbortSignal.timeout(10000),
+              redirect: 'error',
+            });
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+          }
           db.prepare(
             "UPDATE notification_outbox SET delivered_at=?,lease_until='',last_error='' WHERE id=?",
           ).run(now(), job.id);
@@ -757,7 +779,10 @@ export function createDesk(
   if (background) queueMicrotask(() => void flush());
   return {
     commercial,
-    notificationConfigured: configured,
+    telegram,
+    get notificationConfigured() {
+      return webhookConfigured || !!telegram.chat();
+    },
     received: (key) =>
       !!db
         .prepare('SELECT 1 FROM opportunities WHERE request_key=?')
@@ -904,18 +929,22 @@ export function createDesk(
           )
           .all(),
         notifications: {
-          configured,
+          configured: webhookConfigured || !!telegram.chat(),
+          telegram: telegram.status(),
           jobs: db
             .prepare(
-              'SELECT reference,attempts,next_at,delivered_at,last_error FROM notification_outbox ORDER BY next_at DESC LIMIT 50',
+              `SELECT reference,attempts,next_at,delivered_at,last_error FROM notification_outbox
+               WHERE ${notifyReal} ORDER BY next_at DESC LIMIT 50`,
             )
             .all(),
           pending: db
-            .prepare("SELECT COUNT(*) AS count FROM notification_outbox WHERE delivered_at=''")
+            .prepare(
+              `SELECT COUNT(*) AS count FROM notification_outbox WHERE delivered_at='' AND ${notifyReal}`,
+            )
             .get().count,
           failed: db
             .prepare(
-              "SELECT COUNT(*) AS count FROM notification_outbox WHERE delivered_at='' AND attempts>0",
+              `SELECT COUNT(*) AS count FROM notification_outbox WHERE delivered_at='' AND attempts>0 AND ${notifyReal}`,
             )
             .get().count,
         },
