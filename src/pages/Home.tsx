@@ -6,6 +6,7 @@ import { ConnectionStudio } from '../components/ConnectionStudio';
 import { SceneArt, SceneFoot, ThreadLink, ExchangeScene } from '../components/Editorial';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
 import { ConnectionThread } from '../components/ConnectionThread';
+import { CommercialPromise } from '../components/CommercialOffer';
 import { regions, countries, positioning } from '../network';
 import { scenarioLink } from '../brief';
 
@@ -62,7 +63,12 @@ export default function Home() {
           <h1 className="editorial-title" id="hero-title">
             <span>{t('The other', 'Другая')}</span> <em>{t('side.', 'сторона.')}</em>
           </h1>
-          <p className="hero-subtitle">{intro.headline}</p>
+          <p className="hero-subtitle">
+            {t(
+              'Payment partners. Qualified demand. Commercial introductions.',
+              'Платёжные партнёры. Целевой спрос. Деловые знакомства.',
+            )}
+          </p>
           <p className="hero-network-context">
             {intro.focus}
             <span>{intro.markets}</span>
@@ -125,6 +131,7 @@ export default function Home() {
           </Link>
         ))}
       </nav>
+      <CommercialPromise />
       <section
         className="editorial-scene connection-scene"
         id="connection"

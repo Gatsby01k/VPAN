@@ -1,8 +1,12 @@
-import { useState, type FormEvent } from 'react';
+import { lazy, Suspense, useState, type FormEvent } from 'react';
 import { LockKeyhole, LogOut, RefreshCw } from 'lucide-react';
 import { useLocale } from '../locale';
 import { countries, industries, capabilities, companyTypes, label } from '../network';
 import { Eyebrow } from '../components/NetworkLayout';
+import '../commercial.css';
+const CommercialDesk = lazy(() =>
+  import('../components/CommercialDesk').then((m) => ({ default: m.CommercialDesk })),
+);
 
 type Row = Record<string, any>;
 const statusList = ['new', 'review', 'qualified', 'discussion', 'agreed', 'closed', 'unsuitable'];
@@ -28,6 +32,7 @@ const statusRu: Record<string, string> = {
   void: 'Аннулировано',
 };
 const emptyReport = {
+  commercial: {} as Row,
   opportunities: [] as Row[],
   companies: [] as Row[],
   introductions: [] as Row[],
@@ -52,7 +57,7 @@ export default function DealDesk() {
   const [report, setReport] = useState(emptyReport);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [tab, setTab] = useState('opportunities');
+  const [tab, setTab] = useState('overview');
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('');
   const [source, setSource] = useState('');
@@ -244,10 +249,13 @@ export default function DealDesk() {
         aria-label={t('Desk sections', 'Разделы Deal Desk')}
       >
         {[
+          ['overview', 'Founder view', 'Обзор основателя'],
           ['opportunities', 'Opportunities', 'Возможности'],
           ['introductions', 'Introductions', 'Знакомства'],
           ['agreements', 'Agreements', 'Соглашения'],
           ['revenue', 'Revenue', 'Доход'],
+          ['affiliates', 'Affiliates', 'Аффилиаты'],
+          ['acquisition', 'Acquisition', 'Привлечение'],
           ['companies', 'Companies', 'Компании'],
           ['notifications', 'Notifications', 'Уведомления'],
         ].map(([id, en, ru]) => (
@@ -274,6 +282,27 @@ export default function DealDesk() {
         </div>
       )}
       {notice && <p role="status">{notice}</p>}
+      {['overview', 'affiliates', 'acquisition', 'agreements'].includes(tab) &&
+        report.commercial.funnel && (
+          <Suspense
+            fallback={
+              <p role="status">
+                {t('Loading commercial operations…', 'Загрузка коммерческих операций…')}
+              </p>
+            }
+          >
+            <CommercialDesk
+              section={tab}
+              data={report.commercial}
+              report={report}
+              busy={busy}
+              request={request}
+              perform={perform}
+              navigate={setTab}
+              open={open}
+            />
+          </Suspense>
+        )}
       {tab === 'opportunities' && (
         <>
           <div className="desk-tools">
@@ -770,8 +799,11 @@ export default function DealDesk() {
             }}
           >
             <label>
-              {t('Introduction', 'Знакомство')}
-              <select required name="introductionId">
+              {t(
+                'Actual introduction · or choose a sourcing client below',
+                'Знакомство · или клиент поиска ниже',
+              )}
+              <select name="introductionId">
                 <option value="">
                   {t('Choose an actual introduction', 'Выберите состоявшееся знакомство')}
                 </option>
@@ -780,6 +812,28 @@ export default function DealDesk() {
                   .map((i) => (
                     <option key={i.id} value={i.id}>
                       {i.id}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            <label>
+              {t(
+                'Qualified client · for a sourcing mandate before introduction',
+                'Проверенный клиент · для поиска до знакомства',
+              )}
+              <select name="opportunityId">
+                <option value="">
+                  {t('Choose only for a sourcing project', 'Только для проекта поиска')}
+                </option>
+                {report.opportunities
+                  .filter(
+                    (o) =>
+                      o.verification === 'verified' &&
+                      ['qualified', 'discussion', 'agreed'].includes(o.status),
+                  )
+                  .map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.reference} · {o.company_name}
                     </option>
                   ))}
               </select>
@@ -889,6 +943,15 @@ export default function DealDesk() {
                     )}
                     <input required minLength={5} name="evidence" />
                   </label>
+                  <label>
+                    {t('Actual collection date · when received', 'Дата фактического получения')}
+                    <input
+                      type="date"
+                      name="receivedOn"
+                      defaultValue={r.collected_on || ''}
+                      max={new Date().toISOString().slice(0, 10)}
+                    />
+                  </label>
                   <button className="action" disabled={busy}>
                     {t('Update record', 'Обновить запись')}
                   </button>
@@ -952,6 +1015,10 @@ export default function DealDesk() {
               <label>
                 {t('Amount in agreement currency', 'Сумма в валюте соглашения')}
                 <input required inputMode="decimal" name="amount" placeholder="0.00" />
+              </label>
+              <label>
+                {t('Actual collection date · when received', 'Дата фактического получения')}
+                <input type="date" name="receivedOn" max={new Date().toISOString().slice(0, 10)} />
               </label>
               <label>
                 {t('State', 'Статус')}

@@ -6,11 +6,11 @@ The website preserves the original compositions, character artwork, signature, i
 
 ## Run and verify
 
-The public brief currently uses **direct Telegram delivery to `@V1aDDoS`**. Visitors review the full message, open the private chat, and press Send in Telegram themselves. Preparing or opening a message does not create a database receipt. Long drafts use the complete-text copy fallback; the browser draft remains available. Contact and footer links distinguish this personal chat from the public community.
+The public brief uses **automatic delivery selection**. A successful `/health` response declaring durable intake enables the existing persistent API. Without that verification, visitors review the full message and send it themselves in a private Telegram chat with `@V1aDDoS`. A manual handoff never creates a database receipt. Long drafts have a complete-text copy fallback.
 
-`VITE_BRIEF_DELIVERY=telegram` is the default public build-time mode. Set `VITE_BRIEF_DELIVERY=desk` before building only after the persistent intake service is configured and verified. This restores the existing durable API submission path. The Telegram route requires neither a bot token nor a backend; it does not repair the separate content API, growth worker, analytics, or Deal Desk deployment.
+`VITE_BRIEF_DELIVERY=auto` is the default. Explicit `telegram` and `desk` modes remain available. The Telegram route requires neither a bot token nor a backend; it does not enable the private Deal Desk, analytics or growth worker. The three reviewed initial field notes now also have bilingual static pages and a public catalogue fallback; new dynamic publications still require the persistent service.
 
-Node 24 is recommended. The runtime uses Node's SQLite API; no database npm dependency is required.
+Node 24 is recommended. Local and Docker installations use Node's SQLite API. Vercel uses the SQLite-compatible `libsql` driver to connect directly to the approved Turso database; the schema and commercial engine are shared.
 
 ```bash
 npm ci
@@ -28,7 +28,15 @@ npm start
 npm test
 ```
 
-`npm test` builds first, then tests HTTP → SQLite → response, legacy database migration, privacy boundaries, retry conflicts, qualification, matching, bilateral permission, commercial terms, statement accounting, outbox recovery and existing editorial behavior. The current suite has 56 passing tests and uses disposable databases. Browser QA also uses a separate database; fixture companies are never production seed data.
+`npm test` builds first, then tests HTTP → SQLite → response, legacy migrations, privacy boundaries, retries, qualification, matching, bilateral permission, signed schedules, sourcing mandates, attribution conflicts, parent/sub-partner splits, exact commission arithmetic, collection/activation holds, payouts/recoveries, acquisition approval/suppression, research security, outbox recovery and editorial behavior. Tests and browser QA use disposable databases; fixture companies are never production seed data.
+
+## Commercial operations
+
+The private `/admin` desk includes Founder view, Opportunities, Introductions, Agreements, Revenue, Affiliates, Acquisition, Companies and Notifications. [Operating model](commercial/OPERATING_MODEL.md), [agreement preparation schedule](commercial/AGREEMENT_SCHEDULE.md) and [verification evidence](commercial/VERIFICATION.md) explain the implemented flow and launch boundaries.
+
+Paid sourcing mandates can be signed against a verified client before an introduction. Other agreement models require an actual introduction. Record structured signed obligations and every beneficiary split before the first fee statement. Founder view separates gross fees, collections, affiliate liabilities, payout reserves, paid costs, retained cash and collected net contribution. Payouts are evidence records for external payments, not transfers performed by this service.
+
+Acquisition stores source-backed company research, manual contact permission, draft approval, suppression and follow-up dates. Replied enquiries convert into the existing CRM without becoming verified automatically. LinkedIn positioning, four post drafts, discovery questions and four clearly labelled prospect research starting points are included. Optional AI drafting reuses the existing AI Gateway variables and caps attempts at ten per UTC day; template drafts work without an AI key. No outreach is sent automatically.
 
 ## Product architecture
 
@@ -40,6 +48,9 @@ npm test
 - `src/pages/NetworkPages.tsx`: network, industries, contact, legal and field-note content.
 - `src/pages/ConnectionEngine.tsx`: one two-step private brief (scope → context/contact), role-specific guidance and progressive operational details. Company, message and operating context are optional.
 - `operations/desk.mjs`: validation, additive migration, CRM, qualifications, matching candidates, introductions, agreements, revenue records and notification outbox.
+- `operations/commercial.mjs`: signed schedules, sourcing deliveries, affiliates, claims, allocations, payout/recovery evidence, acquisition and founder reports referencing the existing desk records.
+- `operations/research.mjs`: a bounded, requested official-source page reader with public-address validation, DNS pinning, redirect rejection and social-platform exclusions.
+- `operations/managed.mjs`: Vercel entry to the same application using remote Turso, request-scoped notification delivery through `waitUntil`, and authenticated daily maintenance.
 - `server.mjs`: persistent Node HTTP service, SQLite, authenticated operations endpoints and bilingual SSR.
 - `api/service.mjs`: optional Vercel same-origin gateway to that persistent service.
 
@@ -69,7 +80,7 @@ Open `/admin` with the server's `ADMIN_TOKEN`.
 6. Record statement-backed amounts in their agreement currency. Due, invoiced, received and void are separate states. Reporting does not convert currencies or invent revenue from transaction volumes. Immutable statement references prevent retries from creating a second amount after a status change.
 7. Add interaction notes and review the event history. Exact contacts deduplicate automatically; merging company records requires identity evidence. A shared company name or email domain is not sufficient evidence.
 
-Legacy status updates and Deal Desk updates remain synchronized with the original application and audit tables. The SQLite migration is additive and idempotent; it does not drop the original tables or rewrite existing application references.
+Legacy status updates and Deal Desk updates remain synchronized with the original application and audit tables. Application records and references are preserved. Commercial tables are additive. Upgrading the original introduction-only agreement schema requires a checked transactional SQLite table reconstruction to support sourcing mandates; agreement IDs, fees, child references, custom indexes and triggers are preserved. Back up a live database before upgrading.
 
 ## Reliable notifications
 
@@ -79,9 +90,17 @@ The outbox sends JSON `{ event, id, reference, deskPath }`, without applicant co
 
 ## Production deployment and migration
 
-**A static deployment alone does not run SQLite, notifications or dynamic editorial SSR.** The existing `vpan` Vercel project serves vladdos.com. The 28 October audit confirmed production at `edc29b4`, with an unconfigured intake gateway (HTTP 503) and no Vercel project environment variables. This refinement is prepared on `codex/network-production-refinement`; production infrastructure is unchanged.
+**Vercel now has a managed persistence path.** On 10 November 2026 the original production `/health` returned HTTP 503 with no configured backend. With the owner's explicit approval, Turso Starter ($0/month at provisioning) was created as `vpan-commercial` in the existing Vercel team and connected to `vpan` production. Its Marketplace-managed `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` stay in the hosting environment. No production credentials are downloaded into local files.
 
-Preferred Foundation topology: one persistent Node/Docker service with a mounted SQLite volume and HTTPS reverse proxy. It can serve the complete website and API. Alternatively, keep Vercel for the frontend and use the included gateway to the persistent service.
+When these two Turso variables are present, `api/service.mjs` routes the existing API to `operations/managed.mjs`. This runs the same CRM, migrations, attribution and fee logic against remote libSQL. It does not open a local database on Vercel. Configure `ADMIN_TOKEN`, `CRON_SECRET` and `PUBLIC_SITE_URL` as hosting variables. Intake rate limits persist in the database across function instances; private endpoints still require the operations key. The `ADMIN_TOKEN` and `CRON_SECRET` created during setup are Secret variables.
+
+New-enquiry notifications are committed to the same outbox as the enquiry. `waitUntil` retains the first delivery attempt after the confirmed receipt; the authenticated Vercel daily cron at `07:00 UTC` retries pending delivery and runs editorial maintenance. The configured webhook receiver is still required for actual notification delivery. Vercel functions do not rely on background interval timers. AI publication is disabled by default in the example configuration.
+
+The legacy persistent-service gateway remains available when Turso is not configured. This retains compatibility with an existing Node host and SQLite volume. A backup and deliberate migration are required before importing any existing operational database; the newly provisioned database does not imply that past Telegram conversations or an unidentified historical volume have been imported.
+
+For Vercel application rollback, promote the last known good deployment that already uses Turso. For database recovery, confirm the Marketplace plan's recovery window, then restore to a separate private database and reconcile enquiries received after the restore point before updating the production binding. [Turso point-in-time recovery](https://docs.turso.tech/features/point-in-time-recovery).
+
+The optional Node/Docker topology uses a mounted SQLite volume and HTTPS reverse proxy and can serve the complete website and API. The following volume procedure applies to that topology; it is not needed for the Vercel-managed Turso connection.
 
 Before touching a live volume:
 

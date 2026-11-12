@@ -1,0 +1,150 @@
+.commercial-promise {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(28px, 6vw, 100px);
+  padding-block: clamp(65px, 8vw, 125px);
+  border-bottom: 1px solid #30291e29;
+}
+.commercial-promise h2,
+.participant-economics > h2 {
+  font:
+    500 clamp(2.6rem, 4.6vw, 4.8rem)/1.03 'Cormorant Garamond',
+    Georgia,
+    serif;
+  letter-spacing: -0.035em;
+  margin: 22px 0 0;
+}
+.commercial-promise h2 em,
+.participant-economics > h2 em {
+  display: block;
+  color: #9a733c;
+  font-weight: 400;
+}
+.commercial-promise-copy > p {
+  font-size: clamp(0.95rem, 1.25vw, 1.1rem);
+  line-height: 1.85;
+  max-width: 550px;
+  margin: 0 0 22px;
+}
+.commercial-promise-copy .text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #b78a46;
+  padding-bottom: 8px;
+}
+.commercial-proof-points {
+  display: grid;
+  gap: 12px;
+  border-left: 1px solid #bb9270;
+  padding-left: 20px;
+  margin-top: 32px;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.participant-economics {
+  padding-block: 70px;
+}
+.participant-economics > h2 {
+  margin-bottom: 45px;
+}
+.participant-economics details {
+  border-top: 1px solid #30291e29;
+}
+.participant-economics summary {
+  list-style: none;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 35px 1fr 1.1fr 24px;
+  align-items: center;
+  gap: 25px;
+  padding-block: 24px;
+}
+.participant-economics summary::-webkit-details-marker {
+  display: none;
+}
+.participant-economics summary > span {
+  color: #987446;
+  font:
+    italic 1rem Georgia,
+    serif;
+}
+.participant-economics summary h3 {
+  font:
+    500 clamp(1.3rem, 2vw, 1.8rem)/1.2 'Cormorant Garamond',
+    Georgia,
+    serif;
+  margin: 0;
+}
+.participant-economics summary > p {
+  font-size: 0.8rem;
+  color: #60574a;
+  line-height: 1.5;
+  margin: 0;
+}
+.participant-economics details[open] summary svg {
+  transform: rotate(90deg);
+  color: #b71b62;
+}
+.participant-economics details > div {
+  padding: 0 40px 30px 60px;
+  max-width: 900px;
+}
+.participant-economics details > div > p {
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+.participant-economics nav {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+.participant-economics nav a {
+  display: inline-flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 0.75rem;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #b78a46;
+}
+.commercial-public-note {
+  font-size: 0.76rem;
+  line-height: 1.85;
+  color: #665c4e;
+  border-top: 1px solid #30291e29;
+  padding-top: 28px;
+  margin-top: 0;
+  max-width: 950px;
+}
+@media (max-width: 760px) {
+  .commercial-promise {
+    grid-template-columns: 1fr;
+    padding-block: 55px;
+  }
+  .commercial-promise h2,
+  .participant-economics > h2 {
+    font-size: 2.8rem;
+  }
+  .participant-economics summary {
+    grid-template-columns: 25px 1fr 20px;
+    gap: 14px;
+    padding-block: 20px;
+  }
+  .participant-economics summary > p {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .participant-economics summary svg {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .participant-economics details > div {
+    padding: 0 0 25px 39px;
+  }
+  .participant-economics nav {
+    gap: 18px;
+  }
+}

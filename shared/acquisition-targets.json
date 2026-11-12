@@ -1,0 +1,46 @@
+[
+  {
+    "company": "Xendit",
+    "website": "https://www.xendit.co",
+    "companyType": "psp",
+    "countries": ["indonesia", "philippines"],
+    "capabilities": ["collections", "local-methods"],
+    "need": "Hypothesis to qualify: suitable merchant referral or local acceptance partnership for a named Southeast Asian market.",
+    "sourceUrl": "https://www.xendit.co/en/products/all-payment-methods",
+    "observedOn": "2026-11-10",
+    "research": "Public product page describes country-specific payment methods in Southeast Asia. This is self-published capability information, not verification or a relationship with VlaDDoS. Ask about entity eligibility, category restrictions and whether a commercial referral programme is available. No outreach or agreement exists in this research record."
+  },
+  {
+    "company": "dLocal",
+    "website": "https://www.dlocal.com",
+    "companyType": "psp",
+    "countries": ["brazil", "mexico"],
+    "capabilities": ["collections", "payouts", "local-methods"],
+    "need": "Hypothesis to qualify: an eligible enterprise merchant with a defined Brazil or Mexico acceptance or payout requirement.",
+    "sourceUrl": "https://www.dlocal.com/faqs/",
+    "observedOn": "2026-11-10",
+    "research": "Company FAQ describes pay-in and payout infrastructure for global enterprises in emerging markets including Latin America. Individual country, entity, category and method eligibility must be confirmed. This is a target research starting point, not verified supply, a partnership or a referral-fee commitment."
+  },
+  {
+    "company": "Paystack",
+    "website": "https://paystack.com",
+    "companyType": "psp",
+    "countries": ["ghana", "kenya", "nigeria", "south-africa"],
+    "capabilities": ["collections", "local-methods"],
+    "need": "Hypothesis to qualify: eligible locally registered digital commerce businesses seeking acceptance in a supported African market.",
+    "sourceUrl": "https://support.paystack.com/en/articles/2130562",
+    "observedOn": "2026-11-10",
+    "research": "Official help describes services for businesses registered in Nigeria, Ghana, South Africa and Kenya. Its separate international-payment eligibility article excludes several categories including cryptocurrency, betting and online gaming; never treat it as general high-risk supply. Confirm the exact entity, domestic/international flow and current restrictions. No VlaDDoS partnership or commission terms are verified."
+  },
+  {
+    "company": "Yellow Card",
+    "website": "https://yellowcard.io",
+    "companyType": "otc",
+    "countries": ["ghana", "kenya", "nigeria"],
+    "capabilities": ["liquidity", "settlement"],
+    "need": "Hypothesis to qualify: a lawful business stablecoin on/off-ramp or settlement relationship for an explicitly reviewed corridor.",
+    "sourceUrl": "https://docs.yellowcard.engineering/docs/africa",
+    "observedOn": "2026-11-10",
+    "research": "Public technical documentation describes African payment methods for stablecoin on/off-ramping. Documentation is not evidence of licensing, acceptance for a specific entity or an available referral programme. Confirm the jurisdiction, legal entities, assets, prohibited activity and scope directly before qualification. No relationship or agreement with VlaDDoS has been established."
+  }
+]

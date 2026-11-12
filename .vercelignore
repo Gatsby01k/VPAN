@@ -1,0 +1,9 @@
+.git
+.env*
+node_modules
+dist
+dist-server
+data
+research
+commercial
+tests

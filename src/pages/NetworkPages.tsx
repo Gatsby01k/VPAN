@@ -7,6 +7,7 @@ import { NLink, Action, Arrow, Eyebrow } from '../components/NetworkLayout';
 import { useGrowth } from '../growth';
 import { SceneArt, ThreadLink } from '../components/Editorial';
 import { telegramUsername, telegramUrl } from '../telegram';
+import { ParticipantEconomics } from '../components/CommercialOffer';
 
 export function Invitation() {
   const { t } = useLocale();
@@ -165,7 +166,8 @@ export function Network() {
           </div>
         ))}
       </section>
-      <section className="commercial-section wrap">
+      <ParticipantEconomics />
+      <section className="commercial-section wrap" id="commercial-model">
         <Eyebrow>{t('How our work is funded', 'Как оплачивается наша работа')}</Eyebrow>
         <h2>
           {t('Clear terms.', 'Понятные условия.')}
@@ -191,6 +193,12 @@ export function Network() {
               'A contractual share of eligible partner revenue, with attribution, reporting and duration agreed in writing.',
               'Договорная доля от согласованной базы дохода партнёра: авторство, отчётность и срок фиксируются письменно.',
             ],
+            [
+              'Affiliate & strategic agreements',
+              'Аффилиатские и стратегические соглашения',
+              'Merchant referrals, sub-partner introductions and joint commercial mandates. Named beneficiaries, a defined fee base and clear collection and payout obligations.',
+              'Рекомендации мерчантов, субпартнёры и совместные коммерческие задачи. Получатели, база комиссии, сбор и выплаты определяются договором.',
+            ],
           ].map(([en, ru, desc, descRu]) => (
             <div key={en}>
               <h3>{t(en, ru)}</h3>
@@ -204,6 +212,15 @@ export function Network() {
             'Коммерческая заинтересованность и плательщик раскрываются заранее. Отправка брифа не создаёт обязательства по оплате, права на партнёрство или обещания подбора.',
           )}
         </p>
+        <div className="commercial-public-note">
+          <strong>{t('Referral protection & reporting', 'Защита авторства и отчётность')}</strong>
+          <p>
+            {t(
+              'Register the opportunity before an introduction. We review prior relationships and competing claims, then document who earns what, for how long, from which payer and on which reporting basis. Disputed attribution pauses affiliate releases. Recurring compensation follows statement-backed fees and the signed term; a link or submitted brief alone creates no commission right.',
+              'Зафиксируйте возможность до знакомства. Проверяются прежние отношения и конкурирующие заявки; получатели, сроки, плательщик и база отчётности фиксируются письменно. Споры приостанавливают выплаты. Регулярная комиссия опирается на подтверждённые отчёты и срок договора; ссылка или бриф сами по себе права на вознаграждение не создают.',
+            )}
+          </p>
+        </div>
       </section>
       <Invitation />
     </>
@@ -261,8 +278,8 @@ export function Contact() {
           </a>
           <p className="community-note">
             {t(
-              'The community is public. Send commercial details to the private Telegram chat or by email. The brief prepares a message; you send it in Telegram yourself.',
-              'Сообщество публичное. Коммерческие сведения передавайте в личный Telegram или по email. Бриф подготавливает текст — вы сами отправляете его в Telegram.',
+              'The community is public. For commercial details, use the partnership brief, private Telegram chat or email.',
+              'Сообщество публичное. Для коммерческих деталей используйте бриф, личный чат в Telegram или электронную почту.',
             )}
           </p>
         </div>
@@ -276,7 +293,7 @@ export function Legal({ type }: { type: 'privacy' | 'terms' }) {
   return (
     <>
       <PageIntro
-        index="VLADDOS NETWORK / 27 OCT 2026"
+        index={privacy ? 'VLADDOS NETWORK / 12 NOV 2026' : 'VLADDOS NETWORK / 27 OCT 2026'}
         title={
           privacy
             ? t('Your information.', 'Ваша информация.')
@@ -307,8 +324,8 @@ export function Legal({ type }: { type: 'privacy' | 'terms' }) {
               [
                 'What we collect',
                 'Какие данные собираем',
-                'The brief can contain a contact, company name, business context, selected industry, countries, capabilities and methods, operating and commercial details, and campaign or referral identifiers. You review these details before sending them through Telegram. If database submission is enabled, the service also records consent and a submission reference.',
-                'Бриф может содержать контакт, название компании, контекст задачи, индустрию, страны, возможности и методы, операционные и коммерческие сведения, идентификаторы кампании или рекомендации. Вы проверяете эти сведения перед отправкой через Telegram. Если включена серверная отправка, сервис также сохраняет согласие и номер обращения.',
+                'A submitted website brief can contain a business contact, company name, business context, industry, markets, payment methods and capabilities, operating and commercial details, and campaign or referral identifiers. We also record consent and issue a submission reference.',
+                'Отправленный через сайт бриф может содержать деловой контакт, название компании, контекст задачи, индустрию, рынки, платёжные методы и возможности, операционные и коммерческие сведения, идентификаторы кампании или рекомендации. Мы также сохраняем согласие и присваиваем номер обращения.',
               ],
               [
                 'Why we use it',
@@ -319,8 +336,8 @@ export function Legal({ type }: { type: 'privacy' | 'terms' }) {
               [
                 'Storage and access',
                 'Хранение и доступ',
-                'Your browser session may retain an unfinished draft. Opening Telegram keeps that draft so you can recover it; it does not save the enquiry to Deal Desk. If database submission is enabled, a confirmed server receipt clears the contact-bearing draft and the private Deal Desk requires an operations credential. Language preference is stored locally.',
-                'В сессии браузера может храниться черновик. Открытие Telegram сохраняет его для возврата и не создаёт запись в Deal Desk. Если включена серверная отправка, подтверждённый номер удаляет контактные данные черновика; доступ в Deal Desk требует операционного ключа. Язык сохраняется локально.',
+                'We use hosting and database providers to receive and store website briefs. Access to Deal Desk requires an operations credential. Your browser session may keep an unfinished draft. A confirmed website submission clears the draft containing your contact details. Language preference is stored locally.',
+                'Для приёма и хранения брифов с сайта мы используем сервисы хостинга и базы данных. Для доступа к Deal Desk нужен операционный ключ. В сессии браузера может храниться черновик. После подтверждения отправки через сайт черновик с контактами удаляется. Язык сохраняется локально.',
               ],
               [
                 'Your choices',

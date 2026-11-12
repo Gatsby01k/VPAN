@@ -3,12 +3,17 @@ import path from 'node:path';
 import { renderPage, pageMeta } from '../dist-server/entry-server.mjs';
 import { staticRoutes } from '../growth/catalog.mjs';
 import { renderHead } from '../growth/seo.mjs';
+import { staticGuides, staticContent } from '../growth/static.mjs';
 const root = path.resolve('dist');
 const template = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 fs.writeFileSync(path.join(root, 'shell.html'), template);
 const origin = process.env.PUBLIC_SITE_URL || 'https://www.vladdos.com';
-const bootstrap = { articles: [], sources: [], origin };
-for (const route of [...staticRoutes, '/admin', '/404']) {
+const editorialRoutes = staticGuides.map((guide) => '/knowledge/' + guide.slug);
+for (const route of [...staticRoutes, ...editorialRoutes, '/admin', '/404']) {
+  const bootstrap = staticContent(
+    route.startsWith('/knowledge/') ? route.slice('/knowledge/'.length) : '',
+    origin,
+  );
   for (const language of ['en', 'ru']) {
     const url = route + (language === 'ru' ? '?lang=ru' : '');
     const html = renderHead(
@@ -18,6 +23,7 @@ for (const route of [...staticRoutes, '/admin', '/404']) {
         pathname: route,
         language,
         metadata: pageMeta(route, language),
+        article: bootstrap.articles.find((guide) => '/knowledge/' + guide.slug === route),
         bootstrap,
         noindex: route === '/admin' || route === '/404',
       },
@@ -44,7 +50,7 @@ const esc = (s) => s.replaceAll('&', '&amp;');
 fs.writeFileSync(
   path.join(root, 'sitemap.xml'),
   '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">' +
-    staticRoutes
+    [...staticRoutes, ...editorialRoutes]
       .map((r) =>
         ['en', 'ru']
           .map(
@@ -66,4 +72,4 @@ fs.writeFileSync(
       .join('') +
     '</urlset>',
 );
-console.log(`Prerendered ${staticRoutes.length + 2} routes in EN and RU.`);
+console.log(`Prerendered ${staticRoutes.length + editorialRoutes.length + 2} routes in EN and RU.`);

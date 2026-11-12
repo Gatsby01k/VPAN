@@ -3,7 +3,7 @@ import { ArrowUpRight, Check } from 'lucide-react';
 import { useLocale } from '../locale';
 import { scenarios, scenarioLink } from '../brief';
 import { NLink } from './NetworkLayout';
-import { telegramBriefEnabled } from '../telegram';
+import { useTelegramDelivery } from '../useDelivery';
 
 // This is the entry to the brief, not a second intake form.
 export function ConnectionStudio({
@@ -16,6 +16,7 @@ export function ConnectionStudio({
   intentExplicit?: boolean;
 }) {
   const { t } = useLocale();
+  const telegramBriefEnabled = useTelegramDelivery();
   const [role, setRole] = useState('');
   const selected = scenarios.find((scenario) => scenario.id === role);
   return (

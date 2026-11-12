@@ -1,0 +1,348 @@
+.commercial-desk {
+  padding: 36px 0 70px;
+  --desk-line: rgba(45, 35, 28, 0.18);
+}
+.commercial-desk h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 500;
+  line-height: 1.05;
+  margin: 12px 0 22px;
+}
+.commercial-desk h3 {
+  font-size: 1.25rem;
+  margin: 28px 0 16px;
+}
+.commercial-desk > p {
+  max-width: 850px;
+  line-height: 1.7;
+}
+.commercial-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+.commercial-funnel {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  border-block: 1px solid var(--desk-line);
+  margin-top: 30px;
+}
+.commercial-funnel > div {
+  padding: 24px 12px;
+  border-right: 1px solid var(--desk-line);
+}
+.commercial-funnel > div:first-child {
+  padding-left: 0;
+}
+.commercial-funnel > div:last-child {
+  border: 0;
+}
+.commercial-funnel strong {
+  display: block;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: 500;
+}
+.commercial-funnel span {
+  display: block;
+  font-size: 0.75rem;
+  margin-top: 10px;
+}
+.commercial-caption {
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: #665d54;
+  max-width: 850px;
+}
+.commercial-finances {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 28px;
+  margin: 34px 0 20px;
+}
+.commercial-finances article {
+  border-top: 3px solid #a77a42;
+  padding: 24px 0;
+}
+.commercial-finances h3 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  margin: 18px 0 0;
+  overflow-wrap: anywhere;
+}
+.commercial-finances article > p {
+  margin: 6px 0 26px;
+}
+.commercial-finances dl > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--desk-line);
+  font-size: 0.8rem;
+}
+.commercial-finances dd {
+  margin: 0;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.commercial-task-list {
+  list-style: none;
+  margin: 0 0 32px;
+  padding: 0;
+}
+.commercial-task-list li {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--desk-line);
+}
+.commercial-task-list li > span {
+  font-family: Georgia, serif;
+  color: #947144;
+  font-style: italic;
+}
+.commercial-task-list li > div {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.commercial-task-list small {
+  display: block;
+  margin-top: 7px;
+  color: #665d54;
+}
+.commercial-form {
+  border-block: 1px solid var(--desk-line);
+  margin-block: 18px;
+}
+.commercial-form summary {
+  padding: 20px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.commercial-form form {
+  padding: 5px 0 24px;
+}
+.commercial-form fieldset {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+.commercial-desk label {
+  display: grid;
+  gap: 8px;
+  font-size: 0.8rem;
+  min-width: 0;
+}
+.commercial-desk input:not([type='checkbox']),
+.commercial-desk select,
+.commercial-desk textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #bdb1a2;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.4);
+  color: #211d1a;
+  font: inherit;
+  line-height: 1.5;
+}
+.commercial-desk textarea {
+  resize: vertical;
+}
+.commercial-desk select[multiple] {
+  min-height: 135px;
+}
+.commercial-desk small {
+  line-height: 1.5;
+}
+.commercial-desk .consent {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+.commercial-desk .consent input {
+  margin: 3px 6px 0 0;
+}
+.commercial-desk .action {
+  width: fit-content;
+  font-size: 0.8rem;
+  padding: 14px 18px;
+}
+.commercial-desk .text-link {
+  font-size: 0.78rem;
+}
+.commercial-two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+.commercial-partners {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 24px;
+  margin: 25px 0;
+}
+.commercial-partners article {
+  padding: 22px;
+  border: 1px solid var(--desk-line);
+}
+.commercial-partners article h3 {
+  margin: 12px 0;
+}
+.commercial-partners code {
+  display: block;
+  font-size: 0.7rem;
+  overflow-wrap: anywhere;
+  margin: 16px 0;
+}
+.commercial-record {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--desk-line);
+  overflow-wrap: anywhere;
+}
+.commercial-record > strong {
+  display: inline-block;
+  margin-right: 14px;
+}
+.commercial-record > p {
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+.commercial-record label {
+  margin: 14px 0;
+}
+.commercial-state {
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  padding: 5px 8px;
+  background: #e2d8c9;
+}
+.commercial-state.disputed {
+  background: #f4d3dd;
+  color: #7d1543;
+}
+.commercial-state.accepted {
+  background: #dde5d6;
+  color: #28482b;
+}
+.commercial-acquisition {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.7fr) minmax(0, 2fr);
+  gap: 40px;
+  margin-top: 36px;
+}
+.commercial-acquisition aside button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 18px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--desk-line);
+  background: transparent;
+  cursor: pointer;
+}
+.commercial-acquisition aside button.active {
+  background: #24201d;
+  color: #f6f0e7;
+}
+.commercial-acquisition aside small {
+  display: block;
+  margin-top: 7px;
+  font-size: 0.7rem;
+}
+.commercial-prospect h3 {
+  margin: 12px 0 18px;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2.6rem;
+}
+.commercial-prospect > p,
+.commercial-prospect blockquote {
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+.commercial-prospect blockquote {
+  margin: 20px 0;
+  padding: 12px 20px;
+  border-left: 2px solid #c71866;
+}
+.commercial-draft-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin: 18px 0;
+}
+.commercial-empty {
+  border-left: 2px solid #a77a42;
+  padding: 8px 20px;
+  color: #665d54;
+  line-height: 1.7;
+  font-size: 0.9rem;
+}
+.commercial-desk button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.commercial-desk :focus-visible {
+  outline: 2px solid #b31658;
+  outline-offset: 4px;
+}
+.desk-tabs {
+  overflow-x: auto;
+  flex-wrap: wrap;
+}
+@media (max-width: 760px) {
+  .commercial-title {
+    display: block;
+  }
+  .commercial-funnel {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .commercial-funnel > div {
+    border-bottom: 1px solid var(--desk-line);
+    padding: 16px 10px;
+  }
+  .commercial-funnel > div:first-child {
+    padding-left: 10px;
+  }
+  .commercial-funnel strong {
+    font-size: 2.5rem;
+  }
+  .commercial-two-column,
+  .commercial-acquisition {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .commercial-acquisition aside {
+    display: flex;
+    overflow-x: auto;
+  }
+  .commercial-acquisition aside button {
+    min-width: 160px;
+    width: auto;
+  }
+  .commercial-finances dl > div {
+    font-size: 0.72rem;
+  }
+  .commercial-task-list li {
+    gap: 12px;
+  }
+  .commercial-task-list strong {
+    font-size: 0.8rem;
+  }
+  .commercial-desk {
+    padding-top: 24px;
+  }
+}

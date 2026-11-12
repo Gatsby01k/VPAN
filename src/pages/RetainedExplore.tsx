@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { NLink as Link } from '../components/NetworkLayout';
 import { ArrowRight, ArrowUpRight, ChevronDown, Globe2, Search, X } from 'lucide-react';
@@ -50,8 +50,10 @@ const participants = [
 export function Markets() {
   const { language, t } = useLocale();
   const [params, setParams] = useSearchParams();
-  const region = findRegion(params.get('region'));
-  const query = params.get('q') || '';
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+  const region = findRegion(hydrated ? params.get('region') : null);
+  const query = (hydrated && params.get('q')) || '';
   const updateFilter = (key: string, value: string) => {
     const next = new URLSearchParams(params);
     if (value) next.set(key, value);

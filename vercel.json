@@ -1,5 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["iad1"],
+  "functions": { "api/service.mjs": { "includeFiles": "{dist-server/**,dist/shell.html}" } },
+  "crons": [{ "path": "/api/operations-tick", "schedule": "0 7 * * *" }],
   "redirects": [
     {
       "source": "/affiliates",
@@ -51,6 +54,15 @@
     {
       "source": "/feed.xml",
       "destination": "/api/service?_route=/feed.xml"
+    },
+    {
+      "source": "/knowledge/:slug(payment-partner-evaluation|payment-reconciliation-checklist|affiliate-introduction-brief)",
+      "has": [{ "type": "query", "key": "lang", "value": "ru" }],
+      "destination": "/__pages/ru/knowledge/:slug/index.html"
+    },
+    {
+      "source": "/knowledge/:slug(payment-partner-evaluation|payment-reconciliation-checklist|affiliate-introduction-brief)",
+      "destination": "/__pages/en/knowledge/:slug/index.html"
     },
     {
       "source": "/knowledge/:slug",

@@ -47,6 +47,21 @@ function secureCompare(a, b) {
   );
 }
 async function jsonBody(req) {
+  if (req.body !== undefined) {
+    let body = req.body;
+    if (Buffer.byteLength(typeof body === 'string' ? body : JSON.stringify(body)) > 12000)
+      throw fail('Request is too large', 413);
+    if (typeof body === 'string' || Buffer.isBuffer(body)) {
+      try {
+        body = JSON.parse(String(body));
+      } catch {
+        throw fail('Invalid JSON', 400);
+      }
+    }
+    if (!body || typeof body !== 'object' || Array.isArray(body))
+      throw fail('Expected a JSON object', 400);
+    return body;
+  }
   const chunks = [];
   let size = 0;
   for await (const chunk of req) {
@@ -64,10 +79,10 @@ async function jsonBody(req) {
     throw fail('Expected a JSON object', 400);
   return body;
 }
-export function openDatabase(dbPath) {
-  fs.mkdirSync(path.dirname(dbPath), { recursive: true, mode: 0o700 });
-  const db = new DatabaseSync(dbPath);
-  db.exec(`PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
+export function openDatabase(dbPath, { database } = {}) {
+  if (!database) fs.mkdirSync(path.dirname(dbPath), { recursive: true, mode: 0o700 });
+  const db = database || new DatabaseSync(dbPath);
+  db.exec(`PRAGMA foreign_keys=ON; ${database ? '' : 'PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;'}
     CREATE TABLE IF NOT EXISTS applications (
       id TEXT PRIMARY KEY, request_key TEXT UNIQUE NOT NULL, reference TEXT UNIQUE NOT NULL,
       created_at TEXT NOT NULL, updated_at TEXT NOT NULL, role TEXT NOT NULL, markets TEXT NOT NULL,
@@ -80,7 +95,8 @@ export function openDatabase(dbPath) {
     CREATE TABLE IF NOT EXISTS audit_log (
       id INTEGER PRIMARY KEY AUTOINCREMENT, application_id TEXT NOT NULL,
       at TEXT NOT NULL, from_status TEXT, to_status TEXT NOT NULL
-    );`);
+    );
+    CREATE TABLE IF NOT EXISTS request_limits (request_key TEXT PRIMARY KEY, count INTEGER NOT NULL, expires_at INTEGER NOT NULL);`);
   // Keep applications created by the previous version when upgrading a persistent volume.
   if (
     !db
@@ -97,7 +113,7 @@ export function openDatabase(dbPath) {
       .some((column) => column.name === 'attribution')
   )
     db.exec("ALTER TABLE applications ADD COLUMN attribution TEXT NOT NULL DEFAULT '{}'");
-  for (const filename of [dbPath, dbPath + '-wal', dbPath + '-shm'])
+  for (const filename of database ? [] : [dbPath, dbPath + '-wal', dbPath + '-shm'])
     if (fs.existsSync(filename)) fs.chmodSync(filename, 0o600);
   return db;
 }
@@ -152,6 +168,10 @@ export function createApp({
   growthOptions = {},
   deskOptions = {},
   gatewayToken = process.env.INTAKE_GATEWAY_TOKEN || '',
+  database,
+  managed = false,
+  additionalOrigins = [],
+  initialize = true,
 } = {}) {
   if (process.env.NODE_ENV === 'production') {
     if (adminToken.length < 32 || /replace-with|example|change-me/i.test(adminToken))
@@ -161,8 +181,10 @@ export function createApp({
     if (gatewayToken && gatewayToken.length < 32)
       throw new Error('INTAKE_GATEWAY_TOKEN must contain at least 32 characters.');
   }
-  const db = openDatabase(dbPath);
+  const db = initialize ? openDatabase(dbPath, { database }) : database;
+  const acceptedOrigins = new Set([allowedOrigin, ...additionalOrigins]);
   const growth = createGrowth(db, {
+    initialize,
     publicSiteUrl,
     enabled: growthEnabled,
     aiKey: process.env.AI_GATEWAY_API_KEY || '',
@@ -173,12 +195,37 @@ export function createApp({
     ...growthOptions,
   });
   const desk = createDesk(db, {
+    initialize,
+    background: !managed,
     notificationUrl: process.env.NOTIFICATION_WEBHOOK_URL || '',
     notificationSecret: process.env.NOTIFICATION_WEBHOOK_SECRET || '',
+    aiKey: process.env.AI_GATEWAY_API_KEY || '',
+    aiModel: process.env.AI_GATEWAY_MODEL || '',
     ...deskOptions,
   });
   const attempts = new Map();
   const eventAttempts = new Map();
+  function durableLimit(kind, address, maximum, windowMs = 3600000) {
+    if (!managed) return;
+    const bucket = Math.floor(Date.now() / windowMs),
+      expiry = (bucket + 1) * windowMs;
+    const key = crypto
+      .createHash('sha256')
+      .update(adminToken + ':' + kind + ':' + address + ':' + bucket)
+      .digest('hex');
+    let row;
+    try {
+      db.prepare(
+        'INSERT INTO request_limits(request_key,count,expires_at) VALUES(?,1,?) ON CONFLICT(request_key) DO UPDATE SET count=count+1',
+      ).run(key, expiry);
+      row = db.prepare('SELECT count FROM request_limits WHERE request_key=?').get(key);
+      db.prepare('DELETE FROM request_limits WHERE expires_at<?').run(Date.now() - 3600000);
+    } catch (error) {
+      error.operation = 'request-rate-limit';
+      throw error;
+    }
+    if (row.count > maximum) throw fail('Too many requests. Please try again later.', 429);
+  }
   let renderer;
   async function publicPage(req, res, url) {
     const pathname = url.pathname.replace(/\/$/, '') || '/';
@@ -321,7 +368,7 @@ export function createApp({
         !['GET', 'HEAD'].includes(req.method) &&
         allowedOrigin &&
         req.headers.origin &&
-        req.headers.origin !== allowedOrigin
+        !acceptedOrigins.has(req.headers.origin)
       )
         return reply(res, 403, { error: 'This request origin is not allowed.' });
       if (pathname.startsWith('/api/admin/desk')) {
@@ -334,6 +381,38 @@ export function createApp({
           return reply(res, 401, { error: 'Unauthorized' });
         if (req.method === 'GET' && pathname === '/api/admin/desk')
           return reply(res, 200, desk.report());
+        const commercialItem = pathname.match(
+          /^\/api\/admin\/desk\/commercial\/(claims|prospects|drafts)\/([a-f0-9-]{36})$/i,
+        );
+        if (commercialItem && req.method === 'PATCH') {
+          const action = {
+            claims: 'updateClaim',
+            prospects: 'updateProspect',
+            drafts: 'updateDraft',
+          }[commercialItem[1]];
+          return reply(res, 200, desk.commercial[action](commercialItem[2], await jsonBody(req)));
+        }
+        const commercialAction = pathname.match(
+          /^\/api\/admin\/desk\/commercial\/(affiliates|claims|allocations|activations|payouts|costs|prospects|drafts|convert|schedules|recoveries|research|deliveries)$/,
+        );
+        if (commercialAction && req.method === 'POST') {
+          const action = {
+            affiliates: 'affiliate',
+            claims: 'claim',
+            allocations: 'allocation',
+            activations: 'activate',
+            payouts: 'payout',
+            costs: 'cost',
+            prospects: 'prospect',
+            drafts: 'draft',
+            convert: 'convert',
+            schedules: 'schedule',
+            recoveries: 'recover',
+            research: 'research',
+            deliveries: 'deliver',
+          }[commercialAction[1]];
+          return reply(res, 201, await desk.commercial[action](await jsonBody(req), desk.submit));
+        }
         const item = pathname.match(
           /^\/api\/admin\/desk\/opportunities\/([a-f0-9-]{36})(\/notes)?$/i,
         );
@@ -378,6 +457,7 @@ export function createApp({
       if (!rate || rate.until < Date.now()) rate = { count: 0, until: Date.now() + 3600000 };
       attempts.set(key, rate);
       const body = await jsonBody(req);
+      if (!desk.received(body.requestId)) durableLimit('opportunity', addr, 12);
       if (rate.count >= 12 && !desk.received(body.requestId))
         return reply(res, 429, { error: 'Too many requests. Please try again later.' });
       rate.count++;
@@ -395,7 +475,7 @@ export function createApp({
         !['GET', 'HEAD'].includes(req.method) &&
         allowedOrigin &&
         req.headers.origin &&
-        req.headers.origin !== allowedOrigin
+        !acceptedOrigins.has(req.headers.origin)
       )
         return reply(res, 403, { error: 'This request origin is not allowed.' });
       if (req.method === 'GET' && pathname === '/api/content')
@@ -404,7 +484,7 @@ export function createApp({
         if (req.headers.dnt === '1' || req.headers['sec-gpc'] === '1')
           return reply(res, 200, { ok: true });
         if (
-          (allowedOrigin && req.headers.origin && req.headers.origin !== allowedOrigin) ||
+          (allowedOrigin && req.headers.origin && !acceptedOrigins.has(req.headers.origin)) ||
           /bot|crawler|spider/i.test(String(req.headers['user-agent'] || ''))
         )
           return reply(res, 200, { ok: true });
@@ -420,12 +500,13 @@ export function createApp({
           for (const [key, value] of eventAttempts)
             if (value.until < Date.now()) eventAttempts.delete(key);
         if (record.count > 90) return reply(res, 429, { error: 'Too many events' });
+        durableLimit('events', ip, 90, 60000);
         const body = await jsonBody(req);
         growth.view(safeText(body.path, 180), cleanAttribution(body.attribution));
         return reply(res, 200, { ok: true });
       }
       if (req.method === 'POST' && pathname === '/api/apply') {
-        if (allowedOrigin && req.headers.origin && req.headers.origin !== allowedOrigin)
+        if (allowedOrigin && req.headers.origin && !acceptedOrigins.has(req.headers.origin))
           return reply(res, 403, { error: 'This request origin is not allowed.' });
         const body = await jsonBody(req);
         if (safeText(body.site, 80))
@@ -471,6 +552,7 @@ export function createApp({
             : '') ||
           req.socket.remoteAddress ||
           'unknown';
+        durableLimit('legacy-application', addr, 8);
         let record = attempts.get(addr) || { count: 0, until: Date.now() + 3600000 };
         if (Date.now() > record.until) record = { count: 0, until: Date.now() + 3600000 };
         record.count++;
@@ -618,16 +700,30 @@ export function createApp({
   };
   const server = http.createServer((req, res) => {
     Promise.resolve(handler(req, res)).catch((error) => {
+      if (!error.status || error.status >= 500)
+        console.error('network_request_failed', {
+          route: String(req.url || '').split('?')[0],
+          code: error.code || error.name || 'unknown',
+          operation: error.operation || 'request',
+          detail: String(error.message || '')
+            .replace(/[A-Za-z0-9_-]{32,}/g, '[redacted]')
+            .slice(0, 300),
+        });
       if (!res.headersSent)
         reply(res, error.status || 500, { error: error.status ? error.message : 'Server error' });
       else res.destroy();
     });
   });
-  growth.start();
-  server.on(
-    'close',
-    () => void Promise.all([growth.stop(), desk.stop()]).finally(() => db.close()),
-  );
+  if (!managed) growth.start();
+  server.flushNotifications = () => desk.flush();
+  server.runOperations = async () => {
+    await desk.flush();
+    await growth.run(true);
+  };
+  let cleanup;
+  server.shutdown = () =>
+    (cleanup ||= Promise.all([growth.stop(), desk.stop()]).finally(() => db.close()));
+  server.on('close', () => void server.shutdown());
   return server;
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

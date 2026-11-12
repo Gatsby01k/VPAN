@@ -161,11 +161,13 @@ export function createGrowth(
     check = checkSource,
     generate = generateGuide,
     readSearch,
+    initialize = true,
   } = {},
 ) {
   const origin = siteOrigin(publicSiteUrl);
   const lifetime = new AbortController();
-  db.exec(`CREATE TABLE IF NOT EXISTS growth_articles (slug TEXT PRIMARY KEY, status TEXT NOT NULL, body TEXT NOT NULL, content_hash TEXT NOT NULL, created_at TEXT NOT NULL, published_at TEXT, updated_at TEXT NOT NULL);
+  if (initialize)
+    db.exec(`CREATE TABLE IF NOT EXISTS growth_articles (slug TEXT PRIMARY KEY, status TEXT NOT NULL, body TEXT NOT NULL, content_hash TEXT NOT NULL, created_at TEXT NOT NULL, published_at TEXT, updated_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS growth_state (key TEXT PRIMARY KEY, value TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS growth_runs (id TEXT PRIMARY KEY, started_at TEXT NOT NULL, finished_at TEXT, status TEXT NOT NULL, summary TEXT NOT NULL DEFAULT '{}');
     CREATE TABLE IF NOT EXISTS growth_sources (id TEXT PRIMARY KEY, checked_at TEXT, status TEXT NOT NULL DEFAULT 'pending', content_hash TEXT, excerpt TEXT, error TEXT);
@@ -180,23 +182,25 @@ export function createGrowth(
         'INSERT INTO growth_state(key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',
       )
       .run(key, String(value));
-  for (const source of sources)
-    db.prepare('INSERT OR IGNORE INTO growth_sources(id) VALUES (?)').run(source.id);
-  for (const article of catalog) {
-    const issues = validateGuide(article);
-    if (issues.length) throw new Error(`Editorial input ${article.slug}: ${issues.join(', ')}`);
-    db.prepare(
-      'INSERT OR IGNORE INTO growth_articles(slug,status,body,content_hash,created_at,published_at,updated_at) VALUES (?,?,?,?,?,?,?)',
-    ).run(
-      article.slug,
-      article.initial ? 'published' : 'ready',
-      JSON.stringify(article),
-      hash(article),
-      stamp(),
-      article.initial ? stamp() : null,
-      stamp(),
-    );
-  }
+  if (initialize)
+    for (const source of sources)
+      db.prepare('INSERT OR IGNORE INTO growth_sources(id) VALUES (?)').run(source.id);
+  if (initialize)
+    for (const article of catalog) {
+      const issues = validateGuide(article);
+      if (issues.length) throw new Error(`Editorial input ${article.slug}: ${issues.join(', ')}`);
+      db.prepare(
+        'INSERT OR IGNORE INTO growth_articles(slug,status,body,content_hash,created_at,published_at,updated_at) VALUES (?,?,?,?,?,?,?)',
+      ).run(
+        article.slug,
+        article.initial ? 'published' : 'ready',
+        JSON.stringify(article),
+        hash(article),
+        stamp(),
+        article.initial ? stamp() : null,
+        stamp(),
+      );
+    }
   const articles = (all = false) =>
     db
       .prepare(
