@@ -478,29 +478,29 @@ test('static hosting keeps EN/RU documents behind public routes so filesystem pr
   }
 });
 
-test('the retained editorial homepage keeps its original artwork and identity while adding the two-sided business paths', async (t) => {
+test('public editorial pages prerender the original artwork and both brief entry paths', async (t) => {
   const f = await fixture(t);
   const html = await (await fetch(f.base + '/')).text();
   assert.match(html, /assets\/editorial\/hero.webp/);
-  assert.match(html, /class="editorial-scene hero-scene"/);
+  assert.match(html, /<h1 id="hero-title">/);
   assert.match(html, /The other/);
   assert.match(html, /side\./);
   assert.match(html, /assets\/editorial\/connection.webp/);
   assert.match(html, /assets\/editorial\/people.webp/);
   assert.match(html, /assets\/editorial\/exchange.webp/);
-  assert.match(html, /I NEED/);
-  assert.match(html, /I OFFER/);
+  assert.match(html, /type="radio" name="home-intention" checked="" value="need"/);
+  assert.match(html, /type="radio" name="home-intention" value="offer"/);
   assert.match(html, /\/find-a-partner/);
   assert.match(html, /\/join/);
   assert.doesNotMatch(html, /Private Affiliate Network|PAN \//);
   const markets = await (await fetch(f.base + '/markets')).text();
   assert.match(markets, /class="region-picker"/);
-  assert.match(markets, /class="country-card"/);
+  assert.match(markets, /aria-label="Search countries"/);
   assert.match(markets, /\/markets\/mozambique/);
   const about = await (await fetch(f.base + '/about')).text();
   assert.match(about, /class="about-statement wrap"/);
   assert.match(about, /class="accordion"/);
   const contact = await (await fetch(f.base + '/contact')).text();
-  assert.match(contact, /class="editorial-scene contact-scene"/);
+  assert.match(contact, /href="mailto:hello@vladdos.com"/);
   assert.match(contact, /assets\/editorial\/contact.webp/);
 });

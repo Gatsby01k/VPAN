@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { NLink } from './NetworkLayout';
 import { useLocale } from '../locale';
 import {
   clamp,
+  THREAD_ART,
   fitThreadArt,
   threadEnd,
   stepSpring,
@@ -11,22 +11,26 @@ import {
 } from './thread-physics';
 import './connection-thread.css';
 
-type ThreadControls = { choose: (side: 'need' | 'offer', explicit: boolean) => void };
+type Side = 'need' | 'offer';
+type ThreadControls = { choose: (side: Side, explicit: boolean) => void };
+const socketOffset = { need: -94, offer: 90 };
 
 export function ConnectionThread({
   side,
   explicit,
+  onSide,
 }: {
-  side: 'need' | 'offer';
+  side: Side;
   explicit: boolean;
+  onSide: (side: Side) => void;
 }) {
   const { t } = useLocale();
   const art = useRef<HTMLDivElement>(null);
   const image = useRef<HTMLImageElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const controls = useRef<ThreadControls | null>(null);
-  const choice = useRef({ side, explicit });
-  choice.current = { side, explicit };
+  const choice = useRef({ side, explicit, onSide });
+  choice.current = { side, explicit, onSide };
 
   useEffect(() => {
     controls.current?.choose(side, explicit);
@@ -36,7 +40,7 @@ export function ConnectionThread({
     const root = art.current;
     const img = image.current;
     const surface = canvas.current;
-    const end = root?.querySelector<HTMLAnchorElement>('.connection-thread-end');
+    const end = root?.querySelector<HTMLButtonElement>('.connection-thread-end');
     if (!root || !img || !surface || !end) return;
     const region = root.closest('section') || root;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -79,8 +83,6 @@ export function ConnectionThread({
         let left = 0;
         let top = 0;
         let fit = fitThreadArt(1, 1, 'cover', '50% 50%');
-        let artTop = 0;
-        let focused = false;
         let drag: {
           id: number;
           x: number;
@@ -88,6 +90,7 @@ export function ConnectionThread({
           sx: number;
           sy: number;
           moved: boolean;
+          candidate?: Side;
         } | null = null;
         let suppressClick = false;
 
@@ -138,12 +141,6 @@ export function ConnectionThread({
           dirty = true;
           if (!frame && visible && !document.hidden && alive) frame = requestAnimationFrame(tick);
         };
-        const scroll = () => {
-          const y = artTop - window.scrollY;
-          const viewport = window.innerHeight;
-          target.pull = clamp((viewport * 0.78 - y - root.clientHeight * 0.3) / (viewport * 0.65));
-          wake();
-        };
         const resize = () => {
           const rect = img.getBoundingClientRect();
           const bounds = root.getBoundingClientRect();
@@ -151,7 +148,6 @@ export function ConnectionThread({
           height = rect.height;
           left = rect.left - bounds.left;
           top = rect.top - bounds.top;
-          artTop = bounds.top + window.scrollY;
           const css = getComputedStyle(img);
           fit = fitThreadArt(width, height, css.objectFit, css.objectPosition);
           Object.assign(surface.style, {
@@ -165,37 +161,43 @@ export function ConnectionThread({
             root.dataset.threadMotion = 'ready';
             placeEnd(pose());
           }
-          scroll();
+          wake();
+        };
+        const settle = (side: Side, selected: boolean) => {
+          target.side = selected ? (side === 'offer' ? 1 : -1) : 0;
+          target.pull = selected ? 0.5 : 0;
+          target.x = -target.pull * 38 - target.side * 5;
+          target.y = (selected ? socketOffset[side] : 0) + target.pull * 18 + target.side * 7;
+          wake();
         };
         const leave = () => {
-          if (drag) return;
-          target.x = 0;
-          target.y = focused ? -10 : 0;
-          wake();
+          if (!drag) settle(choice.current.side, choice.current.explicit);
         };
         const pointer = (event: PointerEvent) => {
-          if (event.pointerType !== 'mouse') return;
-          if (drag && drag.id === event.pointerId) {
-            const dx = (event.clientX - drag.x) / fit.sx,
-              dy = (event.clientY - drag.y) / fit.sy;
-            if (Math.hypot(dx, dy) > 5) drag.moved = true;
-            target.x = clamp(drag.sx + dx, -35, 55);
-            target.y = clamp(drag.sy + dy, -45, 35);
+          if (drag?.id === event.pointerId) {
+            const dx = (event.clientX - drag.x) / fit.sx;
+            const dy = (event.clientY - drag.y) / fit.sy;
+            if (Math.hypot(event.clientX - drag.x, event.clientY - drag.y) > 5) drag.moved = true;
+            target.pull = 0.45;
+            target.x = clamp(drag.sx + dx, -84, 66);
+            target.y = clamp(drag.sy + dy, -114, 114);
+            const offset = threadEnd(target).y - THREAD_ART.endY;
+            drag.candidate = Math.abs(offset) >= 36 ? (offset < 0 ? 'need' : 'offer') : undefined;
+            root.dataset.candidate = drag.candidate ?? '';
             wake();
-            return;
+          } else if (event.pointerType === 'mouse' && !choice.current.explicit) {
+            const bounds = root.getBoundingClientRect();
+            const px = (event.clientX - bounds.left - left - fit.ox) / fit.sx;
+            const py = (event.clientY - bounds.top - top - fit.oy) / fit.sy;
+            const strength =
+              1 - clamp(Math.hypot(px - THREAD_ART.endX, py - THREAD_ART.endY) / 200);
+            target.x = clamp((px - THREAD_ART.endX) * 0.2, -16, 16) * strength;
+            target.y = clamp((py - THREAD_ART.endY) * 0.2, -14, 14) * strength;
+            wake();
           }
-          const bounds = root.getBoundingClientRect();
-          const px = (event.clientX - bounds.left - left - fit.ox) / fit.sx;
-          const py = (event.clientY - bounds.top - top - fit.oy) / fit.sy;
-          const moved = threadEnd(pose());
-          const distance = Math.hypot(px - moved.x, py - moved.y);
-          const strength = 1 - clamp(distance / 240);
-          target.x = clamp((px - moved.x) * 0.3, -22, 22) * strength;
-          target.y = clamp((py - moved.y) * 0.3, -19, 19) * strength;
-          wake();
         };
         const down = (event: PointerEvent) => {
-          if (event.pointerType !== 'mouse' || event.button !== 0) return;
+          if (event.button !== 0 || !event.isPrimary) return;
           suppressClick = false;
           drag = {
             id: event.pointerId,
@@ -210,24 +212,24 @@ export function ConnectionThread({
         };
         const release = (event: PointerEvent) => {
           if (!drag || drag.id !== event.pointerId) return;
+          const selected = event.type === 'pointerup' && drag.moved ? drag.candidate : undefined;
           suppressClick = drag.moved;
-          if (end.hasPointerCapture(event.pointerId)) end.releasePointerCapture(event.pointerId);
           drag = null;
           delete root.dataset.dragging;
-          leave();
+          delete root.dataset.candidate;
+          if (selected) {
+            settle(selected, true);
+            choice.current.onSide(selected);
+          } else {
+            leave();
+          }
         };
         const click = (event: MouseEvent) => {
-          if (suppressClick && event.detail > 0) event.preventDefault();
+          if (suppressClick && event.detail > 0) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+          }
           suppressClick = false;
-        };
-        const focus = () => {
-          focused = true;
-          target.y = -10;
-          wake();
-        };
-        const blur = () => {
-          focused = false;
-          leave();
         };
         const lost = () => {
           if (drag && end.hasPointerCapture(drag.id)) end.releasePointerCapture(drag.id);
@@ -236,6 +238,7 @@ export function ConnectionThread({
           cancelAnimationFrame(frame);
           delete root.dataset.threadMotion;
           delete root.dataset.dragging;
+          delete root.dataset.candidate;
           end.removeAttribute('style');
           teardown?.();
         };
@@ -248,12 +251,7 @@ export function ConnectionThread({
             resize();
           }
         };
-        controls.current = {
-          choose(next, explicitChoice) {
-            target.side = explicitChoice ? (next === 'offer' ? 1 : -1) : 0;
-            wake();
-          },
-        };
+        controls.current = { choose: settle };
         const intersection = new IntersectionObserver(
           ([entry]) => {
             visible = entry.isIntersecting;
@@ -269,16 +267,14 @@ export function ConnectionThread({
         const size = new ResizeObserver(resize);
         size.observe(root);
         intersection.observe(root);
-        window.addEventListener('scroll', scroll, { passive: true });
         window.addEventListener('resize', resize, { passive: true });
         region.addEventListener('pointermove', pointer as EventListener, { passive: true });
         region.addEventListener('pointerleave', leave);
-        end.addEventListener('focus', focus);
-        end.addEventListener('blur', blur);
         end.addEventListener('pointerdown', down);
         window.addEventListener('pointerup', release);
         window.addEventListener('pointercancel', release);
-        end.addEventListener('click', click);
+        end.addEventListener('click', click, true);
+        end.addEventListener('lostpointercapture', release);
         surface.addEventListener('webglcontextlost', lost);
         document.addEventListener('visibilitychange', visibility);
         resize();
@@ -289,20 +285,19 @@ export function ConnectionThread({
           controls.current = null;
           intersection.disconnect();
           size.disconnect();
-          window.removeEventListener('scroll', scroll);
           window.removeEventListener('resize', resize);
           region.removeEventListener('pointermove', pointer as EventListener);
           region.removeEventListener('pointerleave', leave);
-          end.removeEventListener('focus', focus);
-          end.removeEventListener('blur', blur);
           end.removeEventListener('pointerdown', down);
           window.removeEventListener('pointerup', release);
           window.removeEventListener('pointercancel', release);
-          end.removeEventListener('click', click);
+          end.removeEventListener('click', click, true);
+          end.removeEventListener('lostpointercapture', release);
           surface.removeEventListener('webglcontextlost', lost);
           document.removeEventListener('visibilitychange', visibility);
           delete root.dataset.threadMotion;
           delete root.dataset.dragging;
+          delete root.dataset.candidate;
           end.removeAttribute('style');
           renderer.dispose();
         };
@@ -334,31 +329,40 @@ export function ConnectionThread({
   }, []);
 
   return (
-    <div ref={art} className="scene-art connection-thread-art">
-      <img
-        ref={image}
-        src="/assets/editorial/connection.webp"
-        alt=""
-        width="1586"
-        height="992"
-        loading="lazy"
-      />
-      <canvas ref={canvas} className="connection-thread-canvas" aria-hidden="true" />
-      <NLink
-        to={side === 'need' ? '/find-a-partner' : '/join'}
-        className="connection-thread-end"
-        draggable={false}
-        title={t('Pull the thread', 'Потяните за нить')}
-        aria-label={
-          side === 'need'
-            ? t('Take the other end — find a partner', 'Возьмите другой конец — найти партнёра')
-            : t('Take the other end — join the network', 'Возьмите другой конец — стать партнёром')
-        }
-      >
-        <span className="connection-thread-you folio" aria-hidden="true">
-          {t('YOU', 'ВЫ')}
+    <div ref={art} className="connection-thread-art" data-intent={explicit ? side : undefined}>
+      <div className="connection-thread-print">
+        <img
+          ref={image}
+          src="/assets/editorial/connection.webp"
+          alt=""
+          width="1586"
+          height="992"
+          loading="lazy"
+        />
+        <canvas ref={canvas} className="connection-thread-canvas" aria-hidden="true" />
+      </div>
+      <div className="connection-sockets" aria-hidden="true">
+        <span data-socket="need">
+          <b>I NEED</b>
+          <i />
         </span>
-      </NLink>
+        <span data-socket="offer">
+          <b>I OFFER</b>
+          <i />
+        </span>
+      </div>
+      <button
+        type="button"
+        className="connection-thread-end"
+        title={t('Drag the ring or switch intent', 'Потяните кольцо или переключите намерение')}
+        aria-label={t('Switch connection intent', 'Переключить намерение')}
+        onClick={() => onSide(side === 'need' ? 'offer' : 'need')}
+        onKeyDown={(event) => {
+          if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+          event.preventDefault();
+          onSide(event.key === 'ArrowUp' ? 'need' : 'offer');
+        }}
+      />
     </div>
   );
 }

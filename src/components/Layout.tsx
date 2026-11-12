@@ -1,7 +1,8 @@
+import { EditorialRule, NavigationGlyph, SignatureArrow } from './ConnectionProtocol';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NLink as Link } from './NetworkLayout';
-import { ArrowUpRight, ArrowUp, Command, CornerDownLeft, Menu, Search } from 'lucide-react';
+import { Command, CornerDownLeft, Search } from 'lucide-react';
 import { Brand, Dialog } from './UI';
 import { useLocale } from '../locale';
 import { countries, regions, networkMeta } from '../network';
@@ -88,7 +89,7 @@ function CommandMenu({ open, onClose }: { open: boolean; onClose: () => void }) 
       open={open}
       onClose={onClose}
       title={t('Quick navigation', 'Быстрая навигация')}
-      className="command-dialog"
+      className="command-dialog counter-command"
     >
       <p className="command-eyebrow">
         {t('THE NETWORK, AT YOUR FINGERTIPS', 'ВСЯ СЕТЬ — ПОД РУКОЙ')}
@@ -149,7 +150,7 @@ function CommandMenu({ open, onClose }: { open: boolean; onClose: () => void }) 
                 <strong>{i.title}</strong>
                 <small>{i.subtitle}</small>
               </span>
-              <ArrowUpRight size={18} />
+              <SignatureArrow />
             </button>
           ))
         ) : (
@@ -182,15 +183,6 @@ export function Header() {
   const location = useLocation();
   const [menu, setMenu] = useState(false);
   const [command, setCommand] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  useEffect(() => {
-    const update = () => setScrolled(window.scrollY > 24);
-    update();
-    window.addEventListener('scroll', update, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', update);
-    };
-  }, [location.pathname]);
   useEffect(() => {
     setMenu(false);
   }, [location.pathname, location.hash, location.search]);
@@ -221,73 +213,56 @@ export function Header() {
       >
         {t('Skip to content', 'Перейти к содержимому')}
       </a>
-      <header
-        className={`site-header ${location.pathname === '/' ? 'is-deck-home' : ''} ${scrolled ? 'is-scrolled' : ''}`}
-      >
-        <div className="header-inner wrap">
+      <header className="counter-header">
+        <div className="counter-header-inner">
           <Brand />
-          <nav className="desktop-nav" aria-label={t('Main navigation', 'Основная навигация')}>
-            {links.map(([path, label]) =>
-              path.includes('#') ? (
-                <Link
-                  key={path}
-                  to={path}
-                  aria-current={
-                    location.pathname === '/' && location.hash === '#connection'
-                      ? 'location'
-                      : undefined
-                  }
-                >
-                  {label}
-                  {path === '/contact' && <ArrowUpRight size={17} aria-hidden="true" />}
-                </Link>
-              ) : (
-                <Link
-                  key={path}
-                  to={path}
-                  aria-current={
-                    location.pathname === path || location.pathname.startsWith(path + '/')
-                      ? 'page'
-                      : undefined
-                  }
-                >
-                  {label}
-                  {path === '/contact' && <ArrowUpRight size={17} aria-hidden="true" />}
-                </Link>
-              ),
-            )}
+          <nav className="counter-nav" aria-label={t('Main navigation', 'Основная навигация')}>
+            {links.map(([path, label]) => (
+              <Link
+                key={path}
+                to={path}
+                aria-current={
+                  location.pathname === path || location.pathname.startsWith(path + '/')
+                    ? 'page'
+                    : undefined
+                }
+              >
+                <i className="nav-eyelet" aria-hidden="true" />
+                {label}
+              </Link>
+            ))}
           </nav>
-          <div className="header-tools">
-            <Link className="header-brief" to="/find-a-partner">
+          <div className="counter-header-tools">
+            <Link className="counter-header-brief" to="/find-a-partner">
               {t('Start a brief', 'Составить бриф')}
-              <ArrowUpRight size={16} aria-hidden="true" />
+              <SignatureArrow />
             </Link>
             <button
-              className="language-button"
+              className="counter-language"
               onClick={() => setLanguage(language === 'en' ? 'ru' : 'en')}
               aria-label={t('Switch to Russian', 'Переключить на английский')}
             >
               {language.toUpperCase()}
             </button>
             <button
-              className="icon-button command-trigger"
+              className="counter-quick"
               onClick={() => setCommand(true)}
               aria-label={t('Open quick navigation', 'Открыть быструю навигацию')}
               aria-keyshortcuts="Meta+K Control+K"
             >
-              <Search size={18} strokeWidth={1.6} />
+              <NavigationGlyph search />
               <kbd>
                 <Command size={11} /> K
               </kbd>
             </button>
             <button
-              className="icon-button mobile-toggle"
+              className="counter-menu-toggle"
               onClick={() => setMenu(true)}
               aria-label={t('Open menu', 'Открыть меню')}
               aria-expanded={menu}
               aria-controls="mobile-navigation"
             >
-              <Menu size={22} />
+              <NavigationGlyph />
             </button>
           </div>
         </div>
@@ -296,22 +271,19 @@ export function Header() {
         open={menu}
         onClose={() => setMenu(false)}
         title={t('Navigation', 'Навигация')}
-        className="mobile-menu"
+        className="mobile-menu counter-menu"
       >
         <Brand />
-        <p className="mobile-menu-eyebrow">
-          {t('YOUR NEXT CONNECTION STARTS HERE', 'ВАШЕ СЛЕДУЮЩЕЕ ЗНАКОМСТВО')}
-        </p>
         <div className="mobile-intents">
           <Link to="/find-a-partner" onClick={() => setMenu(false)}>
             <small>I NEED</small>
             <span>{t('Find a partner', 'Найти партнёра')}</span>
-            <ArrowUpRight size={22} />
+            <SignatureArrow />
           </Link>
           <Link to="/join" onClick={() => setMenu(false)}>
             <small>I OFFER</small>
             <span>{t('Join the network', 'Стать партнёром')}</span>
-            <ArrowUpRight size={22} />
+            <SignatureArrow />
           </Link>
         </div>
         <nav
@@ -319,16 +291,16 @@ export function Header() {
           id="mobile-navigation"
           aria-label={t('Mobile navigation', 'Мобильная навигация')}
         >
-          {links.map(([path, label], index) => (
+          {links.map(([path, label]) => (
             <div key={path}>
               <Link
                 to={path}
                 aria-current={location.pathname === path ? 'page' : undefined}
                 onClick={() => setMenu(false)}
               >
-                <small>0{index + 1}</small>
+                <i className="nav-eyelet" aria-hidden="true" />
                 {label}
-                <ArrowUpRight size={27} />
+                <SignatureArrow />
               </Link>
             </div>
           ))}
@@ -352,10 +324,10 @@ export function Header() {
 export function Footer() {
   const { t } = useLocale();
   return (
-    <footer className="editorial-footer footer-evolution">
-      <div className="wrap">
-        <div className="footer-main">
-          <div className="footer-statement">
+    <footer className="counter-footer counter-dark">
+      <div className="counter-footer-inner">
+        <div className="counter-footer-main">
+          <div className="counter-footer-statement">
             <Brand />
             <p>
               {t('Good business starts', 'Хороший бизнес начинается')}
@@ -363,7 +335,7 @@ export function Footer() {
             </p>
             <a href="mailto:hello@vladdos.com">
               hello@vladdos.com
-              <ArrowUpRight size={18} />
+              <SignatureArrow />
             </a>
           </div>
           <nav aria-label={t('Footer navigation', 'Навигация в подвале')}>
@@ -378,29 +350,30 @@ export function Footer() {
               <span className="folio">{t('CONNECT', 'СВЯЗАТЬСЯ')}</span>
               <Link to="/find-a-partner">
                 {t('Find a partner', 'Найти партнёра')}
-                <ArrowUpRight size={14} />
+                <SignatureArrow />
               </Link>
               <Link to="/join">
                 {t('Join the network', 'Стать партнёром')}
-                <ArrowUpRight size={14} />
+                <SignatureArrow />
               </Link>
               <Link to="/contact">{t('Contact', 'Контакты')}</Link>
               <a
-                className="footer-telegram"
+                className="counter-footer-telegram"
                 href={telegramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <span>Telegram · @{telegramUsername}</span>
-                <ArrowUpRight size={14} aria-hidden="true" />
+                <SignatureArrow />
               </a>
               <Link to="/knowledge">{t('Field notes', 'Материалы')}</Link>
             </div>
           </nav>
         </div>
-        <div className="footer-baseline">
+        <EditorialRule />
+        <div className="counter-footer-baseline">
           <span>© {new Date().getUTCFullYear()} VlaDDoS Network</span>
-          <span className="footer-geography">
+          <span className="counter-footer-geography">
             ASIA <i /> LATAM <i /> AFRICA
           </span>
           <div>
@@ -418,7 +391,7 @@ export function Footer() {
                 document.getElementById('main')?.focus({ preventScroll: true });
               }}
             >
-              <ArrowUp size={17} />
+              <SignatureArrow direction="up" />
             </button>
           </div>
         </div>

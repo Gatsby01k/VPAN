@@ -21,6 +21,17 @@ function Pages() {
       <main
         id="main"
         tabIndex={-1}
+        data-public-page={
+          pagePath === '/admin'
+            ? undefined
+            : pagePath.startsWith('/markets/')
+              ? 'country'
+              : pagePath.startsWith('/knowledge/')
+                ? 'article'
+                : pagePath === '/join' || pagePath === '/find-a-partner'
+                  ? 'brief'
+                  : pagePath.slice(1) || 'home'
+        }
         className={
           ['/', '/contact', '/markets', '/about'].includes(pagePath) ||
           pagePath.startsWith('/markets/')

@@ -1,6 +1,7 @@
+import { SignatureArrow } from './ConnectionProtocol';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { NLink as Link } from './NetworkLayout';
-import { ArrowUpRight, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useLocale } from '../locale';
 
 export function Brand({ compact = false }: { compact?: boolean }) {
@@ -36,7 +37,7 @@ export function Action({
     <Link to={to} className={`action ${secondary ? 'action-secondary' : ''} ${className}`}>
       <span>{children}</span>
       <span className="action-icon">
-        <ArrowUpRight size={20} strokeWidth={1.75} aria-hidden="true" />
+        <SignatureArrow />
       </span>
     </Link>
   );

@@ -1,3 +1,5 @@
+import { Engraving } from '../components/CounterpartArt';
+import { EditorialRule, SignatureArrow } from '../components/ConnectionProtocol';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Plus, Minus } from 'lucide-react';
@@ -5,14 +7,15 @@ import { useLocale } from '../locale';
 import { industries, label } from '../network';
 import { NLink, Action, Arrow, Eyebrow } from '../components/NetworkLayout';
 import { useGrowth } from '../growth';
-import { SceneArt, ThreadLink } from '../components/Editorial';
+import { ThreadLink } from '../components/Editorial';
 import { telegramUsername, telegramUrl } from '../telegram';
 import { ParticipantEconomics } from '../components/CommercialOffer';
 
 export function Invitation() {
   const { t } = useLocale();
   return (
-    <section className="invitation wrap">
+    <section className="counter-invitation wrap">
+      <EditorialRule />
       <Eyebrow>{t('The next connection', 'Следующее знакомство')}</Eyebrow>
       <h2>
         {t('What could we', 'Что мы можем')}
@@ -34,13 +37,14 @@ export function PageIntro({
   description: string;
 }) {
   return (
-    <div className="page-intro wrap">
+    <div className="counter-page-intro wrap">
       <Eyebrow>{index}</Eyebrow>
       <h1>
         {title}
         {italic && <em>{italic}</em>}
       </h1>
-      <p>{description}</p>
+      <p className="page-standfirst">{description}</p>
+      <EditorialRule />
     </div>
   );
 }
@@ -73,15 +77,17 @@ export function IndustryList() {
     <div className="industry-list">
       {industries.map((item, i) => (
         <div key={item.id} className="industry-row">
-          <button
-            onClick={() => setExpanded(expanded === item.id ? null : item.id)}
-            aria-expanded={expanded === item.id}
-            aria-controls={'industry-' + item.id}
-          >
-            <span>0{i + 1}</span>
-            <h3>{label(item, language)}</h3>
-            {expanded === item.id ? <Minus aria-hidden="true" /> : <Plus aria-hidden="true" />}
-          </button>
+          <h2>
+            <button
+              onClick={() => setExpanded(expanded === item.id ? null : item.id)}
+              aria-expanded={expanded === item.id}
+              aria-controls={'industry-' + item.id}
+            >
+              <span>0{i + 1}</span>
+              <strong>{label(item, language)}</strong>
+              {expanded === item.id ? <Minus aria-hidden="true" /> : <Plus aria-hidden="true" />}
+            </button>
+          </h2>
           <div id={'industry-' + item.id} hidden={expanded !== item.id}>
             <p>{industryCopy[item.id][language === 'ru' ? 1 : 0]}</p>
             <NLink className="text-link" to={'/find-a-partner?industry=' + item.id}>
@@ -103,7 +109,7 @@ export function Industries() {
   return (
     <>
       <PageIntro
-        index="THE INDUSTRIES"
+        index={t('Sector index', 'Индекс индустрий')}
         title={t('Context comes first.', 'Сначала — контекст.')}
         italic={t('Connections follow.', 'Затем — связи.')}
         description={t(
@@ -149,7 +155,7 @@ export function Network() {
   return (
     <>
       <PageIntro
-        index="THE NETWORK"
+        index={t('Network / operating model', 'Сеть / как мы работаем')}
         title={t('A connection is', 'Знакомство —')}
         italic={t('only the beginning.', 'только начало.')}
         description={t(
@@ -157,7 +163,10 @@ export function Network() {
           'Независимая сеть с личным участием для компаний, которые ищут конкретных партнёров или предлагают полезные возможности.',
         )}
       />
-      <section className="process-section wrap">
+      <section
+        className="process-section wrap"
+        aria-label={t('From brief to introduction', 'От брифа до знакомства')}
+      >
         {process.map(([en, ru, copy, copyRu], i) => (
           <div className="process-row" key={en}>
             <span>0{i + 1}</span>
@@ -229,12 +238,21 @@ export function Network() {
 export function Contact() {
   const { t } = useLocale();
   return (
-    <section className="editorial-scene contact-scene" aria-labelledby="contact-title">
-      <SceneArt name="contact" priority />
-      <div className="scene-copy contact-copy">
-        <h1 className="editorial-title" id="contact-title">
-          {t('Take the', 'Возьмите')}
-          <em>{t('other end.', 'другой конец.')}</em>
+    <section className="counter-contact" aria-labelledby="contact-title">
+      <Engraving className="contact-engraving" />
+      <div className="contact-plate" aria-hidden="true">
+        <img
+          src="/assets/editorial/contact.webp"
+          alt=""
+          width="1586"
+          height="992"
+          fetchPriority="high"
+        />
+      </div>
+      <div className="counter-contact-copy">
+        <p className="world-label">{t('Correspondence', 'Переписка')}</p>
+        <h1 className="counter-title" id="contact-title">
+          {t('Take the', 'Возьмите')} <em>{t('other end.', 'другой конец.')}</em>
         </h1>
         <p className="scene-subtitle">
           {t(
@@ -242,7 +260,7 @@ export function Contact() {
             'Несколько деталей для нужного разговора.',
           )}
         </p>
-        <div className="retained-contact-paths">
+        <div className="counter-contact-paths">
           <div>
             <span className="folio">I NEED</span>
             <ThreadLink to="/find-a-partner">{t('Find a partner', 'Найти партнёра')}</ThreadLink>
@@ -264,7 +282,7 @@ export function Contact() {
             </p>
           </div>
         </div>
-        <div className="contact-foot">
+        <div className="counter-contact-channels">
           <span className="folio">{t('OR JUST SAY HELLO', 'ИЛИ ПРОСТО НАПИШИТЕ')}</span>
           <a href="mailto:hello@vladdos.com">
             hello@vladdos.com <Arrow />
@@ -401,9 +419,17 @@ export function NotFound() {
   );
 }
 export function Knowledge() {
-  const { t } = useLocale();
+  const { t, language } = useLocale();
   const { slug } = useParams();
   const { data, loaded } = useGrowth();
+  const dateFormat = new Intl.DateTimeFormat(language === 'ru' ? 'ru-RU' : 'en-GB', {
+    dateStyle: 'medium',
+    timeZone: 'UTC',
+  });
+  const dateLabel = (value: string) => {
+    const date = new Date(value);
+    return Number.isNaN(date.valueOf()) ? value : dateFormat.format(date);
+  };
   const article = data.articles.find((a) => a.slug === slug);
   if (slug && !article)
     return loaded ? (
@@ -416,7 +442,7 @@ export function Knowledge() {
   return (
     <>
       <PageIntro
-        index="THE FIELD NOTES"
+        index={t('Field notes / partner research', 'Материалы / поиск партнёров')}
         title={
           article ? t(article.title, article.titleRu) : t('Better questions.', 'Точные вопросы.')
         }
@@ -431,7 +457,14 @@ export function Knowledge() {
         }
       />
       {article ? (
-        <article className="prose wrap">
+        <article className="prose wrap field-note-body">
+          <div className="field-note-byline">
+            <ThreadLink to="/knowledge" variant="utility" direction="return">
+              {t('All field notes', 'Все материалы')}
+            </ThreadLink>
+            <span>{article.author}</span>
+            <time dateTime={article.publishedAt}>{dateLabel(article.publishedAt)}</time>
+          </div>
           {article.sections.map((s) => (
             <section key={s.id}>
               <h2>{t(s.heading, s.headingRu)}</h2>
@@ -459,11 +492,15 @@ export function Knowledge() {
         </article>
       ) : (
         <div className="wrap page-section field-notes">
-          {data.articles.map((a) => (
+          {data.articles.map((a, index) => (
             <NLink key={a.slug} to={'/knowledge/' + a.slug}>
-              <h2>{t(a.title, a.titleRu)}</h2>
-              <p>{t(a.summary, a.summaryRu)}</p>
-              <Arrow />
+              <span className="field-note-number">{String(index + 1).padStart(2, '0')}</span>
+              <div>
+                <h2>{t(a.title, a.titleRu)}</h2>
+                <p>{t(a.summary, a.summaryRu)}</p>
+              </div>
+              <time dateTime={a.publishedAt}>{dateLabel(a.publishedAt)}</time>
+              <SignatureArrow />
             </NLink>
           ))}
           {!data.articles.length && (

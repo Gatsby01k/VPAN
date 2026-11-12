@@ -176,17 +176,6 @@
   background: var(--paper);
   padding: 16px;
 }
-.network-product .site-header {
-  height: 98px;
-  margin: 0 56px;
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 30px;
-  position: relative;
-  z-index: 10;
-}
 .network-product .wordmark {
   display: flex;
   align-items: center;
@@ -307,32 +296,6 @@
 .network-product .hero-index span:last-child {
   color: var(--muted);
 }
-.network-product .hero-copy {
-  position: relative;
-  margin: 105px 5% 100px 54%;
-  z-index: 1;
-  width: 41%;
-  max-width: 640px;
-}
-.network-product .hero-copy h1 {
-  font-size: clamp(50px, 5.1vw, 82px);
-  line-height: 1.06;
-  letter-spacing: -0.06em;
-  margin-bottom: 29px;
-}
-.network-product .hero-copy h1 em {
-  margin-top: 2px;
-}
-.network-product .hero-copy > p {
-  max-width: 450px;
-  font-size: 13px;
-  line-height: 1.85;
-}
-.network-product .hero-copy > .eyebrow {
-  font-size: 9px;
-  max-width: none;
-  margin-bottom: 22px;
-}
 .network-product .hero-choices {
   display: flex;
   margin-top: 30px;
@@ -369,14 +332,6 @@
 }
 .network-product .hero-choices > a:hover {
   color: var(--pink);
-}
-.network-product .hero-copy > small {
-  display: block;
-  font-size: 9px;
-  line-height: 1.8;
-  letter-spacing: 0.025em;
-  margin-top: 16px;
-  color: var(--muted);
 }
 .network-product .hero-caption {
   position: absolute;
@@ -1598,16 +1553,6 @@
   .network-product .hero {
     min-height: 850px;
   }
-  .network-product .hero-copy {
-    margin-top: 130px;
-  }
-  .network-product .hero-copy h1 {
-    font-size: 88px;
-  }
-  .network-product .hero-copy > p {
-    font-size: 15px;
-    max-width: 490px;
-  }
   .network-product .hero-choices strong {
     font-size: 14px;
   }
@@ -1615,10 +1560,6 @@
 @media (max-width: 1100px) {
   .network-product .wrap {
     width: calc(100% - 70px);
-  }
-  .network-product .site-header {
-    margin-inline: 35px;
-    gap: 20px;
   }
   .network-product .primary-nav {
     gap: 20px;
@@ -1628,14 +1569,6 @@
   }
   .network-product .hero {
     min-height: 690px;
-  }
-  .network-product .hero-copy {
-    margin-left: 51%;
-    width: 45%;
-    margin-top: 110px;
-  }
-  .network-product .hero-copy h1 {
-    font-size: 55px;
   }
   .network-product .hero-index,
   .network-product .hero-caption {
@@ -1672,9 +1605,6 @@
   }
 }
 @media (max-width: 800px) {
-  .network-product .site-header {
-    height: 83px;
-  }
   .network-product .primary-nav {
     display: none;
   }
@@ -1712,21 +1642,6 @@
   }
   .network-product .hero {
     min-height: 680px;
-  }
-  .network-product .hero-copy {
-    margin-left: 46%;
-    width: 50%;
-    margin-top: 105px;
-  }
-  .network-product .hero-copy h1 {
-    font-size: clamp(40px, 6.5vw, 54px);
-  }
-  .network-product .hero-copy > p {
-    font-size: 12px;
-  }
-  .network-product .hero-copy .eyebrow {
-    font-size: 8px;
-    line-height: 1.8;
   }
   .network-product .hero-art {
     object-position: 35% center;
@@ -1934,10 +1849,6 @@
   .network-product .wrap {
     width: calc(100% - 40px);
   }
-  .network-product .site-header {
-    margin-inline: 20px;
-    height: 77px;
-  }
   .network-product .wordmark {
     font-size: 23px;
     gap: 12px;
@@ -1981,25 +1892,6 @@
   .network-product .hero-index span:last-child {
     display: none;
   }
-  .network-product .hero-copy {
-    margin: 0;
-    padding: 25px 20px 70px;
-    width: 100%;
-    max-width: none;
-    background: linear-gradient(0deg, var(--paper) 92%, transparent 100%);
-  }
-  .network-product .hero-copy h1 {
-    font-size: clamp(45px, 11.2vw, 62px);
-    margin-bottom: 23px;
-  }
-  .network-product .hero-copy .eyebrow {
-    font-size: 8px;
-    margin-bottom: 18px;
-  }
-  .network-product .hero-copy > p {
-    font-size: 12px;
-    max-width: 430px;
-  }
   .network-product .hero-choices {
     display: flex;
     margin-top: 28px;
@@ -2023,9 +1915,6 @@
     width: 16px;
     right: 3px;
     bottom: 20px;
-  }
-  .network-product .hero-copy > small {
-    font-size: 8px;
   }
   .network-product .hero-caption {
     left: 20px;
@@ -2542,9 +2431,6 @@
   );
   z-index: 0;
   pointer-events: none;
-}
-.network-product .hero-copy {
-  animation: copy-enter 0.65s ease-out both;
 }
 .network-product .loom-section:focus-within:before {
   opacity: 1;

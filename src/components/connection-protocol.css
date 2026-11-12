@@ -1,0 +1,239 @@
+:root {
+  --counter-ink: #0b0b09;
+  --counter-paper: #f4ead9;
+  --counter-ivory: #fff8eb;
+  --counter-thread: #ff006d;
+  --counter-mark: #a00045;
+  --counter-gold: #a46b24;
+  --counter-brass: #cf9a55;
+  --counter-rule: #2b1c1140;
+  --counter-dim: #5b4a39;
+  --counter-gutter: clamp(20px, 4.6vw, 86px);
+  --counter-span: min(100% - var(--counter-gutter) * 2, 1512px);
+  --counter-column: clamp(12px, 1.65vw, 28px);
+  --counter-display: 'Bodoni Moda', 'Cormorant', Georgia, serif;
+  --counter-sans: 'Manrope Variable', Arial, sans-serif;
+  --counter-meta: 'Inter Variable', Arial, sans-serif;
+  --counter-tension: cubic-bezier(0.22, 1, 0.36, 1);
+  --counter-response: 180ms;
+  --counter-stitch: 340ms;
+}
+
+:lang(ru) {
+  --counter-display: 'Cormorant', 'Bodoni Moda', Georgia, serif;
+}
+
+.signature-arrow {
+  flex: none;
+  inline-size: 1.8em;
+  block-size: 1.35em;
+  min-inline-size: 23px;
+  overflow: visible;
+  color: inherit;
+  transform: rotate(var(--arrow-angle, -37deg));
+}
+
+.signature-arrow[data-direction='forward'] {
+  --arrow-angle: 0deg;
+}
+.signature-arrow[data-direction='down'] {
+  --arrow-angle: 90deg;
+}
+.signature-arrow[data-direction='return'] {
+  --arrow-angle: 180deg;
+}
+.signature-arrow[data-direction='up'] {
+  --arrow-angle: -90deg;
+}
+
+.signature-arrow :is(path, circle) {
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition:
+    transform 280ms var(--counter-tension),
+    fill 180ms ease,
+    color 180ms ease;
+}
+.signature-arrow .signature-shaft {
+  transform-origin: 7.6px 13.5px;
+  transition-delay: 26ms;
+}
+.signature-arrow .signature-tip {
+  transition-delay: 0ms;
+}
+.signature-arrow .signature-eye {
+  transition-delay: 0ms;
+}
+
+:is(a, button, summary):is(:hover, :focus-visible) > .signature-arrow .signature-shaft,
+:is(a, button):is(:hover, :focus-visible) > span > .signature-arrow .signature-shaft {
+  transform: scaleX(1.21);
+  transition-delay: 0ms;
+}
+:is(a, button, summary):is(:hover, :focus-visible) > .signature-arrow .signature-tip,
+:is(a, button):is(:hover, :focus-visible) > span > .signature-arrow .signature-tip {
+  transform: translateX(3.2px);
+  transition-delay: 38ms;
+}
+:is(a, button, summary):is(:hover, :focus-visible) > .signature-arrow .signature-eye,
+:is(a, button):is(:hover, :focus-visible) > span > .signature-arrow .signature-eye {
+  fill: currentColor;
+  color: var(--protocol-accent, var(--counter-mark));
+  transition-delay: 80ms;
+}
+
+.editorial-rule {
+  display: flex;
+  align-items: center;
+  height: 9px;
+  color: var(--protocol-etch, #785018);
+}
+.editorial-rule::before,
+.editorial-rule::after {
+  content: '';
+  height: 1px;
+}
+.editorial-rule::before {
+  width: 23px;
+  background: currentColor;
+}
+.editorial-rule::after {
+  flex: 1;
+  margin-left: 7px;
+  background: var(--protocol-rule, var(--counter-rule));
+}
+.editorial-rule i {
+  width: 5px;
+  height: 5px;
+  border: 1px solid;
+  transform: rotate(45deg);
+}
+
+.connection-link {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9em;
+  text-decoration: none;
+  color: inherit;
+  font: 750 0.9rem/1.25 var(--counter-sans);
+}
+.connection-link[data-variant='editorial'] {
+  position: relative;
+  min-width: min(100%, 15rem);
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--protocol-rule, var(--counter-rule));
+}
+.connection-link[data-variant='editorial']::after {
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 1px;
+  content: '';
+  background: var(--protocol-accent, var(--counter-mark));
+  transform: scaleX(0.13);
+  transform-origin: left;
+  transition: transform var(--counter-stitch) var(--counter-tension);
+}
+.connection-link:is(:hover, :focus-visible)::after {
+  transform: scaleX(1);
+}
+.connection-link:active {
+  transform: translateY(1px);
+}
+.connection-link[data-variant='utility'] {
+  font-size: 0.81rem;
+}
+
+.intent-stitch {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 9px;
+  color: var(--protocol-etch, #785018);
+  background: linear-gradient(
+      var(--protocol-rule, var(--counter-rule)),
+      var(--protocol-rule, var(--counter-rule))
+    )
+    center / 100% 1px no-repeat;
+  pointer-events: none;
+}
+.intent-stitch > i {
+  position: absolute;
+  inset: 4px auto auto 0;
+  width: 50%;
+  height: 1px;
+  transform-origin: right;
+  background: var(--protocol-accent, var(--counter-mark));
+  transition: transform var(--counter-stitch) var(--counter-tension);
+}
+.intent-stitch[data-side='offer'] > i {
+  transform: translateX(100%);
+}
+.intent-stitch > i::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  right: 0;
+  width: 7px;
+  height: 7px;
+  background: var(--protocol-paper, var(--counter-paper));
+  border: 1px solid var(--protocol-accent, var(--counter-mark));
+  transform: rotate(45deg);
+}
+
+.thread-progress {
+  display: inline-flex;
+  width: 84px;
+  height: 22px;
+  margin-block: 0.22rem;
+  color: var(--protocol-accent, var(--counter-mark));
+}
+.thread-progress svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.thread-progress :is(path, circle) {
+  stroke: currentColor;
+  stroke-width: 1.35;
+  stroke-linecap: round;
+}
+.thread-progress[data-state='pending'] .progress-thread {
+  stroke-dasharray: 0.32 0.19;
+  animation: protocol-draw 1.2s linear infinite;
+}
+.thread-progress[data-state='resolved'] {
+  color: var(--protocol-etch, #785018);
+}
+.thread-progress[data-state='resolved'] circle {
+  fill: currentColor;
+}
+.thread-progress[data-state='resolved'] .progress-thread {
+  stroke-dasharray: 1;
+  animation: protocol-draw 0.4s var(--counter-tension) both reverse;
+}
+@keyframes protocol-draw {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signature-arrow :is(path, circle),
+  .connection-link,
+  .connection-link::after,
+  .intent-stitch > i {
+    transition: none !important;
+  }
+  .thread-progress .progress-thread {
+    animation: none !important;
+  }
+}

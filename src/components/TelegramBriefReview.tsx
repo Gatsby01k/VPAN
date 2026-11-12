@@ -1,5 +1,6 @@
+import { SignatureArrow } from './ConnectionProtocol';
 import { useState, useRef } from 'react';
-import { ArrowLeft, ArrowUpRight, Check, Copy, Send } from 'lucide-react';
+import { Check, Copy, Send } from 'lucide-react';
 import { useLocale } from '../locale';
 import { telegramDraft, telegramUsername, telegramUrl } from '../telegram';
 import './telegram-brief.css';
@@ -55,7 +56,7 @@ export function TelegramBriefReview({ text, onEdit }: { text: string; onEdit: ()
       >
         <span>{t('RECIPIENT', 'ПОЛУЧАТЕЛЬ')}</span>
         <strong>@{telegramUsername}</strong>
-        <ArrowUpRight size={16} aria-hidden="true" />
+        <SignatureArrow />
       </a>
       <label className="telegram-preview-label" htmlFor="telegram-message-preview">
         {t('Full message', 'Полный текст сообщения')}
@@ -85,7 +86,7 @@ export function TelegramBriefReview({ text, onEdit }: { text: string; onEdit: ()
           rel="noopener noreferrer"
         >
           <span>{t('Open Telegram', 'Открыть Telegram')}</span>
-          <ArrowUpRight size={19} aria-hidden="true" />
+          <SignatureArrow />
         </a>
         <button type="button" className="telegram-copy" onClick={() => void copy()}>
           {copied ? <Check size={17} aria-hidden="true" /> : <Copy size={17} aria-hidden="true" />}
@@ -109,7 +110,7 @@ export function TelegramBriefReview({ text, onEdit }: { text: string; onEdit: ()
         )}
       </p>
       <button type="button" className="telegram-edit" onClick={onEdit}>
-        <ArrowLeft size={16} aria-hidden="true" />
+        <SignatureArrow direction="return" />
         {t('Edit my brief', 'Изменить бриф')}
       </button>
     </section>
