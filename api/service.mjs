@@ -1,5 +1,7 @@
-// Same-origin gateway to a persistent service. SQLite never runs in this function.
-export const config = { maxDuration: 30 };
+// Vercel uses managed Turso when configured; the persistent-service gateway remains supported.
+import { staticContent } from '../growth/static.mjs';
+export const config = { maxDuration: 60 };
+let managed;
 const unavailable =
   'The intake service is temporarily unavailable. Receipt is not confirmed; retry with the same request ID.';
 export default async function service(req, res) {
@@ -11,6 +13,35 @@ export default async function service(req, res) {
     if (status === 503) res.setHeader('Retry-After', '30');
     return res.end(JSON.stringify({ error }));
   };
+  const routed = new URL(req.url, 'https://local.invalid');
+  const routeValues = routed.searchParams.getAll('_route');
+  if (
+    routeValues.length !== 1 ||
+    !/^\/(?:api\/(?:opportunities|apply|content|events|operations-tick|admin\/[a-z0-9\/-]+)|health|feed\.xml|knowledge\/[a-z0-9-]{1,100})$/.test(
+      routeValues[0],
+    )
+  )
+    return fail(404, 'Not found.');
+  if (!['GET', 'HEAD', 'POST', 'PATCH'].includes(req.method))
+    return fail(405, 'Method not allowed.');
+  if (process.env.TURSO_DATABASE_URL && process.env.TURSO_AUTH_TOKEN) {
+    if (
+      !process.env.TURSO_DATABASE_URL.startsWith('libsql://') &&
+      !process.env.TURSO_DATABASE_URL.startsWith('https://')
+    )
+      return fail(503, 'Managed database URL is invalid.');
+    try {
+      managed ||= (await import('../operations/managed.mjs')).createManagedService();
+      routed.searchParams.delete('_route');
+      return await managed(req, res, routeValues[0], routed.searchParams);
+    } catch (error) {
+      console.error('managed_backend_unavailable', { code: error.code || 'initialization' });
+      if (!res.headersSent)
+        return fail(503, 'The managed intake service is unavailable. No receipt is confirmed.');
+      res.destroy();
+      return;
+    }
+  }
   const origin = process.env.INTAKE_SERVICE_ORIGIN || '';
   const token = process.env.INTAKE_GATEWAY_TOKEN || '';
   let backend;
@@ -24,6 +55,17 @@ export default async function service(req, res) {
     )
       throw new Error();
   } catch {
+    // Reviewed public editorial content is independent of the persistent commercial service.
+    const input = new URL(req.url, 'https://local.invalid');
+    if (
+      req.method === 'GET' &&
+      input.searchParams.getAll('_route').length === 1 &&
+      input.searchParams.get('_route') === '/api/content'
+    ) {
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      return res.end(JSON.stringify(staticContent(input.searchParams.get('article') || '')));
+    }
     return fail(503, 'The intake service is not configured. No enquiry has been saved.');
   }
   const input = new URL(req.url, 'https://local.invalid');

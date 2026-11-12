@@ -320,6 +320,22 @@ test('bilingual SSR, market deep links, permanent legacy redirects and privacy c
   assert.match(await admin.text(), /noindex/);
   assert.match(admin.headers.get('content-security-policy'), /frame-ancestors 'none'/);
 });
+test('market filters and brief prefills preserve the prerendered markup before hydration', async () => {
+  const { renderPage } = await import('../dist-server/entry-server.mjs');
+  for (const [route, scope] of [
+    ['/markets', 'region=asia&q=Thailand'],
+    [
+      '/find-a-partner',
+      'companyType=merchant&industry=commerce&country=brazil&capabilities=collections',
+    ],
+    ['/join', 'role=provider&market=ghana&capabilities=settlement'],
+  ]) {
+    for (const lang of ['en', 'ru']) {
+      const url = `${route}?lang=${lang}`;
+      assert.equal(renderPage(`${url}&${scope}`), renderPage(url), url);
+    }
+  }
+});
 test('Vercel gateway fails closed without a durable service and only forwards allowlisted paths', async () => {
   const { default: gateway } = await import('../api/service.mjs');
   const oldOrigin = process.env.INTAKE_SERVICE_ORIGIN,

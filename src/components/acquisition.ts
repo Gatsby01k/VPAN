@@ -17,17 +17,37 @@ export function acquisition(): Attribution {
     return {};
   if (attribution) return attribution;
   const params = new URLSearchParams(window.location.search);
-  const explicit = ['utm_source', 'utm_medium', 'utm_campaign', 'ref'].some((key) =>
-    params.has(key),
-  );
-  if (!explicit) {
-    try {
-      const saved = JSON.parse(sessionStorage.getItem(KEY) || 'null');
-      if (saved && saved.version === 1 && typeof saved.value === 'object')
-        return (attribution = saved.value);
-    } catch {
-      /* Attribution is optional. */
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(KEY) || 'null');
+    if (
+      saved &&
+      saved.version === 1 &&
+      saved.value &&
+      typeof saved.value === 'object' &&
+      !Array.isArray(saved.value)
+    ) {
+      // First touch is immutable within this browser session, including across explicit campaign links.
+      const clean: Attribution = {};
+      for (const key of ['source', 'medium', 'campaign', 'ref'] as const)
+        if (
+          typeof saved.value[key] === 'string' &&
+          /^[\p{L}\p{N} ._-]{1,100}$/u.test(saved.value[key])
+        )
+          clean[key] = saved.value[key];
+      if (
+        typeof saved.value.landing === 'string' &&
+        /^\/(?:[a-z0-9-]+\/?)*$/.test(saved.value.landing)
+      )
+        clean.landing = saved.value.landing.slice(0, 180);
+      if (
+        typeof saved.value.referrer === 'string' &&
+        /^[a-z0-9.-]{1,120}$/i.test(saved.value.referrer)
+      )
+        clean.referrer = saved.value.referrer;
+      return (attribution = clean);
     }
+  } catch {
+    /* Attribution is optional. */
   }
   const value: Attribution = {};
   for (const [key, query] of [

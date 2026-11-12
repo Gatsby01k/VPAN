@@ -27,7 +27,8 @@ import { NLink, Eyebrow, Arrow } from '../components/NetworkLayout';
 import { acquisition, type Attribution } from '../components/acquisition';
 import { BriefRolePicker } from '../components/BriefRolePicker';
 import { TelegramBriefReview } from '../components/TelegramBriefReview';
-import { telegramBriefEnabled, telegramUsername } from '../telegram';
+import { telegramUsername } from '../telegram';
+import { useTelegramDelivery } from '../useDelivery';
 import '../components/brief-controls.css';
 
 type BriefField = 'role' | 'industry' | 'country' | 'capability' | 'contact' | 'consent';
@@ -55,9 +56,11 @@ interface Brief {
 }
 const KEY = 'vladdos-brief-v1',
   RECEIPT = 'vladdos-receipt-v1';
+const emptyScope = scopeFromParams(new URLSearchParams());
 const toggle = (items: string[], value: string) =>
   items.includes(value) ? items.filter((i) => i !== value) : [...items, value];
 export default function ConnectionEngine() {
+  const telegramBriefEnabled = useTelegramDelivery();
   const { t, language } = useLocale();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -93,8 +96,10 @@ export default function ConnectionEngine() {
     consent: false,
     site: '',
   };
-  const [brief, setBrief] = useState(initial);
-  const [industryExplicit, setIndustryExplicit] = useState(!!scope.industry);
+  // Vercel serves the same first render for every query in a given language.
+  // Apply the URL and restore the matching draft together after hydration.
+  const [brief, setBrief] = useState<Brief>(() => ({ ...initial, ...emptyScope }));
+  const [industryExplicit, setIndustryExplicit] = useState(false);
   const [readyEntry, setReadyEntry] = useState('');
   const ready = readyEntry === entry;
   const [step, setStep] = useState<'scope' | 'contact'>('scope');

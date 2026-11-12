@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import taxonomy from '../shared/taxonomy.json' with { type: 'json' };
+import { createCommercial } from './commercial.mjs';
 
 const error = (message, status = 422) => Object.assign(new Error(message), { status });
 const str = (value, max = 180) => (typeof value === 'string' ? value.trim().slice(0, max) : '');
@@ -116,7 +117,12 @@ function transaction(db, fn) {
     db.exec('COMMIT');
     return result;
   } catch (e) {
-    db.exec('ROLLBACK');
+    try {
+      db.exec('ROLLBACK');
+    } catch {
+      e.rollbackFailed = true;
+    }
+    e.operation ||= 'desk-transaction';
     throw e;
   }
 }
@@ -136,7 +142,7 @@ export function migrateDesk(db) {
       CREATE INDEX IF NOT EXISTS idx_opportunity_pipeline ON opportunities(status, side, industry);
       CREATE TABLE IF NOT EXISTS desk_events (id INTEGER PRIMARY KEY AUTOINCREMENT, opportunity_id TEXT NOT NULL REFERENCES opportunities(id), at TEXT NOT NULL, kind TEXT NOT NULL, detail TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS introductions (id TEXT PRIMARY KEY, demand_id TEXT NOT NULL REFERENCES opportunities(id), supply_id TEXT NOT NULL REFERENCES opportunities(id), status TEXT NOT NULL DEFAULT 'proposed', evidence TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, UNIQUE(demand_id,supply_id));
-      CREATE TABLE IF NOT EXISTS agreements (id TEXT PRIMARY KEY, introduction_id TEXT NOT NULL REFERENCES introductions(id), model TEXT NOT NULL, terms TEXT NOT NULL, attribution TEXT NOT NULL, currency TEXT NOT NULL, rate_bps INTEGER, starts_on TEXT NOT NULL, ends_on TEXT NOT NULL, evidence TEXT NOT NULL, created_at TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS agreements (id TEXT PRIMARY KEY, introduction_id TEXT REFERENCES introductions(id), model TEXT NOT NULL, terms TEXT NOT NULL, attribution TEXT NOT NULL, currency TEXT NOT NULL, rate_bps INTEGER, starts_on TEXT NOT NULL, ends_on TEXT NOT NULL, evidence TEXT NOT NULL, created_at TEXT NOT NULL, opportunity_id TEXT REFERENCES opportunities(id), CHECK(introduction_id IS NOT NULL OR (model='sourcing-project' AND opportunity_id IS NOT NULL)));
       CREATE TABLE IF NOT EXISTS revenue_entries (id TEXT PRIMARY KEY, agreement_id TEXT NOT NULL REFERENCES agreements(id), period TEXT NOT NULL, amount_minor INTEGER NOT NULL, currency TEXT NOT NULL, status TEXT NOT NULL, evidence TEXT NOT NULL, created_at TEXT NOT NULL, UNIQUE(agreement_id,period,evidence));
       CREATE TABLE IF NOT EXISTS notification_outbox (id TEXT PRIMARY KEY, opportunity_id TEXT NOT NULL UNIQUE REFERENCES opportunities(id), reference TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0, next_at TEXT NOT NULL, lease_until TEXT NOT NULL DEFAULT '', delivered_at TEXT NOT NULL DEFAULT '', last_error TEXT NOT NULL DEFAULT '');
     `);
@@ -153,6 +159,13 @@ export function migrateDesk(db) {
     db.exec(
       'CREATE UNIQUE INDEX IF NOT EXISTS idx_revenue_statement ON revenue_entries(agreement_id,period,statement_ref)',
     );
+    if (
+      !db
+        .prepare('PRAGMA table_info(revenue_entries)')
+        .all()
+        .some((c) => c.name === 'collected_on')
+    )
+      db.exec("ALTER TABLE revenue_entries ADD COLUMN collected_on TEXT NOT NULL DEFAULT ''");
     // Additive import only: the original application rows and references remain untouched.
     const rows = db
       .prepare(
@@ -199,6 +212,43 @@ export function migrateDesk(db) {
     }
   });
 }
+function migrateSourcingMandates(db) {
+  if (
+    db
+      .prepare('PRAGMA table_info(agreements)')
+      .all()
+      .some((c) => c.name === 'opportunity_id')
+  )
+    return;
+  // SQLite cannot relax NOT NULL in place. Preserve every existing agreement, its references,
+  // custom indexes and triggers in one checked transaction; no introductions are fabricated.
+  const definitions = db
+    .prepare(
+      "SELECT sql FROM sqlite_master WHERE tbl_name='agreements' AND type IN ('index','trigger') AND sql IS NOT NULL",
+    )
+    .all();
+  db.exec('PRAGMA foreign_keys=OFF');
+  try {
+    transaction(db, () => {
+      db.exec(`CREATE TABLE agreements_mandates (
+        id TEXT PRIMARY KEY, introduction_id TEXT REFERENCES introductions(id), model TEXT NOT NULL,
+        terms TEXT NOT NULL, attribution TEXT NOT NULL, currency TEXT NOT NULL, rate_bps INTEGER,
+        starts_on TEXT NOT NULL, ends_on TEXT NOT NULL, evidence TEXT NOT NULL, created_at TEXT NOT NULL,
+        opportunity_id TEXT REFERENCES opportunities(id),
+        CHECK(introduction_id IS NOT NULL OR (model='sourcing-project' AND opportunity_id IS NOT NULL))
+      );
+      INSERT INTO agreements_mandates(id,introduction_id,model,terms,attribution,currency,rate_bps,starts_on,ends_on,evidence,created_at)
+        SELECT id,introduction_id,model,terms,attribution,currency,rate_bps,starts_on,ends_on,evidence,created_at FROM agreements;
+      DROP TABLE agreements;
+      ALTER TABLE agreements_mandates RENAME TO agreements;`);
+      for (const definition of definitions) db.exec(definition.sql);
+      if (db.prepare('PRAGMA foreign_key_check').all().length)
+        throw error('Sourcing migration failed foreign-key verification.', 500);
+    });
+  } finally {
+    db.exec('PRAGMA foreign_keys=ON');
+  }
+}
 function company(db, contact, name, at) {
   const known = db.prepare('SELECT company_id FROM network_contacts WHERE contact=?').get(contact);
   if (known) return known.company_id;
@@ -221,9 +271,22 @@ function company(db, contact, name, at) {
 }
 export function createDesk(
   db,
-  { notificationUrl = '', notificationSecret = '', send = fetch } = {},
+  {
+    notificationUrl = '',
+    notificationSecret = '',
+    send = fetch,
+    aiKey = '',
+    aiModel = '',
+    fetcher = fetch,
+    background = true,
+    initialize = true,
+  } = {},
 ) {
-  migrateDesk(db);
+  if (initialize) {
+    migrateDesk(db);
+    migrateSourcingMandates(db);
+  }
+  const commercial = createCommercial(db, { aiKey, aiModel, fetcher, initialize });
   let sending = false,
     stopped = false;
   const configured = /^https:\/\//.test(notificationUrl) && !!notificationSecret;
@@ -284,12 +347,13 @@ export function createDesk(
         at,
       );
       event(id, 'received', 'Opportunity received. Capabilities are self-declared and unverified.');
+      commercial.capture(id, attribution.ref);
       db.prepare(
         'INSERT INTO notification_outbox(id,opportunity_id,reference,next_at) VALUES(?,?,?,?)',
       ).run(crypto.randomUUID(), id, reference, at);
       return { reference, replay: false };
     });
-    queueMicrotask(() => void flush());
+    if (background) queueMicrotask(() => void flush());
     return result;
   }
   function candidates(id) {
@@ -461,11 +525,24 @@ export function createDesk(
     return db.prepare('SELECT * FROM introductions WHERE id=?').get(id);
   }
   function agreement(body) {
+    if (body.introductionId && body.opportunityId)
+      throw error('Choose either an introduction or a sourcing client.');
     const intro = db
       .prepare('SELECT * FROM introductions WHERE id=?')
       .get(str(body.introductionId));
-    if (!intro || !['introduced', 'discussion', 'agreed', 'won'].includes(intro.status))
-      throw error('An actual introduction must be recorded first.');
+    const mandate =
+      body.model === 'sourcing-project' && !body.introductionId
+        ? get(str(body.opportunityId))
+        : null;
+    if (
+      !mandate &&
+      (!intro || !['introduced', 'discussion', 'agreed', 'won'].includes(intro.status))
+    )
+      throw error(
+        'Record an actual introduction, or a qualified opportunity for a sourcing mandate.',
+      );
+    if (mandate && !eligible(mandate))
+      throw error('Verify and qualify the client opportunity before recording a sourcing mandate.');
     if (!['revenue-share', 'success-fee', 'sourcing-project'].includes(body.model))
       throw error('Choose an agreement model.');
     const terms = str(body.terms, 3000),
@@ -484,8 +561,10 @@ export function createDesk(
     if (rate !== null && (!Number.isInteger(rate) || rate < 0 || rate > 10000))
       throw error('Revenue share must be between 0 and 10000 basis points.');
     const prior = db
-      .prepare('SELECT * FROM agreements WHERE introduction_id=? AND evidence=?')
-      .get(intro.id, evidence);
+      .prepare(
+        'SELECT * FROM agreements WHERE introduction_id IS ? AND opportunity_id IS ? AND evidence=?',
+      )
+      .get(intro?.id || null, mandate?.id || null, evidence);
     if (prior) {
       if (
         prior.terms !== terms ||
@@ -502,10 +581,10 @@ export function createDesk(
     const id = crypto.randomUUID();
     transaction(db, () => {
       db.prepare(
-        'INSERT INTO agreements(id,introduction_id,model,terms,attribution,currency,rate_bps,starts_on,ends_on,evidence,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
+        'INSERT INTO agreements(id,introduction_id,model,terms,attribution,currency,rate_bps,starts_on,ends_on,evidence,created_at,opportunity_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',
       ).run(
         id,
-        intro.id,
+        intro?.id || null,
         body.model,
         terms,
         attribution,
@@ -515,9 +594,10 @@ export function createDesk(
         body.endsOn,
         evidence,
         now(),
+        mandate?.id || null,
       );
       event(
-        intro.demand_id,
+        intro?.demand_id || mandate.id,
         'agreement',
         'Agreement ' + id + ' recorded; not a payment confirmation.',
       );
@@ -532,6 +612,8 @@ export function createDesk(
     if (body.currency !== contract.currency) throw error('Use the agreement reporting currency.');
     if (!['due', 'invoiced', 'received'].includes(body.status))
       throw error('Choose a revenue state.');
+    if (body.receivedOn && (!validDate(body.receivedOn) || body.receivedOn > now().slice(0, 10)))
+      throw error('Use the actual collection date, no later than today.');
     const evidence = str(body.evidence, 1000);
     if (
       !/^\d{4}-\d{2}$/.test(body.period || '') ||
@@ -556,7 +638,7 @@ export function createDesk(
     const id = crypto.randomUUID();
     transaction(db, () => {
       db.prepare(
-        'INSERT INTO revenue_entries(id,agreement_id,period,amount_minor,currency,status,evidence,statement_ref,created_at) VALUES(?,?,?,?,?,?,?,?,?)',
+        'INSERT INTO revenue_entries(id,agreement_id,period,amount_minor,currency,status,evidence,statement_ref,created_at,collected_on) VALUES(?,?,?,?,?,?,?,?,?,?)',
       ).run(
         id,
         contract.id,
@@ -567,10 +649,13 @@ export function createDesk(
         evidence,
         evidence,
         now(),
+        body.status === 'received' ? body.receivedOn || now().slice(0, 10) : '',
       );
       const intro = db
-        .prepare('SELECT demand_id FROM introductions WHERE id=?')
-        .get(contract.introduction_id);
+        .prepare(
+          'SELECT COALESCE(i.demand_id,a.opportunity_id) demand_id FROM agreements a LEFT JOIN introductions i ON i.id=a.introduction_id WHERE a.id=?',
+        )
+        .get(contract.id);
       event(
         intro.demand_id,
         'revenue-recorded',
@@ -594,6 +679,7 @@ export function createDesk(
     const evidence = str(body.evidence, 1000);
     if (!source || !target || evidence.length < 10)
       throw error('Confirm company identity with evidence before merging.');
+    commercial.protectMerge(source.id, target.id);
     transaction(db, () => {
       const items = db.prepare('SELECT id FROM opportunities WHERE company_id=?').all(source.id);
       db.prepare('UPDATE network_contacts SET company_id=? WHERE company_id=?').run(
@@ -666,10 +752,11 @@ export function createDesk(
       sending = false;
     }
   }
-  const timer = setInterval(() => void flush(), 30000);
-  timer.unref();
-  queueMicrotask(() => void flush());
+  const timer = background ? setInterval(() => void flush(), 30000) : null;
+  timer?.unref();
+  if (background) queueMicrotask(() => void flush());
   return {
+    commercial,
     notificationConfigured: configured,
     received: (key) =>
       !!db
@@ -701,26 +788,32 @@ export function createDesk(
         db.prepare(
           'INSERT OR IGNORE INTO notification_outbox(id,opportunity_id,reference,next_at) VALUES(?,?,?,?)',
         ).run(crypto.randomUUID(), id, item.reference, now());
-        queueMicrotask(() => void flush());
+        if (background) queueMicrotask(() => void flush());
       }
     },
     updateRevenue(id, body) {
       const row = db.prepare('SELECT * FROM revenue_entries WHERE id=?').get(id);
       if (!row) throw error('Revenue entry not found.', 404);
+      commercial.protectRevenue(id, body.status);
+      if (body.receivedOn && (!validDate(body.receivedOn) || body.receivedOn > now().slice(0, 10)))
+        throw error('Use the actual collection date, no later than today.');
       if (
         !['due', 'invoiced', 'received', 'void'].includes(body.status) ||
         str(body.evidence, 1000).length < 5
       )
         throw error('Record a valid state and supporting evidence.');
       transaction(db, () => {
-        db.prepare('UPDATE revenue_entries SET status=?,evidence=? WHERE id=?').run(
+        db.prepare('UPDATE revenue_entries SET status=?,evidence=?,collected_on=? WHERE id=?').run(
           body.status,
           str(body.evidence, 1000),
+          body.status === 'received'
+            ? body.receivedOn || row.collected_on || now().slice(0, 10)
+            : '',
           id,
         );
         const intro = db
           .prepare(
-            'SELECT i.demand_id FROM introductions i JOIN agreements a ON a.introduction_id=i.id WHERE a.id=?',
+            'SELECT COALESCE(i.demand_id,a.opportunity_id) demand_id FROM agreements a LEFT JOIN introductions i ON a.introduction_id=i.id WHERE a.id=?',
           )
           .get(row.agreement_id);
         event(
@@ -790,6 +883,7 @@ export function createDesk(
     },
     report() {
       return {
+        commercial: commercial.report(),
         opportunities: db
           .prepare(
             'SELECT o.*,c.name AS company_name,(SELECT group_concat(contact) FROM network_contacts WHERE company_id=o.company_id) AS contacts FROM opportunities o JOIN network_companies c ON c.id=o.company_id ORDER BY o.created_at DESC LIMIT 1000',

@@ -66,8 +66,8 @@ export function renderHead(
         description,
         mainEntityOfPage: canonical,
         inLanguage: language,
-        datePublished: article.publishedAt,
-        dateModified: article.updatedAt,
+        ...(article.publishedAt ? { datePublished: article.publishedAt } : {}),
+        ...(article.updatedAt ? { dateModified: article.updatedAt } : {}),
         author: { '@type': 'Organization', name: article.author },
         publisher: { '@id': origin + '/#organization' },
         citation: bootstrap.sources
