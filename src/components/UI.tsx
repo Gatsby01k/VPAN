@@ -80,7 +80,12 @@ export function PageHeading({
       <Eyebrow>{eyebrow}</Eyebrow>
       <h1 className="display">
         <span>{title}</span>
-        <span className="display-accent accent">{accent}</span>
+        {accent && (
+          <>
+            {' '}
+            <span className="display-accent accent">{accent}</span>
+          </>
+        )}
       </h1>
       <div className="page-heading-bottom">
         <p>{description}</p>

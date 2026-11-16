@@ -1,14 +1,15 @@
 import { Engraving } from '../components/CounterpartArt';
+import { CountryImpression, RegionImpression } from '../components/MarketImpression';
 import { SignatureArrow } from '../components/ConnectionProtocol';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { NLink as Link } from '../components/NetworkLayout';
-import { ChevronDown, Globe2, Search, X } from 'lucide-react';
+import { Globe2, Search, X } from 'lucide-react';
 import { ThreadLink } from '../components/Editorial';
 import { Action, Eyebrow, PageHeading, Reveal } from '../components/UI';
 import { useLocale } from '../locale';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
-import { countries, regions } from '../network';
+import { countries, paymentMethodLabel, regions } from '../network';
 import type { Language } from '../network';
 import marketContext from '../../shared/market-context.json';
 
@@ -68,7 +69,7 @@ export function Markets() {
       markets.filter(
         (country) =>
           (!region || country.region === region.value) &&
-          `${country.name} ${country.ru} ${country.code} ${country.currency} ${country.methods.join(' ')}`
+          `${country.name} ${country.ru} ${country.code} ${country.currency} ${country.methods.join(' ')} ${country.methods.map((method) => paymentMethodLabel(method, 'ru')).join(' ')}`
             .toLocaleLowerCase()
             .includes(query.trim().toLocaleLowerCase()),
       ),
@@ -83,15 +84,23 @@ export function Markets() {
   };
   return (
     <>
-      <PageHeading
-        eyebrow={t('Markets / regions & countries', 'Рынки / регионы и страны')}
-        title={t('Choose a region.', 'Выберите регион.')}
-        accent={t('Find your country.', 'Найдите свою страну.')}
-        description={t(
-          'Africa, Asia and Latin America are our regional directions. Choose a region to see its countries, currencies and local payment methods.',
-          'Африка, Азия и Латинская Америка — региональные направления. Выберите регион, затем страну: её валюту и локальные платёжные методы.',
-        )}
-      />
+      <header className="market-index-cover wrap">
+        <div>
+          <Eyebrow>{t('Market research', 'Исследование рынков')}</Eyebrow>
+          <h1>{t('Market directory.', 'Каталог рынков.')}</h1>
+        </div>
+        <div className="market-index-note">
+          <p>
+            {t(
+              'Countries, currencies and local payment methods across Asia, Latin America and Africa.',
+              'Страны, валюты и местные способы оплаты в Азии, Латинской Америке и Африке.',
+            )}
+          </p>
+          <ThreadLink to="/#atlas" variant="utility">
+            {t('Open the atlas', 'Открыть атлас')}
+          </ThreadLink>
+        </div>
+      </header>
       <section
         className="markets-section wrap"
         aria-label={t('Regions and countries', 'Регионы и страны')}
@@ -101,26 +110,24 @@ export function Markets() {
           role="group"
           aria-label={t('Choose a region', 'Выберите регион')}
         >
-          {countryGroups(markets, language).map((group, index) => (
+          {countryGroups(markets, language).map((group) => (
             <button
               key={group.id}
               aria-pressed={region?.id === group.id}
               onClick={() => updateFilter('region', region?.id === group.id ? '' : group.id)}
             >
-              <span className="folio">
-                0{index + 1} / {t('REGION', 'РЕГИОН')}
+              <RegionImpression region={group.id} />
+              <span className="market-region-label">
+                <strong>{t(group.name, group.ru)}</strong>
+                <span>
+                  {t('Countries', 'Страны')}: {group.countries.length}
+                </span>
               </span>
-              <strong>{t(group.name, group.ru)}</strong>
-              <span>
-                {t('Countries', 'Страны')}: {group.countries.length}
-              </span>
-              <SignatureArrow />
             </button>
           ))}
         </div>
         <div className="market-toolbar">
           <div className="market-filter-heading">
-            <span className="folio">{t('FIND YOUR NEXT MARKET', 'НАЙДИТЕ СВОЙ РЫНОК')}</span>
             <button
               className="region-reset"
               onClick={() => updateFilter('region', '')}
@@ -200,7 +207,11 @@ export function Markets() {
                       {country.code} / {country.currency}
                     </span>
                     <h3>{t(country.name, country.ru)}</h3>
-                    <span className="market-ledger-methods">{country.methods.join(' / ')}</span>
+                    <span className="market-ledger-methods">
+                      {country.methods
+                        .map((method) => paymentMethodLabel(method, language))
+                        .join(' / ')}
+                    </span>
                     <SignatureArrow direction="forward" />
                   </Link>
                 </li>
@@ -267,12 +278,7 @@ export function Country() {
           <Eyebrow>
             {regionName(market.region, language)} / {market.currency}
           </Eyebrow>
-          <h1 className="display">
-            <span>{t(market.name, market.ru)}.</span>
-            <span className="display-accent accent">
-              {t('Local connections.', 'Локальные связи.')}
-            </span>
-          </h1>
+          <h1 className="display">{t(market.name, market.ru)}.</h1>
           <p className="country-intro">{t(context.en, context.ru)}</p>
           <div className="retained-country-actions">
             <ThreadLink to={`/find-a-partner?country=${market.slug}`}>
@@ -285,28 +291,22 @@ export function Country() {
         </div>
         <figure className="country-plate">
           <Engraving className="country-engraving" />
-          <img
-            src="/assets/editorial/exchange.webp"
-            alt=""
-            width="1586"
-            height="992"
-            fetchPriority="high"
-          />
+          <CountryImpression code={market.code} />
           <figcaption>
             <strong>{market.code}</strong>
-            <span>{market.currency}</span>
+            <Link
+              to={`/?${new URLSearchParams({ atlas: market.region, market: market.code })}#atlas`}
+            >
+              {t('On the atlas', 'На карте')} <SignatureArrow direction="forward" />
+            </Link>
           </figcaption>
         </figure>
       </section>
       <section className="country-details section">
         <div className="wrap country-details-grid">
           <Reveal>
-            <Eyebrow number="01">{t('Country context', 'Контекст страны')}</Eyebrow>
-            <h2 className="section-title">
-              {t('Understand the', 'Понимайте')}
-              <br />
-              <span className="display-accent">{t('local edge.', 'местные особенности.')}</span>
-            </h2>
+            <Eyebrow>{t('Country context', 'Контекст страны')}</Eyebrow>
+            <h2 className="section-title">{t('What to verify.', 'Что проверить.')}</h2>
             <p className="section-description">{t(context.focus, context.focusRu)}</p>
           </Reveal>
           <div>
@@ -318,7 +318,13 @@ export function Country() {
               <span>{t('Payment method references', 'Платёжные методы')}</span>
               <div className="chips">
                 {market.methods.map((m) => (
-                  <span key={m}>{m}</span>
+                  <Link
+                    className="country-method-link"
+                    key={m}
+                    to={`/markets?${new URLSearchParams({ region: market.region, q: m })}`}
+                  >
+                    {paymentMethodLabel(m, language)} <SignatureArrow direction="forward" />
+                  </Link>
                 ))}
               </div>
             </Reveal>
@@ -533,7 +539,7 @@ export function About() {
                       <small>0{i + 1}</small>
                       {title}
                     </span>
-                    <ChevronDown size={22} aria-hidden="true" />
+                    <SignatureArrow direction={open === i ? 'up' : 'down'} />
                   </button>
                 </h3>
                 <div
@@ -555,13 +561,25 @@ export function About() {
           {t('Local roots.', 'Локальные знания.')}{' '}
           <span className="display-accent">{t('Open horizons.', 'Открытые горизонты.')}</span>
         </h2>
-        <div className="about-market-links">
-          {markets.map((m) => (
-            <Link to={`/markets/${m.slug}`} key={m.slug}>
-              <span>{m.code}</span>
-              {t(m.name, m.ru)}
-              <SignatureArrow />
-            </Link>
+        <div className="about-geography">
+          {countryGroups(markets, 'en').map((group) => (
+            <section key={group.id}>
+              <h3>
+                <Link to={`/markets?region=${group.id}`}>
+                  {t(group.en, group.ru)} <SignatureArrow />
+                </Link>
+              </h3>
+              <ul>
+                {group.countries.map((market) => (
+                  <li key={market.slug}>
+                    <Link to={`/markets/${market.slug}`}>
+                      <span>{market.code}</span>
+                      {t(market.en, market.ru)}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
           ))}
         </div>
       </section>

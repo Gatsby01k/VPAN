@@ -1,6 +1,6 @@
 import { EditorialRule, NavigationGlyph, SignatureArrow } from './ConnectionProtocol';
 import { useEffect, useId, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { NLink as Link } from './NetworkLayout';
 import { Command, CornerDownLeft, Search } from 'lucide-react';
 import { Brand, Dialog } from './UI';
@@ -402,6 +402,7 @@ export function Footer() {
 
 export function RouteEffects() {
   const location = useLocation();
+  const navigationType = useNavigationType();
   const { language } = useLocale();
   const { data } = useGrowth();
   const previousScrollLocation = useRef<typeof location | null>(null);
@@ -470,18 +471,27 @@ export function RouteEffects() {
   useEffect(() => {
     const previous = previousScrollLocation.current;
     previousScrollLocation.current = location;
+    const atlasLocation =
+      location.pathname === '/' && new URLSearchParams(location.search).has('atlas');
+    const atlasChange = atlasLocation && location.hash === '#atlas' && navigationType === 'REPLACE';
     if (
       previous &&
       previous.pathname === location.pathname &&
-      previous.hash === location.hash &&
-      previous.search !== location.search
+      (atlasChange || (previous.hash === location.hash && previous.search !== location.search))
     )
       return;
     const scroll = () => {
       if (previous && previous.pathname !== location.pathname)
         document.getElementById('main')?.focus({ preventScroll: true });
-      if (location.hash)
-        document.getElementById(location.hash.slice(1))?.scrollIntoView({
+      const atlasReturn =
+        location.pathname === '/' &&
+        navigationType === 'POP' &&
+        previous?.state?.fromAtlas === true;
+      const anchor = atlasReturn
+        ? 'atlas'
+        : location.hash.slice(1) || (atlasLocation ? 'atlas' : '');
+      if (anchor)
+        document.getElementById(anchor)?.scrollIntoView({
           behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
             ? 'instant'
             : 'smooth',
@@ -490,6 +500,6 @@ export function RouteEffects() {
     };
     const frame = requestAnimationFrame(scroll);
     return () => cancelAnimationFrame(frame);
-  }, [location.pathname, location.hash, location.search, location.key]);
+  }, [location.pathname, location.hash, location.search, location.key, navigationType]);
   return null;
 }

@@ -2,7 +2,6 @@ import { Engraving } from '../components/CounterpartArt';
 import { EditorialRule, SignatureArrow } from '../components/ConnectionProtocol';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus, Minus } from 'lucide-react';
 import { useLocale } from '../locale';
 import { industries, label } from '../network';
 import { NLink, Action, Arrow, Eyebrow } from '../components/NetworkLayout';
@@ -41,7 +40,12 @@ export function PageIntro({
       <Eyebrow>{index}</Eyebrow>
       <h1>
         {title}
-        {italic && <em>{italic}</em>}
+        {italic && (
+          <>
+            {' '}
+            <em>{italic}</em>
+          </>
+        )}
       </h1>
       <p className="page-standfirst">{description}</p>
       <EditorialRule />
@@ -70,12 +74,20 @@ const industryCopy: Record<string, [string, string]> = {
     'Конкретная B2B-возможность с понятной коммерческой целью. Расскажите, что даст партнёрство.',
   ],
 };
+const sectorMarks: Record<string, string> = {
+  payments: 'M7 14h13l5-5m-5 0h5v5M25 22H12l-5 5m0-5v5h5',
+  igaming: 'M16 7 25 18 16 29 7 18Z M16 12v12M11.5 18h9',
+  exchange: 'M7 20a9 9 0 0 1 15-8l3 3m0-5v5h-5M25 16a9 9 0 0 1-15 8l-3-3m0 5v-5h5',
+  commerce: 'M8 13 16 9l8 4v11l-8 4-8-4Zm0 0 8 4 8-4m-8 4v11m-5-17 8 4',
+  other: 'M16 7v22M5 18h22m-18-7 14 14m0-14L9 25',
+};
+
 export function IndustryList() {
   const { language, t } = useLocale();
   const [expanded, setExpanded] = useState<string | null>(null);
   return (
     <div className="industry-list">
-      {industries.map((item, i) => (
+      {industries.map((item) => (
         <div key={item.id} className="industry-row">
           <h2>
             <button
@@ -83,9 +95,12 @@ export function IndustryList() {
               aria-expanded={expanded === item.id}
               aria-controls={'industry-' + item.id}
             >
-              <span>0{i + 1}</span>
+              <svg className="sector-mark" viewBox="0 0 32 36" fill="none" aria-hidden="true">
+                <rect x="2.5" y="4.5" width="27" height="27" rx="13.5" />
+                <path d={sectorMarks[item.id]} />
+              </svg>
               <strong>{label(item, language)}</strong>
-              {expanded === item.id ? <Minus aria-hidden="true" /> : <Plus aria-hidden="true" />}
+              <SignatureArrow direction={expanded === item.id ? 'up' : 'down'} />
             </button>
           </h2>
           <div id={'industry-' + item.id} hidden={expanded !== item.id}>
@@ -109,12 +124,11 @@ export function Industries() {
   return (
     <>
       <PageIntro
-        index={t('Sector index', 'Индекс индустрий')}
-        title={t('Context comes first.', 'Сначала — контекст.')}
-        italic={t('Connections follow.', 'Затем — связи.')}
+        index={t('Partnerships by sector', 'Партнёрства по отраслям')}
+        title={t('Industries.', 'Индустрии.')}
         description={t(
-          'Industry defines the conversation. Geography defines the requirements. Capabilities define who should be at the table.',
-          'Индустрия задаёт контекст. География определяет требования. Возможности определяют участников разговора.',
+          'Explore the roles and capabilities we look for in each sector.',
+          'Откройте свою отрасль, чтобы посмотреть, какие задачи и партнёрства мы рассматриваем.',
         )}
       />
       <div className="wrap page-section">
@@ -154,26 +168,51 @@ export function Network() {
   const { t } = useLocale();
   return (
     <>
-      <PageIntro
-        index={t('Network / operating model', 'Сеть / как мы работаем')}
-        title={t('A connection is', 'Знакомство —')}
-        italic={t('only the beginning.', 'только начало.')}
-        description={t(
-          'An independent, human-led network for companies seeking specific partners and companies with something valuable to offer.',
-          'Независимая сеть с личным участием для компаний, которые ищут конкретных партнёров или предлагают полезные возможности.',
-        )}
-      />
+      <header className="network-cover">
+        <div className="network-cover-inner wrap">
+          <div className="network-cover-copy">
+            <Eyebrow>{t('Operating model', 'Как мы работаем')}</Eyebrow>
+            <h1>
+              {t('From brief', 'От брифа')} <em>{t('to introduction.', 'до знакомства.')}</em>
+            </h1>
+            <p>
+              {t(
+                'We verify a concrete brief, agree what may be shared, and connect both sides when the fit is clear.',
+                'Проверяем задачу, согласуем раскрытие информации и знакомим стороны, когда видим основание для партнёрства.',
+              )}
+            </p>
+            <ThreadLink to="/network#commercial-model" direction="down">
+              {t('Read the commercial terms', 'Посмотреть условия работы')}
+            </ThreadLink>
+          </div>
+          <div className="network-cover-art" aria-hidden="true">
+            <Engraving />
+            <svg viewBox="0 0 470 290" focusable="false">
+              <image
+                href="/assets/editorial/network-clasps.png"
+                x="15"
+                y="8"
+                width="440"
+                height="261"
+              />
+              <path d="M45 201C24 204 35 250 5 270M432 71C457 71 439 43 468 47" />
+            </svg>
+          </div>
+        </div>
+      </header>
       <section
         className="process-section wrap"
         aria-label={t('From brief to introduction', 'От брифа до знакомства')}
       >
-        {process.map(([en, ru, copy, copyRu], i) => (
-          <div className="process-row" key={en}>
-            <span>0{i + 1}</span>
-            <h2>{t(en, ru)}</h2>
-            <p>{t(copy, copyRu)}</p>
-          </div>
-        ))}
+        <ol className="network-stitch">
+          {process.map(([en, ru, copy, copyRu], i) => (
+            <li className="process-row" key={en}>
+              <span>0{i + 1}</span>
+              <h2>{t(en, ru)}</h2>
+              <p>{t(copy, copyRu)}</p>
+            </li>
+          ))}
+        </ol>
       </section>
       <ParticipantEconomics />
       <section className="commercial-section wrap" id="commercial-model">
@@ -252,14 +291,8 @@ export function Contact() {
       <div className="counter-contact-copy">
         <p className="world-label">{t('Correspondence', 'Переписка')}</p>
         <h1 className="counter-title" id="contact-title">
-          {t('Take the', 'Возьмите')} <em>{t('other end.', 'другой конец.')}</em>
+          {t('Let’s discuss', 'Обсудим')} <em>{t('your brief.', 'вашу задачу.')}</em>
         </h1>
-        <p className="scene-subtitle">
-          {t(
-            'A few details to start the right conversation.',
-            'Несколько деталей для нужного разговора.',
-          )}
-        </p>
         <div className="counter-contact-paths">
           <div>
             <span className="folio">I NEED</span>
@@ -311,7 +344,11 @@ export function Legal({ type }: { type: 'privacy' | 'terms' }) {
   return (
     <>
       <PageIntro
-        index={privacy ? 'VLADDOS NETWORK / 12 NOV 2026' : 'VLADDOS NETWORK / 27 OCT 2026'}
+        index={
+          privacy
+            ? t('Privacy · 12 Nov 2026', 'Конфиденциальность · 12 ноября 2026')
+            : t('Terms · 27 Oct 2026', 'Условия · 27 октября 2026')
+        }
         title={
           privacy
             ? t('Your information.', 'Ваша информация.')
@@ -443,10 +480,7 @@ export function Knowledge() {
     <>
       <PageIntro
         index={t('Field notes / partner research', 'Материалы / поиск партнёров')}
-        title={
-          article ? t(article.title, article.titleRu) : t('Better questions.', 'Точные вопросы.')
-        }
-        italic={article ? undefined : t('Better partnerships.', 'Сильные партнёрства.')}
+        title={article ? t(article.title, article.titleRu) : t('Field notes.', 'Материалы.')}
         description={
           article
             ? t(article.summary, article.summaryRu)
@@ -457,49 +491,62 @@ export function Knowledge() {
         }
       />
       {article ? (
-        <article className="prose wrap field-note-body">
-          <div className="field-note-byline">
-            <ThreadLink to="/knowledge" variant="utility" direction="return">
-              {t('All field notes', 'Все материалы')}
-            </ThreadLink>
-            <span>{article.author}</span>
-            <time dateTime={article.publishedAt}>{dateLabel(article.publishedAt)}</time>
-          </div>
-          {article.sections.map((s) => (
-            <section key={s.id}>
-              <h2>{t(s.heading, s.headingRu)}</h2>
-              <p>{t(s.body, s.bodyRu).replaceAll('PAN', 'VlaDDoS Network')}</p>
-              <ul>
-                {t(s.bullets.join('\n'), s.bulletsRu.join('\n'))
-                  .split('\n')
-                  .filter(Boolean)
-                  .map((x) => (
-                    <li key={x}>{x}</li>
-                  ))}
-              </ul>
-            </section>
-          ))}
-          <h2>{t('Primary sources', 'Первоисточники')}</h2>
-          {data.sources
-            .filter((s) => article.sourceIds.includes(s.id))
-            .map((s) => (
-              <p key={s.id}>
-                <a href={s.url} target="_blank" rel="noreferrer">
-                  {s.name}
-                </a>
-              </p>
+        <div className="field-note-layout wrap">
+          {article.sections.length > 1 && (
+            <nav className="field-note-index" aria-label={t('In this note', 'В этом материале')}>
+              <strong>{t('In this note', 'В этом материале')}</strong>
+              <ol>
+                {article.sections.map((section) => (
+                  <li key={section.id}>
+                    <a href={`#note-${section.id}`}>{t(section.heading, section.headingRu)}</a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          )}
+          <article className="prose field-note-body">
+            <div className="field-note-byline">
+              <ThreadLink to="/knowledge" variant="utility" direction="return">
+                {t('All field notes', 'Все материалы')}
+              </ThreadLink>
+              <span>{article.author}</span>
+              <time dateTime={article.publishedAt}>{dateLabel(article.publishedAt)}</time>
+            </div>
+            {article.sections.map((s) => (
+              <section key={s.id} id={`note-${s.id}`}>
+                <h2>{t(s.heading, s.headingRu)}</h2>
+                <p>{t(s.body, s.bodyRu).replaceAll('PAN', 'VlaDDoS Network')}</p>
+                <ul>
+                  {t(s.bullets.join('\n'), s.bulletsRu.join('\n'))
+                    .split('\n')
+                    .filter(Boolean)
+                    .map((x) => (
+                      <li key={x}>{x}</li>
+                    ))}
+                </ul>
+              </section>
             ))}
-        </article>
+            <h2>{t('Primary sources', 'Первоисточники')}</h2>
+            {data.sources
+              .filter((s) => article.sourceIds.includes(s.id))
+              .map((s) => (
+                <p key={s.id}>
+                  <a href={s.url} target="_blank" rel="noreferrer">
+                    {s.name}
+                  </a>
+                </p>
+              ))}
+          </article>
+        </div>
       ) : (
         <div className="wrap page-section field-notes">
-          {data.articles.map((a, index) => (
+          {data.articles.map((a) => (
             <NLink key={a.slug} to={'/knowledge/' + a.slug}>
-              <span className="field-note-number">{String(index + 1).padStart(2, '0')}</span>
+              <time dateTime={a.publishedAt}>{dateLabel(a.publishedAt)}</time>
               <div>
                 <h2>{t(a.title, a.titleRu)}</h2>
                 <p>{t(a.summary, a.summaryRu)}</p>
               </div>
-              <time dateTime={a.publishedAt}>{dateLabel(a.publishedAt)}</time>
               <SignatureArrow />
             </NLink>
           ))}

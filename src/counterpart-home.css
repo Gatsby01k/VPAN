@@ -37,8 +37,7 @@
   outline-offset: 4px;
 }
 .counterpart-home .sr-only,
-.station-choice input,
-.dial-regions input {
+.station-choice input {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -298,7 +297,6 @@
   transform: scaleX(1);
 }
 .station-choice i,
-.dial-regions i,
 .role-eyelet {
   position: relative;
   flex: none;
@@ -309,7 +307,6 @@
   color: #795528;
 }
 .station-choice i::after,
-.dial-regions i::after,
 .role-eyelet::after {
   content: '';
   position: absolute;
@@ -324,7 +321,6 @@
   color: var(--counter-mark);
 }
 .station-choice:has(:checked) i::after,
-.dial-regions :checked + i::after,
 .world-network-roles a:is(:hover, :focus-visible) .role-eyelet::after {
   scale: 1;
 }
@@ -348,6 +344,11 @@
 }
 .station-outcome .connection-link {
   min-height: 41px;
+}
+
+.station-choice:has(:focus-visible) {
+  outline: 2px solid var(--protocol-accent, var(--counter-mark));
+  outline-offset: 3px;
 }
 
 .world-network {
@@ -428,124 +429,6 @@
   background: var(--counter-paper);
   border-radius: 50%;
   padding: 3px;
-}
-
-.world-atlas {
-  overflow: hidden;
-}
-.world-atlas-inner {
-  width: min(100% - 2 * var(--counter-gutter), 1070px);
-  margin-inline: auto;
-  min-height: 415px;
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-  align-items: center;
-  gap: clamp(25px, 7vw, 110px);
-  padding-block: 46px;
-}
-.world-dial {
-  position: relative;
-  width: min(100%, 420px);
-  aspect-ratio: 1.1;
-  margin: auto;
-}
-.dial-engraving,
-.dial-needle {
-  width: 86%;
-  height: 86%;
-  position: absolute;
-  top: 7%;
-  left: 7%;
-}
-.dial-engraving {
-  color: #c59455;
-  opacity: 0.56;
-}
-.dial-needle {
-  color: #ff5b9f;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  fill: var(--counter-ink);
-  transform: rotate(var(--dial-angle, 0deg));
-  transition: transform 0.62s var(--counter-tension);
-}
-.world-atlas-inner[data-region='latam'] {
-  --dial-angle: 123deg;
-}
-.world-atlas-inner[data-region='africa'] {
-  --dial-angle: -123deg;
-}
-.dial-regions {
-  position: absolute;
-  inset: 0;
-}
-.dial-regions label {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  position: absolute;
-  z-index: 1;
-  min-height: 44px;
-  padding: 0 8px;
-  font: 690 0.78rem/1.2 var(--counter-sans);
-  white-space: nowrap;
-  color: #efd8b3;
-  background: var(--counter-ink);
-  border-bottom: 1px solid #806036;
-  cursor: pointer;
-}
-.dial-regions label[data-region='asia'] {
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-}
-.dial-regions label[data-region='latam'] {
-  right: 0;
-  bottom: 16%;
-}
-.dial-regions label[data-region='africa'] {
-  left: 0;
-  bottom: 16%;
-}
-.dial-regions label:is(:hover, :has(:checked)) {
-  color: #ff85b5;
-  border-color: currentColor;
-}
-.dial-regions label:has(:checked) i {
-  color: inherit;
-}
-.dial-regions label:has(:focus-visible),
-.station-choice:has(:focus-visible) {
-  outline: 2px solid var(--protocol-accent, var(--counter-mark));
-  outline-offset: 3px;
-}
-.world-atlas-copy {
-  min-width: 0;
-}
-.world-atlas-copy h2 {
-  margin-bottom: 23px;
-}
-.atlas-reading {
-  padding: 12px 0;
-  border-block: 1px solid var(--protocol-rule);
-  margin-bottom: 10px;
-}
-.atlas-reading strong {
-  display: block;
-  font-weight: 760;
-  color: #ff8cba;
-}
-.atlas-reading span {
-  font-size: 0.73rem;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: #e8c496;
-}
-.atlas-reading p {
-  max-width: 34ch;
-  margin-top: 6px;
-  font-size: 0.92rem;
-  color: #eee2cf;
 }
 
 .world-procedure {
@@ -818,34 +701,6 @@
   }
   .world-network-roles a {
     background: linear-gradient(90deg, #f4ead9, #f4ead9f0 91%, transparent);
-  }
-  .world-atlas-inner {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 6px;
-    padding-block: 25px 35px;
-  }
-  .world-dial {
-    grid-area: 3 / 1;
-    width: min(100%, 335px);
-  }
-  .world-atlas-copy {
-    display: contents;
-  }
-  .world-atlas-copy .world-label {
-    grid-area: 1 / 1;
-    margin: 0;
-  }
-  .world-atlas-copy h2 {
-    grid-area: 2 / 1;
-    margin: 0;
-  }
-  .world-atlas-copy .atlas-reading {
-    grid-area: 4 / 1;
-    margin: 0;
-  }
-  .world-atlas-copy .connection-link {
-    grid-area: 5 / 1;
-    margin-top: 5px;
   }
   .procedure-title {
     display: block;

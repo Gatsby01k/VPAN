@@ -7,7 +7,7 @@ import { SignatureArrow } from '../components/ConnectionProtocol';
 import { Engraving, HeroImpression } from '../components/CounterpartArt';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
 import { ConnectionThread } from '../components/ConnectionThread';
-import { countries, regions } from '../network';
+import { PaymentAtlas } from '../components/PaymentAtlas';
 import { scenarioLink } from '../brief';
 import '../counterpart-home.css';
 
@@ -45,21 +45,6 @@ const participants = [
   ],
 ] as const;
 
-const regionNotes = {
-  asia: [
-    'Explore local collection methods, wallets and operating requirements.',
-    'Изучите локальные методы приёма, кошельки и операционные требования.',
-  ],
-  latam: [
-    'Compare local payment rails, settlement and merchant requirements.',
-    'Сравните локальные платёжные системы, расчёты и требования к мерчантам.',
-  ],
-  africa: [
-    'Research mobile money, bank transfers and local operating context.',
-    'Изучите мобильные деньги, банковские переводы и местный контекст.',
-  ],
-} as const;
-
 const milestones = [
   [
     'Qualification',
@@ -91,9 +76,6 @@ export default function Home() {
   const { t } = useLocale();
   const [side, setSide] = useState<Side>('need');
   const [intentExplicit, setIntentExplicit] = useState(false);
-  const [region, setRegion] = useState('asia');
-  const selectedRegion = regions.find((item) => item.id === region) ?? regions[0];
-  const regionNote = regionNotes[selectedRegion.id as keyof typeof regionNotes];
   const chooseSide = (next: Side, explicit = true) => {
     setSide(next);
     if (explicit) setIntentExplicit(true);
@@ -248,50 +230,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="world-atlas counter-dark" id="atlas" aria-labelledby="atlas-title">
-        <div className="world-atlas-inner" data-region={selectedRegion.id}>
-          <div className="world-dial">
-            <Engraving className="dial-engraving" />
-            <svg className="dial-needle" viewBox="0 0 300 300" aria-hidden="true">
-              <path d="M150 157V28l-4 9m4-9 4 9" />
-              <circle cx="150" cy="150" r="10" />
-              <circle cx="150" cy="150" r="3" />
-            </svg>
-            <fieldset className="dial-regions">
-              <legend className="sr-only">
-                {t('Preview a research region', 'Выберите регион для просмотра')}
-              </legend>
-              {regions.map((item) => (
-                <label key={item.id} data-region={item.id}>
-                  <input
-                    type="radio"
-                    name="atlas-region"
-                    checked={item.id === selectedRegion.id}
-                    onChange={() => setRegion(item.id)}
-                  />
-                  <i aria-hidden="true" />
-                  {t(item.en, item.ru)}
-                </label>
-              ))}
-            </fieldset>
-          </div>
-          <div className="world-atlas-copy">
-            <p className="world-label">{t('The atlas', 'Атлас')}</p>
-            <h2 id="atlas-title">{t('Local knowledge.', 'Местный контекст.')}</h2>
-            <div className="atlas-reading" role="status">
-              <strong>{t(selectedRegion.en, selectedRegion.ru)}</strong>
-              <span>
-                {countries.filter((country) => country.region === selectedRegion.id).length}{' '}
-                {t('research destinations', 'стран в каталоге')}
-              </span>
-              <p>{t(regionNote[0], regionNote[1])}</p>
-            </div>
-            <ThreadLink to={`/markets?region=${selectedRegion.id}`}>
-              {t(`Explore ${selectedRegion.en}`, `Смотреть регион: ${selectedRegion.ru}`)}
-            </ThreadLink>
-          </div>
-        </div>
-      </section>
+      <PaymentAtlas />
 
       <section className="world-procedure" id="how-it-works" aria-labelledby="process-title">
         <div className="procedure-title">

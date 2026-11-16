@@ -18,6 +18,8 @@ export const projectDescription = (language: Language) =>
 
 export const label = (item: { en: string; ru: string } | undefined, language: Language) =>
   item?.[language] || '';
+export const paymentMethodLabel = (method: string, language: Language) =>
+  language === 'ru' && method === 'Bank transfers' ? 'Банковские переводы' : method;
 export const publicRoutes = [
   '/',
   '/network',
