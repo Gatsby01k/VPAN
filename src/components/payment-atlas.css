@@ -327,7 +327,7 @@
   stroke: var(--atlas-wine);
   stroke-width: 1.25;
 }
-.atlas-marker[data-current='true'] circle:last-child {
+.atlas-arrival {
   fill: none;
 }
 .atlas-marker[data-available='false'] {
@@ -401,6 +401,13 @@
 }
 .atlas-map-key small {
   font-size: 0.51em;
+}
+.atlas-details-jump {
+  display: none;
+}
+#main .atlas-entry:focus-visible {
+  outline: 1px solid #da9266;
+  outline-offset: 6px;
 }
 .atlas-shuttle {
   position: absolute;
@@ -723,22 +730,37 @@
   .atlas-shuttle:has(.atlas-rewind:active) img {
     transform: rotate(-1.4deg);
   }
-  .atlas-branch,
   .atlas-trunk {
-    animation: atlas-thread-tension 470ms var(--counter-tension);
+    animation: counter-thread-draw 175ms ease-out;
   }
   .atlas-branch {
-    animation-delay: 130ms;
-    animation-fill-mode: backwards;
+    animation: counter-thread-draw 335ms var(--counter-tension)
+      calc(175ms + var(--atlas-branch-delay)) backwards;
   }
-  @keyframes atlas-thread-tension {
+  .atlas-junction {
+    animation: atlas-thread-knot 135ms ease-out 165ms backwards;
+  }
+  .atlas-arrival {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: atlas-thread-seat 300ms var(--counter-tension);
+  }
+  @keyframes atlas-thread-knot {
     from {
-      stroke-dasharray: 1 1;
-      stroke-dashoffset: 1;
+      opacity: 0;
     }
     to {
-      stroke-dasharray: 1 1;
-      stroke-dashoffset: 0;
+      opacity: 1;
+    }
+  }
+  @keyframes atlas-thread-seat {
+    from {
+      opacity: 0.4;
+      transform: scale(1.42);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
     }
   }
 }
@@ -787,6 +809,17 @@
   }
   .atlas-map-key {
     min-height: clamp(81px, 23vw, 113px);
+  }
+  .atlas-details-jump {
+    display: inline-flex;
+    width: fit-content;
+    min-height: 44px;
+    align-items: center;
+    gap: 4px;
+    margin-inline-start: auto;
+    padding: 0 6px;
+    color: var(--atlas-wine);
+    font: 760 0.78rem/1.25 var(--counter-sans);
   }
   .atlas-console {
     border-inline-start: 1px solid #ae87587a;

@@ -47,6 +47,7 @@ export function CountryImpression({ code }: { code: string }) {
   const y = 151 - ((minY + maxY) * scale) / 2;
   const startX = x + shape.point[0] * scale;
   const startY = y + shape.point[1] * scale;
+  const thread = `M${startX} ${startY}C${startX} ${startY + 45} 228 218 248 240s27 18 49 18`;
   const outline = shape.shape.replace(
     /(-?[\d.]+),(-?[\d.]+)/g,
     (_, px: string, py: string) =>
@@ -78,10 +79,8 @@ export function CountryImpression({ code }: { code: string }) {
         fill={`url(#${hatch})`}
         fillRule="evenodd"
       />
-      <path
-        className="country-impression-thread"
-        d={`M${startX} ${startY}C${startX} ${startY + 45} 228 218 248 240s27 18 49 18`}
-      />
+      <path className="country-impression-thread" d={thread} />
+      <path className="country-impression-trace" d={thread} pathLength="1" />
       <circle className="country-impression-pin" cx={startX} cy={startY} r="4" />
       <circle className="country-impression-pin" cx="297" cy="258" r="4" />
     </svg>

@@ -1,7 +1,7 @@
 import { Engraving } from '../components/CounterpartArt';
 import { EditorialRule, SignatureArrow } from '../components/ConnectionProtocol';
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { useLocale } from '../locale';
 import { industries, label } from '../network';
 import { NLink, Action, Arrow, Eyebrow } from '../components/NetworkLayout';
@@ -97,10 +97,11 @@ export function IndustryList() {
             >
               <svg className="sector-mark" viewBox="0 0 32 36" fill="none" aria-hidden="true">
                 <rect x="2.5" y="4.5" width="27" height="27" rx="13.5" />
-                <path d={sectorMarks[item.id]} />
+                <path className="sector-mark-ticks" d="M16 2.5v4m0 23v4M.5 18h4m23 0h4" />
+                <path className="sector-mark-cut" d={sectorMarks[item.id]} pathLength="1" />
               </svg>
               <strong>{label(item, language)}</strong>
-              <SignatureArrow direction={expanded === item.id ? 'up' : 'down'} />
+              <SignatureArrow direction="down" />
             </button>
           </h2>
           <div id={'industry-' + item.id} hidden={expanded !== item.id}>
@@ -166,6 +167,7 @@ const process = [
 ];
 export function Network() {
   const { t } = useLocale();
+  const artwork = '/assets/editorial/network-clasps.png';
   return (
     <>
       <header className="network-cover">
@@ -187,14 +189,8 @@ export function Network() {
           </div>
           <div className="network-cover-art" aria-hidden="true">
             <Engraving />
-            <svg viewBox="0 0 470 290" focusable="false">
-              <image
-                href="/assets/editorial/network-clasps.png"
-                x="15"
-                y="8"
-                width="440"
-                height="261"
-              />
+            <svg viewBox="0 0 470 290" focusable="false" data-page-art={artwork}>
+              <image href={artwork} x="15" y="8" width="440" height="261" />
               <path d="M45 201C24 204 35 250 5 270M432 71C457 71 439 43 468 47" />
             </svg>
           </div>
@@ -276,17 +272,12 @@ export function Network() {
 }
 export function Contact() {
   const { t } = useLocale();
+  const artwork = '/assets/editorial/contact.webp';
   return (
     <section className="counter-contact" aria-labelledby="contact-title">
       <Engraving className="contact-engraving" />
-      <div className="contact-plate" aria-hidden="true">
-        <img
-          src="/assets/editorial/contact.webp"
-          alt=""
-          width="1586"
-          height="992"
-          fetchPriority="high"
-        />
+      <div className="contact-plate" aria-hidden="true" data-page-art={artwork}>
+        <img src={artwork} alt="" width="1586" height="992" fetchPriority="high" />
       </div>
       <div className="counter-contact-copy">
         <p className="world-label">{t('Correspondence', 'Переписка')}</p>
@@ -458,6 +449,7 @@ export function NotFound() {
 export function Knowledge() {
   const { t, language } = useLocale();
   const { slug } = useParams();
+  const { hash } = useLocation();
   const { data, loaded } = useGrowth();
   const dateFormat = new Intl.DateTimeFormat(language === 'ru' ? 'ru-RU' : 'en-GB', {
     dateStyle: 'medium',
@@ -496,11 +488,19 @@ export function Knowledge() {
             <nav className="field-note-index" aria-label={t('In this note', 'В этом материале')}>
               <strong>{t('In this note', 'В этом материале')}</strong>
               <ol>
-                {article.sections.map((section) => (
-                  <li key={section.id}>
-                    <a href={`#note-${section.id}`}>{t(section.heading, section.headingRu)}</a>
-                  </li>
-                ))}
+                {article.sections.map((section) => {
+                  const target = `#note-${section.id}`;
+                  return (
+                    <li key={section.id}>
+                      <NLink
+                        to={`/knowledge/${article.slug}${target}`}
+                        aria-current={target === hash ? 'location' : undefined}
+                      >
+                        {t(section.heading, section.headingRu)}
+                      </NLink>
+                    </li>
+                  );
+                })}
               </ol>
             </nav>
           )}

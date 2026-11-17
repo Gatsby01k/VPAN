@@ -166,11 +166,12 @@ function AtlasChart({
         <Compass x={compact ? width - 49 : width - 63} y={compact ? 61 : 68} />
         <g className="atlas-threads" key={connections.map((country) => country.code).join()}>
           <path className="atlas-trunk" d={trunk} pathLength="1" />
-          {connections.map((country) => (
+          {connections.map((country, index) => (
             <path
               className="atlas-branch"
               key={country.code}
               data-current={country.code === selected.code}
+              style={{ '--atlas-branch-delay': `${index * 30}ms` } as CSSProperties}
               d={branch(at(shapes.get(country.code)!.point))}
               pathLength="1"
             />
@@ -197,7 +198,9 @@ function AtlasChart({
             >
               <path d={`M${x} ${y}L${at(label).join(' ')}`} />
               <circle cx={x} cy={y} r="3.7" />
-              {selected.code === country.code && <circle cx={x} cy={y} r="7.5" />}
+              {selected.code === country.code && (
+                <circle className="atlas-arrival" cx={x} cy={y} r="7.5" />
+              )}
             </g>
           );
         })}
@@ -240,6 +243,7 @@ export function PaymentAtlas() {
   const { search, hash } = useLocation();
   const navigate = useNavigate();
   const methodSelect = useRef<HTMLSelectElement>(null);
+  const marketDetails = useRef<HTMLElement>(null);
   const [ready, setReady] = useState(false);
   const [previewCode, setPreviewCode] = useState<string | null>(null);
   const [previousReadings, setPreviousReadings] = useState<Record<string, Reading>>({});
@@ -374,6 +378,23 @@ export function PaymentAtlas() {
                   <span>{t(country.en, country.ru)}</span>
                 </label>
               ))}
+              <button
+                type="button"
+                className="atlas-details-jump"
+                aria-controls="atlas-market-details"
+                aria-label={t(`Country details: ${name}`, `К карточке страны: ${name}`)}
+                onClick={() => {
+                  marketDetails.current?.focus({ preventScroll: true });
+                  marketDetails.current?.scrollIntoView({
+                    block: 'start',
+                    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                      ? 'instant'
+                      : 'smooth',
+                  });
+                }}
+              >
+                {t('Country details', 'К карточке')} <SignatureArrow direction="down" />
+              </button>
             </fieldset>
             <div className="atlas-plot" style={outletPosition}>
               <Engraving className="atlas-paper-engraving" />
@@ -434,8 +455,10 @@ export function PaymentAtlas() {
 
             <div className="atlas-console">
               <article
+                ref={marketDetails}
                 className="atlas-entry"
                 id="atlas-market-details"
+                tabIndex={-1}
                 aria-labelledby="atlas-market-name"
               >
                 <div className="atlas-entry-head">

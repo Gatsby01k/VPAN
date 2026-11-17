@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
-import { Link, type LinkProps } from 'react-router-dom';
+import { Link, useLinkClickHandler, type LinkProps } from 'react-router-dom';
 import { useLocale } from '../locale';
 import { SignatureArrow } from './ConnectionProtocol';
+import { startPageTurn } from './pageTurn';
 
 export function NLink({ to, children, ...props }: LinkProps) {
   const { language } = useLocale();
@@ -13,8 +14,31 @@ export function NLink({ to, children, ...props }: LinkProps) {
     if (language === 'ru') params.set('lang', 'ru');
     target = name + (params.size ? '?' + params.toString() : '') + (hash ? '#' + hash : '');
   }
+  const openLink = useLinkClickHandler(target, props);
   return (
-    <Link to={target} {...props}>
+    <Link
+      to={target}
+      {...props}
+      onClick={(event) => {
+        props.onClick?.(event);
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey ||
+          props.reloadDocument ||
+          props.mask ||
+          (props.target && props.target !== '_self') ||
+          event.currentTarget.hasAttribute('download')
+        )
+          return;
+        const url = new URL(event.currentTarget.href);
+        if (url.origin === location.origin && startPageTurn(url.pathname, () => openLink(event)))
+          event.preventDefault();
+      }}
+    >
       {children}
     </Link>
   );

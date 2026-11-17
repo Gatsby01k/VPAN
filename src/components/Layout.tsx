@@ -1,5 +1,5 @@
 import { EditorialRule, NavigationGlyph, SignatureArrow } from './ConnectionProtocol';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { NLink as Link } from './NetworkLayout';
 import { Command, CornerDownLeft, Search } from 'lucide-react';
@@ -8,6 +8,8 @@ import { useLocale } from '../locale';
 import { countries, regions, networkMeta } from '../network';
 import { useGrowth } from '../growth';
 import { recordPage } from './acquisition';
+import { PageTurnArt } from './PageTurnArt';
+import { completePageNavigation, startPageTurn } from './pageTurn';
 import { telegramUsername, telegramUrl } from '../telegram';
 
 function CommandMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -82,7 +84,8 @@ function CommandMenu({ open, onClose }: { open: boolean; onClose: () => void }) 
   }, [active, query, open, resultsId]);
   const go = (path: string) => {
     onClose();
-    navigate(path + (language === 'ru' ? (path.includes('?') ? '&' : '?') + 'lang=ru' : ''));
+    const target = path + (language === 'ru' ? (path.includes('?') ? '&' : '?') + 'lang=ru' : '');
+    if (!startPageTurn(path.split('?')[0], () => navigate(target))) navigate(target);
   };
   return (
     <Dialog
@@ -468,7 +471,7 @@ export function RouteEffects() {
     const timer = window.setTimeout(() => recordPage(location.pathname), 100);
     return () => clearTimeout(timer);
   }, [location.pathname]);
-  useEffect(() => {
+  useLayoutEffect(() => {
     const previous = previousScrollLocation.current;
     previousScrollLocation.current = location;
     const atlasLocation =
@@ -481,25 +484,32 @@ export function RouteEffects() {
     )
       return;
     const scroll = () => {
-      if (previous && previous.pathname !== location.pathname)
-        document.getElementById('main')?.focus({ preventScroll: true });
+      const changedPage = previous && previous.pathname !== location.pathname;
+      if (changedPage) document.getElementById('main')?.focus({ preventScroll: true });
       const atlasReturn =
         location.pathname === '/' &&
         navigationType === 'POP' &&
         previous?.state?.fromAtlas === true;
-      const anchor = atlasReturn
+      const anchorId = atlasReturn
         ? 'atlas'
         : location.hash.slice(1) || (atlasLocation ? 'atlas' : '');
-      if (anchor)
-        document.getElementById(anchor)?.scrollIntoView({
-          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
-            ? 'instant'
-            : 'smooth',
+      const anchor = anchorId ? document.getElementById(anchorId) : null;
+      if (anchorId)
+        anchor?.scrollIntoView({
+          behavior:
+            changedPage || window.matchMedia('(prefers-reduced-motion: reduce)').matches
+              ? 'instant'
+              : 'smooth',
         });
       else window.scrollTo({ top: 0, behavior: 'instant' });
+      if (changedPage) completePageNavigation(previous.pathname, location.pathname);
     };
+    if (previous?.pathname !== location.pathname && document.documentElement.dataset.pageTurn) {
+      scroll();
+      return;
+    }
     const frame = requestAnimationFrame(scroll);
     return () => cancelAnimationFrame(frame);
   }, [location.pathname, location.hash, location.search, location.key, navigationType]);
-  return null;
+  return <PageTurnArt />;
 }
