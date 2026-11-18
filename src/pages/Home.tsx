@@ -4,7 +4,7 @@ import { NLink as Link } from '../components/NetworkLayout';
 import { ConnectionStudio } from '../components/ConnectionStudio';
 import { ThreadLink } from '../components/Editorial';
 import { SignatureArrow } from '../components/ConnectionProtocol';
-import { Engraving, HeroImpression } from '../components/CounterpartArt';
+import { CounterSeal, Engraving, HeroImpression, StitchMark } from '../components/CounterpartArt';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
 import { ConnectionThread } from '../components/ConnectionThread';
 import { PaymentAtlas } from '../components/PaymentAtlas';
@@ -26,6 +26,9 @@ const participants = [
     'PSP и агрегаторы',
     'Local infrastructure and relevant merchant demand.',
     'Локальная инфраструктура и спрос мерчантов.',
+    'clasps',
+    'Infrastructure',
+    'Инфраструктура',
   ],
   [
     'merchant',
@@ -34,6 +37,9 @@ const participants = [
     'Мерчанты и операторы',
     'Acceptance, payouts and local operating partners.',
     'Приём, выплаты и локальные операционные партнёры.',
+    'doorway',
+    'Market access',
+    'Выход на рынок',
   ],
   [
     'local-partner',
@@ -42,6 +48,9 @@ const participants = [
     'Локальные платёжные партнёры',
     'Local methods, operating scope and market knowledge.',
     'Локальные методы, операционные возможности и знание рынка.',
+    'map',
+    'Local knowledge',
+    'Знание рынка',
   ],
 ] as const;
 
@@ -134,6 +143,10 @@ export default function Home() {
           <p className="cover-territories">
             {t('Asia / Latin America / Africa', 'Азия / Латинская Америка / Африка')}
           </p>
+          <p className="cover-colophon">
+            <span aria-hidden="true" />
+            {t('Two sides. One connection.', 'Две стороны. Одна связь.')}
+          </p>
         </div>
       </section>
 
@@ -211,18 +224,33 @@ export default function Home() {
             </h2>
           </div>
           <ol className="world-network-roles">
-            {participants.map(([id, target, en, ru, description, descriptionRu]) => (
-              <li key={id}>
-                <Link to={scenarioLink(id, target)}>
-                  <span className="role-eyelet" aria-hidden="true" />
-                  <span>
-                    <strong>{t(en, ru)}</strong>
-                    <small>{t(description, descriptionRu)}</small>
-                  </span>
-                  <SignatureArrow />
-                </Link>
-              </li>
-            ))}
+            {participants.map(
+              ([id, target, en, ru, description, descriptionRu, art, note, noteRu]) => (
+                <li key={id}>
+                  <Link to={scenarioLink(id, target)} className="partner-folio">
+                    <span className="partner-folio-art" aria-hidden="true">
+                      <img
+                        src={`/assets/editorial/counterpart-${art}-v1.jpg`}
+                        srcSet={`/assets/editorial/counterpart-${art}-v1-600.jpg 600w, /assets/editorial/counterpart-${art}-v1.jpg 1200w`}
+                        sizes="(max-width: 740px) 35vw, (max-width: 1440px) 29vw, 440px"
+                        alt=""
+                        width="1200"
+                        height="800"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <i className="folio-eyelet" />
+                      <span className="folio-art-note">{t(note, noteRu)}</span>
+                    </span>
+                    <span className="partner-folio-copy">
+                      <i className="nav-eyelet" aria-hidden="true" />
+                      <strong>{t(en, ru)}</strong>
+                      <small>{t(description, descriptionRu)}</small>
+                    </span>
+                  </Link>
+                </li>
+              ),
+            )}
           </ol>
           <ThreadLink to="/network" variant="utility">
             {t('See all network roles', 'Все роли в сети')}
@@ -239,11 +267,14 @@ export default function Home() {
           <ThreadLink to="/network#commercial-model" variant="utility">
             {t('Read the commercial terms', 'Как устроена оплата')}
           </ThreadLink>
+          <CounterSeal className="procedure-seal" />
         </div>
         <ol className="procedure-stitches">
           {milestones.map(([en, ru, description, descriptionRu], i) => (
             <li key={en}>
-              <span aria-hidden="true">0{i + 1}</span>
+              <span aria-hidden="true">
+                <StitchMark stage={i} />
+              </span>
               <h3>{t(en, ru)}</h3>
               <p>{t(description, descriptionRu)}</p>
             </li>

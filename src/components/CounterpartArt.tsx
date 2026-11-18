@@ -3,6 +3,68 @@ import { preload } from 'react-dom';
 
 const engravingAngles = Array.from({ length: 24 }, (_, index) => index * 7.5);
 
+// Native details borrow the engraved brass and cord from the original plates.
+export function CounterSeal({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 120 120"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <circle cx="60" cy="60" r="55" stroke="currentColor" strokeWidth=".7" />
+      <circle cx="60" cy="60" r="51" stroke="currentColor" strokeWidth="2" strokeDasharray=".6 3" />
+      <g transform="translate(18 18) scale(.28)">
+        <Engraving />
+      </g>
+      <circle
+        cx="60"
+        cy="60"
+        r="27"
+        fill="var(--counter-paper)"
+        stroke="currentColor"
+        strokeWidth=".7"
+      />
+      <path
+        d="m44 44 16 34 16-34M40 44h15m10 0h15m-33 2 13 28 13-28"
+        stroke="currentColor"
+        strokeWidth="1.4"
+      />
+      <path
+        d="M2 72c15 0 13 20 31 16 13-3 9-13 19-13"
+        stroke="var(--counter-mark)"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <circle cx="53" cy="75" r="2.5" fill="var(--counter-paper)" stroke="var(--counter-mark)" />
+    </svg>
+  );
+}
+
+const stitchPaths = [
+  'M7 18h7m8 0h7M18 7v7m0 8v7',
+  'M6 18h8m8 0h8M14 15l4 4 9-10',
+  'M6 18h7m10 0h7M13 18c0-10 10-10 10 0s-10 10-10 0Z',
+  'M5 18h26M12 13l5 5-5 5m9-10 5 5-5 5',
+];
+
+export function StitchMark({ stage }: { stage: number }) {
+  return (
+    <svg viewBox="0 0 36 36" fill="none" aria-hidden="true" focusable="false">
+      <circle cx="18" cy="18" r="16" stroke="currentColor" strokeWidth=".65" />
+      {stage === 0 && <circle cx="18" cy="18" r="4" stroke="currentColor" strokeWidth="1.1" />}
+      <path
+        d={stitchPaths[stage]}
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function Engraving({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 300 300" fill="none" aria-hidden="true">

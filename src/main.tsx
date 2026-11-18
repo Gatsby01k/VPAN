@@ -14,6 +14,7 @@ import './evolution.css';
 import './commercial-public.css';
 import './counterpart-public.css';
 import './counterpart-editions.css';
+import './counterpart-finishing.css';
 import { emptyGrowth, type GrowthData } from './growth';
 import { languageFromSearch } from './locale';
 
