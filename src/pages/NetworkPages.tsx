@@ -433,16 +433,27 @@ export function NotFound() {
   return (
     <>
       <PageIntro
-        index="404 / END OF THIS THREAD"
+        index={t('404 / END OF THIS THREAD', '404 / НИТЬ ОБОРВАЛАСЬ')}
         title={t('A missing connection.', 'Связь потерялась.')}
         description={t(
           'This page could not be found. Let’s pick up the thread.',
           'Страница не найдена. Вернёмся к началу.',
         )}
       />
-      <div className="wrap page-section">
-        <Action to="/">{t('Back to the network', 'Вернуться к сети')}</Action>
-      </div>
+      <nav
+        className="wrap missing-links"
+        aria-label={t('Continue exploring', 'Продолжить просмотр')}
+      >
+        <ThreadLink to="/" direction="return">
+          {t('Back to the network', 'Вернуться к сети')}
+        </ThreadLink>
+        <ThreadLink to="/markets" variant="utility">
+          {t('Market directory', 'Каталог рынков')}
+        </ThreadLink>
+        <ThreadLink to="/knowledge" variant="utility">
+          {t('Field notes', 'Материалы')}
+        </ThreadLink>
+      </nav>
     </>
   );
 }

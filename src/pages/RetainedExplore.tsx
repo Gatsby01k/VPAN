@@ -1,14 +1,15 @@
 import { Engraving } from '../components/CounterpartArt';
 import { CountryImpression, RegionImpression } from '../components/MarketImpression';
 import { SignatureArrow } from '../components/ConnectionProtocol';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { NLink as Link } from '../components/NetworkLayout';
-import { Globe2, Search, X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { ThreadLink } from '../components/Editorial';
 import { Action, Eyebrow, PageHeading, Reveal } from '../components/UI';
 import { useLocale } from '../locale';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
+import { NotFound } from './NetworkPages';
 import { countries, paymentMethodLabel, regions } from '../network';
 import type { Language } from '../network';
 import marketContext from '../../shared/market-context.json';
@@ -55,6 +56,7 @@ export function Markets() {
   const { language, t } = useLocale();
   const [params, setParams] = useSearchParams();
   const [hydrated, setHydrated] = useState(false);
+  const searchInput = useRef<HTMLInputElement>(null);
   useEffect(() => setHydrated(true), []);
   const region = findRegion(hydrated ? params.get('region') : null);
   const query = (hydrated && params.get('q')) || '';
@@ -63,6 +65,7 @@ export function Markets() {
     if (value) next.set(key, value);
     else next.delete(key);
     setParams(next, { replace: key === 'q', preventScrollReset: true });
+    if (key === 'q' && !value) searchInput.current?.focus({ preventScroll: true });
   };
   const filtered = useMemo(
     () =>
@@ -81,6 +84,7 @@ export function Markets() {
     next.delete('q');
     next.delete('region');
     setParams(next, { preventScrollReset: true });
+    searchInput.current?.focus({ preventScroll: true });
   };
   return (
     <>
@@ -136,9 +140,10 @@ export function Markets() {
               {t('All regions', 'Все регионы')}
             </button>
           </div>
-          <label className="search-field country-search">
+          <div className="search-field country-search">
             <Search size={18} aria-hidden="true" />
             <input
+              ref={searchInput}
               value={query}
               onChange={(e) => updateFilter('q', e.target.value)}
               placeholder={t('Country, currency or method', 'Страна, валюта или метод')}
@@ -153,7 +158,7 @@ export function Markets() {
                 <X size={18} aria-hidden="true" />
               </button>
             )}
-          </label>
+          </div>
         </div>
         <p className="country-result-count" role="status">
           {region ? t(region.name, region.ru) : t('All regions', 'Все регионы')} <span>/</span>{' '}
@@ -162,6 +167,7 @@ export function Markets() {
         {(query || region) && (
           <div
             className="market-active-filters"
+            role="group"
             aria-label={t('Active filters', 'Активные фильтры')}
           >
             {region && (
@@ -179,8 +185,10 @@ export function Markets() {
               <button
                 onClick={() => updateFilter('q', '')}
                 aria-label={t('Clear search: ', 'Очистить поиск: ') + query}
+                title={query}
               >
-                “{query}”<X size={13} aria-hidden="true" />
+                <span>“{query}”</span>
+                <X size={13} aria-hidden="true" />
               </button>
             )}
             <button className="market-clear-all" onClick={reset}>
@@ -221,7 +229,7 @@ export function Markets() {
         ))}
         {!filtered.length && (
           <div className="empty-state">
-            <Globe2 size={36} strokeWidth={1.5} aria-hidden="true" />
+            <Engraving className="market-empty-mark" />
             <h2>{t('No countries found.', 'Страны не найдены.')}</h2>
             <p>
               {t(
@@ -229,8 +237,9 @@ export function Markets() {
                 'Измените запрос или выберите другой регион.',
               )}
             </p>
-            <button className="button" onClick={reset}>
-              {t('Reset filters', 'Сбросить фильтры')}
+            <button className="connection-link" onClick={reset}>
+              <span>{t('Reset filters', 'Сбросить фильтры')}</span>
+              <SignatureArrow direction="return" />
             </button>
           </div>
         )}
@@ -250,18 +259,7 @@ export function Country() {
   const { language, t } = useLocale();
   const market = markets.find((m) => m.slug === slug);
   const context = marketContext[slug as keyof typeof marketContext];
-  if (!market)
-    return (
-      <PageHeading
-        eyebrow="404"
-        title={t('Country not found.', 'Страна не найдена.')}
-        accent=""
-        description={t(
-          'Return to the market index to choose a country.',
-          'Выберите страну в списке рынков.',
-        )}
-      />
-    );
+  if (!market) return <NotFound />;
   return (
     <>
       <nav className="breadcrumbs wrap" aria-label={t('Breadcrumb', 'Навигационная цепочка')}>

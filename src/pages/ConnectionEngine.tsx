@@ -276,6 +276,19 @@ export default function ConnectionEngine() {
       group?.scrollIntoView({ block: 'center' });
     });
   };
+  const showScope = () => {
+    setStep('scope');
+    setError('');
+    focusField('role');
+  };
+  const showContact = () => {
+    setStep('contact');
+    setError('');
+    requestAnimationFrame(() => {
+      document.getElementById('engine-contact-heading')?.focus({ preventScroll: true });
+      document.getElementById('engine-contact-step')?.scrollIntoView({ block: 'start' });
+    });
+  };
   const fieldMessages: Record<BriefField, string> = {
     role: t(
       'Choose the role that describes your business.',
@@ -392,12 +405,7 @@ export default function ConnectionEngine() {
     e.preventDefault();
     if (busy || !ready || !validateScope()) return;
     if (step === 'scope') {
-      setStep('contact');
-      setError('');
-      requestAnimationFrame(() => {
-        document.getElementById('engine-contact')?.focus();
-        document.getElementById('engine-contact-step')?.scrollIntoView({ block: 'start' });
-      });
+      showContact();
       return;
     }
     setError('');
@@ -596,8 +604,7 @@ export default function ConnectionEngine() {
               aria-current={step === 'scope' ? 'step' : undefined}
               disabled={busy}
               onClick={() => {
-                setStep('scope');
-                setError('');
+                if (step !== 'scope') showScope();
               }}
             >
               01 / {t('Business scope', 'Задача бизнеса')}
@@ -608,10 +615,7 @@ export default function ConnectionEngine() {
               aria-current={step === 'contact' ? 'step' : undefined}
               disabled={busy}
               onClick={() => {
-                if (validateScope()) {
-                  setStep('contact');
-                  setError('');
-                }
+                if (step !== 'contact' && validateScope()) showContact();
               }}
             >
               02 / {t('Context & contact', 'Контекст и контакт')}
@@ -884,7 +888,7 @@ export default function ConnectionEngine() {
                         )}
                       </span>
                       <p>{scopeSummary.join(' · ')}</p>
-                      <button type="button" className="text-link" onClick={() => setStep('scope')}>
+                      <button type="button" className="text-link" onClick={showScope}>
                         {t('Edit scope', 'Изменить задачу')}
                         <Arrow />
                       </button>
@@ -892,7 +896,9 @@ export default function ConnectionEngine() {
                     <div className="loom-section contact-section" id="engine-contact-step">
                       <div className="loom-label">
                         <span>02</span>
-                        <h2>{t('Where can we reach you?', 'Как с вами связаться?')}</h2>
+                        <h2 id="engine-contact-heading" tabIndex={-1}>
+                          {t('Where can we reach you?', 'Как с вами связаться?')}
+                        </h2>
                       </div>
                       <div className="field-pair">
                         <label htmlFor="engine-contact">
@@ -1159,16 +1165,7 @@ export default function ConnectionEngine() {
               )}
               <div className="engine-actions">
                 {step === 'contact' && (
-                  <button
-                    type="button"
-                    className="engine-back"
-                    disabled={busy}
-                    onClick={() => {
-                      setStep('scope');
-                      setError('');
-                      focusField('role');
-                    }}
-                  >
+                  <button type="button" className="engine-back" disabled={busy} onClick={showScope}>
                     <SignatureArrow direction="return" />
                     {t('Back to scope', 'Назад к задаче')}
                   </button>

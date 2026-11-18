@@ -2,6 +2,9 @@ import { createContext, useContext, useEffect, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 type Language = 'en' | 'ru';
+export const languageFromSearch = (search: string): Language =>
+  new URLSearchParams(search).get('lang') === 'ru' ? 'ru' : 'en';
+
 const LocaleContext = createContext({
   language: 'en' as Language,
   setLanguage: (_: Language) => {},
@@ -19,8 +22,7 @@ export function LocaleProvider({
   const navigate = useNavigate();
   // The URL is authoritative on the server and client. Stored preferences must not
   // silently replace EN content with RU under an EN canonical URL.
-  const language: Language =
-    new URLSearchParams(location.search).get('lang') === 'ru' ? 'ru' : 'en';
+  const language = languageFromSearch(location.search);
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);

@@ -92,6 +92,15 @@ test('all public routes have prerendered content, assets and a real 404', async 
   const unknown = await fetch(base + '/does-not-exist');
   assert.equal(unknown.status, 404);
   assert.match(await unknown.text(), /Page not found/);
+  for (const route of ['/404', '/404.html', '/does-not-exist', '/markets/does-not-exist']) {
+    const missingRu = await fetch(base + route + '?lang=ru');
+    assert.equal(missingRu.status, 404);
+    assert.equal(missingRu.headers.get('content-language'), 'ru');
+    const missingHtml = await missingRu.text();
+    assert.match(missingHtml, /<html[^>]+lang="ru"/);
+    assert.match(missingHtml, /Связь потерялась/);
+    assert.doesNotMatch(missingHtml, /A missing connection/);
+  }
   const head = await fetch(base + '/markets/ghana', { method: 'HEAD' });
   assert.equal(head.status, 200);
   assert.equal(await head.text(), '');

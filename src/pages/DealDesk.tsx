@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, type FormEvent } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react';
 import { LockKeyhole, LogOut, RefreshCw } from 'lucide-react';
 import { useLocale } from '../locale';
 import { countries, industries, capabilities, companyTypes, label } from '../network';
@@ -70,10 +70,29 @@ export default function DealDesk() {
   const [dueOnly, setDueOnly] = useState(false);
   const [selected, setSelected] = useState<Row | null>(null);
   const [detail, setDetail] = useState<Row | null>(null);
+  const detailSection = useRef<HTMLElement>(null);
+  const selectedId = selected?.id;
+  useEffect(() => {
+    if (!selectedId) return;
+    const frame = requestAnimationFrame(() => {
+      detailSection.current?.focus({ preventScroll: true });
+      detailSection.current?.scrollIntoView({
+        block: 'start',
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          ? 'instant'
+          : 'smooth',
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [selectedId]);
   const [note, setNote] = useState('');
   const [notice, setNotice] = useState('');
   const [telegramLink, setTelegramLink] = useState<{ code: string; url: string } | null>(null);
   const state = (s: string) => (language === 'ru' ? statusRu[s] || s : s.replaceAll('-', ' '));
+  const companyName = (name: string) =>
+    name === 'Company not yet supplied'
+      ? t('Company not yet supplied', 'Компания пока не указана')
+      : name;
   const eventText = (event: Row) => {
     if (event.kind !== 'qualification') return event.detail;
     try {
@@ -356,7 +375,12 @@ export default function DealDesk() {
               {t('Follow-up due', 'Пора связаться')}
             </label>
           </div>
-          <div className="desk-table-scroll">
+          <div
+            className="desk-table-scroll"
+            role="region"
+            aria-label={t('Opportunity records', 'Таблица возможностей')}
+            tabIndex={0}
+          >
             <table>
               <thead>
                 <tr>
@@ -397,10 +421,14 @@ export default function DealDesk() {
                   .map((o) => (
                     <tr key={o.id}>
                       <td>
-                        <button className="desk-record-link" onClick={() => void open(o)}>
+                        <button
+                          id={'desk-opportunity-' + o.id}
+                          className="desk-record-link"
+                          onClick={() => void open(o)}
+                        >
                           {o.reference}
                         </button>
-                        <strong>{o.company_name}</strong>
+                        <strong>{companyName(o.company_name)}</strong>
                         <small>{o.contacts}</small>
                       </td>
                       <td>
@@ -449,13 +477,19 @@ export default function DealDesk() {
             </p>
           )}
           {selected && detail && (
-            <section className="desk-detail">
+            <section className="desk-detail" ref={detailSection} tabIndex={-1}>
               <div className="section-heading">
                 <div>
                   <Eyebrow>{selected.reference}</Eyebrow>
-                  <h2>{selected.company_name}</h2>
+                  <h2>{companyName(selected.company_name)}</h2>
                 </div>
-                <button className="text-link" onClick={() => setSelected(null)}>
+                <button
+                  className="text-link"
+                  onClick={() => {
+                    setSelected(null);
+                    document.getElementById('desk-opportunity-' + selected.id)?.focus();
+                  }}
+                >
                   {t('Close details', 'Закрыть')}
                 </button>
               </div>
@@ -844,7 +878,7 @@ export default function DealDesk() {
                   )
                   .map((o) => (
                     <option key={o.id} value={o.id}>
-                      {o.reference} · {o.company_name}
+                      {o.reference} · {companyName(o.company_name)}
                     </option>
                   ))}
               </select>
@@ -1149,7 +1183,12 @@ export default function DealDesk() {
           >
             {t('Process due notifications', 'Обработать ожидающие уведомления')}
           </button>
-          <div className="desk-table-scroll">
+          <div
+            className="desk-table-scroll"
+            role="region"
+            aria-label={t('Notification queue', 'Очередь уведомлений')}
+            tabIndex={0}
+          >
             <table>
               <thead>
                 <tr>

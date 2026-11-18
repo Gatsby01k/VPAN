@@ -68,8 +68,7 @@ export function ParticipantEconomics() {
         {t('SIX ROLES. SHARED COMMERCIAL VALUE.', 'ШЕСТЬ РОЛЕЙ. ОБЩАЯ КОММЕРЧЕСКАЯ ЦЕННОСТЬ.')}
       </Eyebrow>
       <h2 id="participant-economics-title">
-        {t('Your place in', 'Ваше место')}
-        <em>{t('the relationship.', 'в партнёрстве.')}</em>
+        {t('Your place in', 'Ваше место')} <em>{t('the relationship.', 'в партнёрстве.')}</em>
       </h2>
       {relationships.map(([id, en, ru, result, resultRu, copy, copyRu], index) => (
         <details key={id}>

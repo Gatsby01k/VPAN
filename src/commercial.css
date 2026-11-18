@@ -314,14 +314,38 @@
   overflow-x: auto;
   flex-wrap: wrap;
 }
+.network-product .deal-desk :is(.desk-detail, .desk-record-link) {
+  scroll-margin-top: calc(var(--counter-header-height) + 16px);
+}
+@media (max-width: 760px) {
+  .network-product .deal-desk .desk-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 4px;
+    padding: 6px;
+    border-radius: 0;
+    scrollbar-width: thin;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+  }
+  .network-product .deal-desk .desk-tabs > button {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 0;
+    white-space: nowrap;
+    scroll-snap-align: start;
+  }
+}
 @media (max-width: 760px) {
   .commercial-title {
     display: block;
   }
   .commercial-funnel {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .commercial-funnel > div {
+    min-width: 0;
     border-bottom: 1px solid var(--desk-line);
     padding: 16px 10px;
   }
@@ -330,6 +354,9 @@
   }
   .commercial-funnel strong {
     font-size: 2.5rem;
+  }
+  .commercial-funnel span {
+    overflow-wrap: anywhere;
   }
   .commercial-two-column,
   .commercial-acquisition {
@@ -355,5 +382,10 @@
   }
   .commercial-desk {
     padding-top: 24px;
+  }
+}
+@media (max-width: 360px) {
+  .commercial-funnel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

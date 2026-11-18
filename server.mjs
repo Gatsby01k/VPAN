@@ -117,7 +117,7 @@ export function openDatabase(dbPath, { database } = {}) {
     if (fs.existsSync(filename)) fs.chmodSync(filename, 0o600);
   return db;
 }
-function serveFile(req, res, urlPath) {
+function serveFile(req, res, urlPath, language = 'en') {
   let filename;
   try {
     filename = decodeURIComponent(urlPath);
@@ -132,10 +132,13 @@ function serveFile(req, res, urlPath) {
   if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory())
     candidate = path.join(candidate, 'index.html');
   let status = 200;
-  if (!fs.existsSync(candidate) || !fs.statSync(candidate).isFile()) {
-    if (path.extname(filename) || filename.startsWith('/assets/'))
+  const errorPage =
+    candidate === path.join(PUBLIC, '404', 'index.html') ||
+    candidate === path.join(PUBLIC, '404.html');
+  if (errorPage || !fs.existsSync(candidate) || !fs.statSync(candidate).isFile()) {
+    if (!errorPage && (path.extname(filename) || filename.startsWith('/assets/')))
       return reply(res, 404, { error: 'Not found' });
-    candidate = path.join(PUBLIC, '404', 'index.html');
+    candidate = path.join(PUBLIC, '__pages', language, '404', 'index.html');
     status = 404;
     if (!fs.existsSync(candidate))
       return reply(res, 503, { error: 'Build the website with npm run build first.' });
@@ -147,6 +150,7 @@ function serveFile(req, res, urlPath) {
     filename.startsWith('/assets/') && /-[\w-]{8,}\.(?:js|mjs|css|woff2?)$/.test(filename);
   res.writeHead(status, {
     'Content-Type': TYPES[ext],
+    ...(status === 404 ? { 'Content-Language': language } : {}),
     'Cache-Control': immutable
       ? 'public, max-age=31536000, immutable'
       : ext === '.html'
@@ -236,10 +240,11 @@ export function createApp({
       pathname.startsWith('/knowledge/') ? pathname.slice('/knowledge/'.length) : '',
     );
     const article = data.articles.find((g) => '/knowledge/' + g.slug === pathname);
+    const language = url.searchParams.get('lang') === 'ru' ? 'ru' : 'en';
     if (!staticRoutes.includes(pathname) && !article && pathname !== '/admin')
-      return serveFile(req, res, url.pathname);
+      return serveFile(req, res, url.pathname, language);
     const shellPath = path.join(PUBLIC, 'shell.html');
-    if (!fs.existsSync(shellPath)) return serveFile(req, res, url.pathname);
+    if (!fs.existsSync(shellPath)) return serveFile(req, res, url.pathname, language);
     // Reload an updated SSR bundle when the local preview is rebuilt.
     const entry = path.join(HERE, 'dist-server/entry-server.mjs');
     const revision = fs.statSync(entry).mtimeMs;
@@ -248,7 +253,6 @@ export function createApp({
         revision,
         module: await import('./dist-server/entry-server.mjs?rev=' + revision),
       };
-    const language = url.searchParams.get('lang') === 'ru' ? 'ru' : 'en';
     let html = fs
       .readFileSync(shellPath, 'utf8')
       .replace(

@@ -38,7 +38,7 @@
   list-style: none;
   cursor: pointer;
   display: grid;
-  grid-template-columns: 35px 1fr 1.1fr 24px;
+  grid-template-columns: 35px minmax(0, 1fr) minmax(0, 1.1fr) 28px;
   align-items: center;
   gap: 25px;
   padding-block: 24px;
@@ -65,9 +65,22 @@
   line-height: 1.5;
   margin: 0;
 }
-.participant-economics details[open] summary svg {
-  transform: rotate(90deg);
-  color: #b71b62;
+.participant-economics summary > .signature-arrow {
+  width: 100%;
+  transform: rotate(62deg);
+}
+.participant-economics details[open] summary > .signature-arrow {
+  transform: rotate(-48deg);
+}
+.participant-economics details[open] summary > :is(span, .signature-arrow) {
+  color: var(--counter-mark);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .participant-economics summary > .signature-arrow {
+    transition:
+      transform 320ms var(--counter-tension),
+      color 180ms ease;
+  }
 }
 .participant-economics details > div {
   padding: 0 40px 30px 60px;
@@ -102,10 +115,10 @@
 }
 @media (max-width: 760px) {
   .participant-economics > h2 {
-    font-size: 2.8rem;
+    font-size: clamp(2.1rem, 10.8vw, 2.8rem);
   }
   .participant-economics summary {
-    grid-template-columns: 25px 1fr 20px;
+    grid-template-columns: 25px minmax(0, 1fr) 24px;
     gap: 14px;
     padding-block: 20px;
   }
@@ -113,7 +126,7 @@
     grid-column: 2;
     grid-row: 2;
   }
-  .participant-economics summary svg {
+  .participant-economics summary > .signature-arrow {
     grid-column: 3;
     grid-row: 1;
   }

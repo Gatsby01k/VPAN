@@ -15,6 +15,7 @@ import './commercial-public.css';
 import './counterpart-public.css';
 import './counterpart-editions.css';
 import { emptyGrowth, type GrowthData } from './growth';
+import { languageFromSearch } from './locale';
 
 const root = document.getElementById('root')!;
 let initialGrowth: GrowthData = emptyGrowth;
@@ -31,5 +32,7 @@ const app = (
     </BrowserRouter>
   </StrictMode>
 );
-if (root.innerHTML.trim() && !root.innerHTML.includes('<!--app-html-->')) hydrateRoot(root, app);
+const language = languageFromSearch(window.location.search);
+// Static hosts can serve the English fallback document for an unknown Russian URL.
+if (document.documentElement.lang === language && root.firstElementChild) hydrateRoot(root, app);
 else createRoot(root).render(app);

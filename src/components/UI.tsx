@@ -102,12 +102,14 @@ export function Dialog({
   title,
   children,
   className = '',
+  id,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
   children: ReactNode;
   className?: string;
+  id?: string;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const { t } = useLocale();
@@ -128,6 +130,7 @@ export function Dialog({
   return (
     <dialog
       ref={ref}
+      id={id}
       className={`dialog ${className}`}
       aria-label={title}
       onCancel={(e) => {

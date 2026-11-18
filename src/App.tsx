@@ -7,6 +7,7 @@ import { Markets, Country, About } from './pages/RetainedExplore';
 import ConnectionEngine from './pages/ConnectionEngine';
 import DealDesk from './pages/DealDesk';
 import { GrowthProvider, type GrowthData } from './growth';
+import { publicRoutes } from './network';
 function LegacyRoute({ offer = false }: { offer?: boolean }) {
   const location = useLocation();
   return <Navigate replace to={(offer ? '/join' : '/find-a-partner') + location.search} />;
@@ -14,6 +15,8 @@ function LegacyRoute({ offer = false }: { offer?: boolean }) {
 function Pages() {
   const location = useLocation();
   const pagePath = location.pathname.replace(/\/+$/, '') || '/';
+  const knownPage = publicRoutes.includes(pagePath);
+  const countryPage = knownPage && pagePath.startsWith('/markets/');
   return (
     <>
       <Header />
@@ -24,17 +27,18 @@ function Pages() {
         data-public-page={
           pagePath === '/admin'
             ? undefined
-            : pagePath.startsWith('/markets/')
+            : countryPage
               ? 'country'
-              : pagePath.startsWith('/knowledge/')
+              : /^\/knowledge\/[^/]+$/.test(pagePath)
                 ? 'article'
                 : pagePath === '/join' || pagePath === '/find-a-partner'
                   ? 'brief'
-                  : pagePath.slice(1) || 'home'
+                  : knownPage
+                    ? pagePath.slice(1) || 'home'
+                    : '404'
         }
         className={
-          ['/', '/contact', '/markets', '/about'].includes(pagePath) ||
-          pagePath.startsWith('/markets/')
+          ['/', '/contact', '/markets', '/about'].includes(pagePath) || countryPage
             ? ''
             : 'network-product'
         }

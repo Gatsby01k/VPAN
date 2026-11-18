@@ -186,6 +186,8 @@ export function Header() {
   const location = useLocation();
   const [menu, setMenu] = useState(false);
   const [command, setCommand] = useState(false);
+  const currentPage = (path: string) =>
+    location.pathname === path || location.pathname.startsWith(`${path}/`) ? 'page' : undefined;
   useEffect(() => {
     setMenu(false);
   }, [location.pathname, location.hash, location.search]);
@@ -221,15 +223,7 @@ export function Header() {
           <Brand />
           <nav className="counter-nav" aria-label={t('Main navigation', 'Основная навигация')}>
             {links.map(([path, label]) => (
-              <Link
-                key={path}
-                to={path}
-                aria-current={
-                  location.pathname === path || location.pathname.startsWith(path + '/')
-                    ? 'page'
-                    : undefined
-                }
-              >
+              <Link key={path} to={path} aria-current={currentPage(path)}>
                 <i className="nav-eyelet" aria-hidden="true" />
                 {label}
               </Link>
@@ -264,6 +258,7 @@ export function Header() {
               aria-label={t('Open menu', 'Открыть меню')}
               aria-expanded={menu}
               aria-controls="mobile-navigation"
+              aria-haspopup="dialog"
             >
               <NavigationGlyph />
             </button>
@@ -271,6 +266,7 @@ export function Header() {
         </div>
       </header>
       <Dialog
+        id="mobile-navigation"
         open={menu}
         onClose={() => setMenu(false)}
         title={t('Navigation', 'Навигация')}
@@ -291,16 +287,11 @@ export function Header() {
         </div>
         <nav
           className="mobile-menu-links"
-          id="mobile-navigation"
           aria-label={t('Mobile navigation', 'Мобильная навигация')}
         >
           {links.map(([path, label]) => (
             <div key={path}>
-              <Link
-                to={path}
-                aria-current={location.pathname === path ? 'page' : undefined}
-                onClick={() => setMenu(false)}
-              >
+              <Link to={path} aria-current={currentPage(path)} onClick={() => setMenu(false)}>
                 <i className="nav-eyelet" aria-hidden="true" />
                 {label}
                 <SignatureArrow />

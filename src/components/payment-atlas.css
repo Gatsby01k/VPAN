@@ -845,6 +845,7 @@
     text-overflow: ellipsis;
     border-bottom: 0;
     min-height: 48px;
+    font-size: 1rem;
   }
   .atlas-entry-head {
     margin-bottom: 19px;
@@ -884,6 +885,6 @@
     padding-top: 8px;
   }
   .atlas-method-slot select {
-    min-height: 43px;
+    min-height: 44px;
   }
 }
