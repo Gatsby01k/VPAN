@@ -9,6 +9,9 @@ const ids = (key) => new Set(taxonomy[key].map((item) => item.id));
 const valid = Object.fromEntries(
   ['industries', 'countries', 'capabilities', 'companyTypes'].map((key) => [key, ids(key)]),
 );
+const methodsByCountry = new Map(
+  taxonomy.countries.map((country) => [country.id, country.methods]),
+);
 const states = new Set([
   'new',
   'review',
@@ -103,6 +106,7 @@ export function validateOpportunity(body) {
       source: str(body.attribution?.source, 100),
       campaign: str(body.attribution?.campaign, 100),
       ref: str(body.attribution?.ref, 100),
+      ...(body.attribution?.entry === 'payment-atlas' ? { entry: 'payment-atlas' } : {}),
       ...Object.fromEntries(
         ['medium', 'landing', 'referrer'].flatMap((key) => {
           const value = str(body.attribution?.[key], key === 'landing' ? 180 : 120);
@@ -379,22 +383,7 @@ export function createDesk(
       .prepare('SELECT * FROM opportunities WHERE side<>? AND industry=? AND company_id<>?')
       .all(item.side, item.industry, item.company_id)
       .map(record)
-      .filter(
-        (other) =>
-          eligible(other) &&
-          other.profile.countries?.some((c) => item.profile.countries?.includes(c)) &&
-          other.profile.capabilities?.some((c) => item.profile.capabilities?.includes(c)) &&
-          (!item.profile.targetType || item.profile.targetType === other.profile.companyType) &&
-          (!other.profile.targetType || other.profile.targetType === item.profile.companyType) &&
-          (!item.profile.methods?.length ||
-            !other.profile.methods?.length ||
-            item.profile.methods.some((m) => other.profile.methods.includes(m))) &&
-          (!item.profile.settlementCurrencies?.length ||
-            !other.profile.settlementCurrencies?.length ||
-            item.profile.settlementCurrencies.some((c) =>
-              other.profile.settlementCurrencies.includes(c),
-            )),
-      )
+      .filter((other) => eligible(other) && compatible(item, other))
       .map((other) => ({
         id: other.id,
         reference: other.reference,
@@ -411,13 +400,118 @@ export function createDesk(
         notice: 'Candidate for manual review; not a confirmed match.',
       }));
   }
-  function eligible(item) {
+  function compatible(item, other) {
+    const demand = item.profile;
+    const supply = other.profile;
+    return (
+      item.company_id !== other.company_id &&
+      supply.countries?.some((country) => demand.countries?.includes(country)) &&
+      supply.capabilities?.some((capability) => demand.capabilities?.includes(capability)) &&
+      (!demand.targetType || demand.targetType === supply.companyType) &&
+      (!supply.targetType || supply.targetType === demand.companyType) &&
+      (!demand.methods?.length ||
+        !supply.methods?.length ||
+        demand.methods.some((method) => supply.methods.includes(method))) &&
+      (!demand.settlementCurrencies?.length ||
+        !supply.settlementCurrencies?.length ||
+        demand.settlementCurrencies.some((currency) =>
+          supply.settlementCurrencies.includes(currency),
+        ))
+    );
+  }
+  function eligible(item, today = now().slice(0, 10)) {
     return (
       ['need', 'offer'].includes(item.side) &&
       ['qualified', 'discussion', 'agreed'].includes(item.status) &&
       item.verification === 'verified' &&
-      (!item.expires_at || item.expires_at >= now().slice(0, 10))
+      (!item.expires_at || item.expires_at >= today)
     );
+  }
+  function sourcingLeads(opportunities, introductions, agreements) {
+    const today = now().slice(0, 10);
+    const inProgress = new Set([
+      ...introductions.filter((intro) => intro.status !== 'lost').map((intro) => intro.demand_id),
+      ...agreements.filter((agreement) => agreement.ends_on >= today).map((a) => a.opportunity_id),
+    ]);
+    const demand = opportunities.filter(
+      (item) =>
+        item.side === 'need' &&
+        item.status !== 'agreed' &&
+        item.owner !== 'deployment-verification' &&
+        eligible(item, today) &&
+        item.profile.countries?.length &&
+        item.profile.capabilities?.length &&
+        !inProgress.has(item.id),
+    );
+    if (!demand.length) return [];
+
+    const offersByIndustry = new Map();
+    const offers = db
+      .prepare(
+        `SELECT company_id,industry,profile FROM opportunities
+       WHERE side='offer' AND verification='verified' AND owner<>'deployment-verification'
+         AND status IN ('qualified','discussion','agreed') AND (expires_at='' OR expires_at>=?)`,
+      )
+      .all(today);
+    for (const row of offers) {
+      if (!offersByIndustry.has(row.industry)) offersByIndustry.set(row.industry, []);
+      offersByIndustry.get(row.industry).push({ ...row, profile: asJson(row.profile) });
+    }
+    const gaps = demand.filter(
+      (item) => !offersByIndustry.get(item.industry)?.some((offer) => compatible(item, offer)),
+    );
+    const groups = new Map();
+    const byOpportunity = new Map();
+    for (const item of gaps) {
+      const routes = [];
+      for (const country of item.profile.countries) {
+        for (const method of item.profile.methods || []) {
+          if (!methodsByCountry.get(country)?.includes(method)) continue;
+          const key = JSON.stringify([item.industry, country, method]);
+          if (!groups.has(key)) groups.set(key, { country, method, companies: new Set() });
+          const group = groups.get(key);
+          group.companies.add(item.company_id);
+          routes.push(group);
+        }
+      }
+      byOpportunity.set(item.id, routes);
+    }
+    return gaps
+      .map(({ id }) => {
+        const routes = byOpportunity.get(id);
+        const repeated = routes.reduce(
+          (best, route) => (route.companies.size > (best?.companies.size ?? 1) ? route : best),
+          null,
+        );
+        return {
+          id,
+          repeated: repeated
+            ? {
+                country: repeated.country,
+                method: repeated.method,
+                companies: repeated.companies.size,
+              }
+            : null,
+        };
+      })
+      .sort((a, b) => (b.repeated?.companies ?? 1) - (a.repeated?.companies ?? 1));
+  }
+  function atlasPipeline() {
+    const fromAtlas = `FROM opportunities WHERE owner<>'deployment-verification'
+      AND CASE WHEN json_valid(attribution) THEN json_extract(attribution, '$.entry') END='payment-atlas'`;
+    return {
+      briefs: db.prepare(`SELECT COUNT(*) AS count ${fromAtlas}`).get().count,
+      collected: db
+        .prepare(
+          `WITH atlas AS (SELECT id ${fromAtlas})
+         SELECT r.currency,SUM(r.amount_minor) AS amount_minor FROM revenue_entries r
+         JOIN agreements a ON a.id=r.agreement_id
+         LEFT JOIN introductions i ON i.id=a.introduction_id
+         JOIN atlas ON atlas.id=COALESCE(i.demand_id,a.opportunity_id)
+         WHERE r.status='received' GROUP BY r.currency ORDER BY r.currency`,
+        )
+        .all(),
+    };
   }
   function patch(id, body) {
     const item = get(id);
@@ -907,21 +1001,28 @@ export function createDesk(
       return { ok: true };
     },
     report() {
+      const opportunities = db
+        .prepare(
+          'SELECT o.*,c.name AS company_name,(SELECT group_concat(contact) FROM network_contacts WHERE company_id=o.company_id) AS contacts FROM opportunities o JOIN network_companies c ON c.id=o.company_id ORDER BY o.created_at DESC LIMIT 1000',
+        )
+        .all()
+        .map(record);
+      const introductions = db
+        .prepare('SELECT * FROM introductions ORDER BY created_at DESC')
+        .all();
+      const agreements = db.prepare('SELECT * FROM agreements ORDER BY created_at DESC').all();
       return {
         commercial: commercial.report(),
-        opportunities: db
-          .prepare(
-            'SELECT o.*,c.name AS company_name,(SELECT group_concat(contact) FROM network_contacts WHERE company_id=o.company_id) AS contacts FROM opportunities o JOIN network_companies c ON c.id=o.company_id ORDER BY o.created_at DESC LIMIT 1000',
-          )
-          .all()
-          .map(record),
+        opportunities,
+        sourcingLeads: sourcingLeads(opportunities, introductions, agreements),
+        atlasPipeline: atlasPipeline(),
         companies: db
           .prepare(
             'SELECT c.*,(SELECT group_concat(contact) FROM network_contacts WHERE company_id=c.id) AS contacts FROM network_companies c ORDER BY c.created_at DESC',
           )
           .all(),
-        introductions: db.prepare('SELECT * FROM introductions ORDER BY created_at DESC').all(),
-        agreements: db.prepare('SELECT * FROM agreements ORDER BY created_at DESC').all(),
+        introductions,
+        agreements,
         revenue: db.prepare('SELECT * FROM revenue_entries ORDER BY created_at DESC').all(),
         totals: db
           .prepare(

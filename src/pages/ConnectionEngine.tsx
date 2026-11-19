@@ -10,12 +10,13 @@ import {
   companyTypes,
   countries,
   label,
+  paymentMethodLabel,
   scopeFromParams,
   scopeFromLegacy,
 } from '../network';
 import { briefEntry, scenarioFor } from '../brief';
 import { NLink, Eyebrow, Arrow } from '../components/NetworkLayout';
-import { acquisition, type Attribution } from '../components/acquisition';
+import { acquisition, allowsAttribution, type Attribution } from '../components/acquisition';
 import { BriefRolePicker } from '../components/BriefRolePicker';
 import { TelegramBriefReview } from '../components/TelegramBriefReview';
 import { telegramUsername } from '../telegram';
@@ -353,6 +354,7 @@ export default function ConnectionEngine() {
       language,
     ),
     chosen.map((c) => label(c, language)).join(' / '),
+    brief.methods.map((method) => paymentMethodLabel(method, language)).join(' / '),
     capabilities
       .filter((c) => brief.capabilities.includes(c.id))
       .map((c) => label(c, language))
@@ -424,14 +426,19 @@ export default function ConnectionEngine() {
       focusField(contactErrors.contact ? 'contact' : 'consent');
       return;
     }
+    const attribution: Attribution = { ...acquisition() };
+    if (params.get('entry') === 'payment-atlas' && allowsAttribution()) {
+      // Keep the brief's entry separate from first-touch and affiliate attribution.
+      attribution.entry = 'payment-atlas';
+    }
     if (telegramBriefEnabled) {
       if (brief.site.trim()) return;
-      setTelegramSource(acquisition());
+      setTelegramSource(attribution);
       setFieldErrors({});
       setTelegramReview(true);
       return;
     }
-    const body = { ...brief, language, attribution: { source: 'website', ...acquisition() } };
+    const body = { ...brief, language, attribution: { source: 'website', ...attribution } };
     const signature = JSON.stringify(body);
     if (retry.current.signature !== signature)
       retry.current = { signature, id: crypto.randomUUID() };

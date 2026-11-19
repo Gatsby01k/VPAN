@@ -699,6 +699,7 @@
   letter-spacing: 0.095em;
   text-transform: uppercase;
 }
+.atlas-brief-link,
 .atlas-market-link {
   display: flex;
   align-items: center;
@@ -711,13 +712,27 @@
   font-size: 0.79rem;
   font-weight: 760;
 }
+.atlas-brief-link {
+  flex: 1 0 100%;
+  padding-block: 8px;
+  border-color: #e9a3bb;
+  background: #f8dbd6;
+  color: #441727;
+  font-size: 0.875rem;
+}
+.atlas-brief-link:is(:hover, :focus-visible) {
+  background: #ffe8e5;
+  color: #441727;
+}
 .atlas-market-link:hover {
   color: #fff3ea;
   background: #682943;
 }
+.atlas-brief-link svg,
 .atlas-market-link svg {
   width: 22px;
   height: 22px;
+  flex: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {

@@ -290,6 +290,11 @@ export function PaymentAtlas() {
   const focus = t(context.focus, context.focusRu).split('. ')[0].replace(/\.?$/, '.');
   const directory = new URLSearchParams({ region: region.id });
   if (method) directory.set('q', method);
+  const brief = new URLSearchParams({ country: selected.id, entry: 'payment-atlas' });
+  if (method) {
+    brief.set('methods', method);
+    brief.set('capabilities', 'local-methods');
+  }
   const countWord = matches.length === 1 ? 'страна' : matches.length < 5 ? 'страны' : 'стран';
   const count = t(
     `${matches.length} ${matches.length === 1 ? 'market' : 'markets'}`,
@@ -499,6 +504,15 @@ export function PaymentAtlas() {
                     {focus}
                   </p>
                   <div className="atlas-ticket-links">
+                    <NLink className="atlas-brief-link" to={`/find-a-partner?${brief}`}>
+                      {method
+                        ? t(
+                            `Find a partner for ${methodName(method)}`,
+                            `Найти партнёра для ${methodName(method)}`,
+                          )
+                        : t('Find a partner here', 'Найти партнёра здесь')}
+                      <SignatureArrow />
+                    </NLink>
                     <NLink
                       className="atlas-market-link"
                       to={`/markets/${selected.id}`}

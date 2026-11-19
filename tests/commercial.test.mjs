@@ -105,6 +105,78 @@ function referral(f, opportunity, more = {}) {
   return { affiliate, claim };
 }
 
+test('the atlas pipeline counts collected fees and surfaces repeated verified demand until there is supply or a mandate', (t) => {
+  const { desk } = fixture(t);
+  const atlas = {
+    methods: ['Pix'],
+    attribution: { source: 'partner', ref: 'ref-123', entry: 'payment-atlas' },
+  };
+  const add = (side, extra) => {
+    const { reference } = desk.submit(scope(side, { ...atlas, ...extra }));
+    return desk.report().opportunities.find((item) => item.reference === reference);
+  };
+  const verify = (item, extra) =>
+    desk.patch(item.id, {
+      status: 'qualified',
+      verification: 'verified',
+      evidence: proof,
+      share_consent: true,
+      ...extra,
+    });
+  const original = add('need', { contact: 'buyer@example.test' });
+  const duplicate = add('need', { contact: 'buyer@example.test', attribution: { entry: 'bogus' } });
+  const second = add('need', { contact: 'other@example.test' });
+  const supply = add('offer', { attribution: {} });
+
+  assert.deepEqual(desk.report().sourcingLeads, []);
+  assert.deepEqual(desk.detail(original.id).attribution, {
+    ...atlas.attribution,
+    campaign: '',
+  });
+  assert.equal(desk.detail(duplicate.id).attribution.entry, undefined);
+  assert.deepEqual(desk.report().atlasPipeline, { briefs: 2, collected: [] });
+  verify(original);
+  verify(duplicate);
+  assert.equal(desk.report().sourcingLeads[0].repeated, null);
+  verify(second);
+  assert.deepEqual(desk.report().sourcingLeads.find((lead) => lead.id === original.id).repeated, {
+    country: 'brazil',
+    method: 'Pix',
+    companies: 2,
+  });
+  verify(supply);
+  assert.equal(desk.detail(original.id).candidates[0].id, supply.id);
+  assert.deepEqual(desk.report().sourcingLeads, []);
+  verify(supply, { expires_at: '2020-01-01' });
+  assert.equal(desk.report().sourcingLeads.length, 3);
+
+  const agreement = desk.agreement({
+    opportunityId: original.id,
+    model: 'sourcing-project',
+    terms: proof,
+    attribution: proof,
+    currency: 'USD',
+    startsOn: day(),
+    endsOn: '2099-12-31',
+    evidence: proof,
+  });
+  assert.ok(!desk.report().sourcingLeads.some((lead) => lead.id === original.id));
+  const entry = desk.revenue({
+    agreementId: agreement.id,
+    amountMinor: 29000,
+    currency: 'USD',
+    period: day().slice(0, 7),
+    status: 'due',
+    evidence: 'Fixture for partner sourcing fee',
+  });
+  assert.deepEqual(desk.report().atlasPipeline.collected, []);
+  desk.updateRevenue(entry.id, { status: 'received', evidence: proof });
+  assert.deepEqual(JSON.parse(JSON.stringify(desk.report().atlasPipeline)), {
+    briefs: 2,
+    collected: [{ currency: 'USD', amount_minor: 29000 }],
+  });
+});
+
 test('referral source is captured atomically as an unaccepted claim, and retries cannot claim twice', async (t) => {
   const f = fixture(t),
     affiliate = f.c.affiliate({

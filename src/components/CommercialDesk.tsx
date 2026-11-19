@@ -1,9 +1,17 @@
 import { useState, type FormEvent } from 'react';
 import { ArrowUpRight, Copy, Download } from 'lucide-react';
 import { useLocale } from '../locale';
-import { capabilities, companyTypes, countries, industries, label } from '../network';
+import {
+  capabilities,
+  companyTypes,
+  countries,
+  industries,
+  label,
+  paymentMethodLabel,
+} from '../network';
 import playbook from '../../shared/commercial-playbook.json';
 import researchTargets from '../../shared/acquisition-targets.json';
+import type { AtlasPipeline, SourcingLead } from './SourcingOffer';
 
 type Row = Record<string, any>;
 type Option = { id: string; name: string };
@@ -21,7 +29,7 @@ type Request = (path?: string, method?: string, body?: unknown) => Promise<any>;
 type Props = {
   section: string;
   data: Row;
-  report: Row;
+  report: Row & { sourcingLeads?: SourcingLead[]; atlasPipeline?: AtlasPipeline };
   busy: boolean;
   request: Request;
   perform: (fn: () => Promise<unknown>) => Promise<void>;
@@ -161,6 +169,7 @@ export function CommercialDesk({
   const [draftBody, setDraftBody] = useState('');
   const [draftId, setDraftId] = useState('');
   const [decisionEvidence, setDecisionEvidence] = useState('');
+  const atlas = report.atlasPipeline;
   const save = (path: string, body: unknown, method = 'POST') =>
     perform(() => request('/commercial/' + path, method, body));
   const agreementOptions = opt(
@@ -224,6 +233,77 @@ export function CommercialDesk({
               'Текущие записи, а не когортная конверсия. Получение подтверждается документами.',
             )}
           </p>
+          <section className="commercial-sourcing" aria-labelledby="sourcing-queue-title">
+            <h3 id="sourcing-queue-title">
+              {t('Paid search opportunities', 'Возможности для платного поиска')}
+            </h3>
+            <p>
+              {t(
+                'Verified requests without a suitable candidate in the Deal Desk. Repeated demand from distinct companies appears first.',
+                'Проверенные запросы без подходящего кандидата в Deal Desk. Повторяющийся спрос от разных компаний показан первым.',
+              )}
+            </p>
+            {atlas && atlas.briefs > 0 && (
+              <p className="commercial-caption">
+                {t('Briefs from the atlas', 'Брифы из атласа')}: <strong>{atlas.briefs}</strong>
+                {' · '}
+                {t('Gross fees collected', 'Полученные комиссии')}:{' '}
+                <strong>
+                  {atlas.collected.map((r) => money(r.amount_minor, r.currency)).join(' / ') ||
+                    t('No collected fees', 'Оплаты пока нет')}
+                </strong>
+              </p>
+            )}
+            {report.sourcingLeads?.length ? (
+              <ul className="commercial-task-list">
+                {report.sourcingLeads.map(({ id, repeated }) => {
+                  const row = report.opportunities.find((item: Row) => item.id === id);
+                  if (!row) return null;
+                  const markets = countries
+                    .filter((country) => row.profile.countries.includes(country.id))
+                    .map((country) => label(country, language))
+                    .join(' / ');
+                  const methods = (row.profile.methods || [])
+                    .map((method: string) => paymentMethodLabel(method, language))
+                    .join(' / ');
+                  return (
+                    <li className="commercial-sourcing-row" key={id}>
+                      <div>
+                        <strong>
+                          {row.reference} · {[markets, methods].filter(Boolean).join(' · ')}
+                        </strong>
+                        {repeated && (
+                          <small>
+                            {t('Distinct companies', 'Разных компаний')}: {repeated.companies}
+                            {' · '}
+                            {label(
+                              countries.find((country) => country.id === repeated.country),
+                              language,
+                            )}
+                            {' · '}
+                            {paymentMethodLabel(repeated.method, language)}
+                          </small>
+                        )}
+                      </div>
+                      <button
+                        className="text-link"
+                        onClick={() => {
+                          navigate('opportunities');
+                          void open(row);
+                        }}
+                      >
+                        {t('Review brief', 'Открыть бриф')}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <Empty>
+                {t('No search opportunities to review.', 'Нет запросов на рассмотрение.')}
+              </Empty>
+            )}
+          </section>
           <div className="commercial-finances">
             {data.totals.length ? (
               data.totals.map((r: Row) => (

@@ -3,6 +3,7 @@ import { LockKeyhole, LogOut, RefreshCw } from 'lucide-react';
 import { useLocale } from '../locale';
 import { countries, industries, capabilities, companyTypes, label } from '../network';
 import { Eyebrow } from '../components/NetworkLayout';
+import { SourcingOffer, type AtlasPipeline, type SourcingLead } from '../components/SourcingOffer';
 import '../commercial.css';
 const CommercialDesk = lazy(() =>
   import('../components/CommercialDesk').then((m) => ({ default: m.CommercialDesk })),
@@ -39,6 +40,8 @@ const emptyReport = {
   agreements: [] as Row[],
   revenue: [] as Row[],
   totals: [] as Row[],
+  sourcingLeads: [] as SourcingLead[],
+  atlasPipeline: { briefs: 0, collected: [] } as AtlasPipeline,
   notifications: {
     configured: false,
     pending: 0,
@@ -721,6 +724,10 @@ export default function DealDesk() {
                   </p>
                 )}
               </div>
+              {report.sourcingLeads?.some((lead) => lead.id === selected.id) &&
+                detail.candidates.length === 0 && (
+                  <SourcingOffer key={selected.id} profile={detail.profile} />
+                )}
               <form
                 className="desk-note"
                 onSubmit={(e) => {

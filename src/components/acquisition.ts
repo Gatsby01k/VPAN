@@ -6,15 +6,18 @@ export interface Attribution {
   ref?: string;
   landing?: string;
   referrer?: string;
+  entry?: 'payment-atlas';
 }
 let attribution: Attribution | undefined;
+export function allowsAttribution() {
+  return (
+    typeof window !== 'undefined' &&
+    navigator.doNotTrack !== '1' &&
+    !(navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl
+  );
+}
 export function acquisition(): Attribution {
-  if (typeof window === 'undefined') return {};
-  if (
-    navigator.doNotTrack === '1' ||
-    (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl
-  )
-    return {};
+  if (!allowsAttribution()) return {};
   if (attribution) return attribution;
   const params = new URLSearchParams(window.location.search);
   try {
@@ -77,11 +80,7 @@ export function acquisition(): Attribution {
   return value;
 }
 export function recordPage(path: string) {
-  if (
-    navigator.doNotTrack === '1' ||
-    (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl
-  )
-    return;
+  if (!allowsAttribution()) return;
   void fetch('/api/events', {
     method: 'POST',
     keepalive: true,

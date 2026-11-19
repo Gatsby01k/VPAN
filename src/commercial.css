@@ -128,6 +128,36 @@
   margin-top: 7px;
   color: #665d54;
 }
+.commercial-sourcing {
+  margin-block: 32px;
+  padding: 0 clamp(14px, 2.25vw, 27px);
+  border-block: 1px solid var(--desk-line);
+  background: #a77a420d;
+}
+.commercial-sourcing > p {
+  line-height: 1.6;
+}
+.commercial-sourcing .commercial-task-list {
+  margin-bottom: 16px;
+}
+.commercial-sourcing-row .text-link {
+  flex: none;
+  min-height: 44px;
+}
+.desk-sourcing-offer {
+  --desk-line: #a77a4266;
+  padding-inline: clamp(14px, 2.25vw, 27px);
+  background: #a77a4210;
+}
+.desk-sourcing-offer > div {
+  display: grid;
+  gap: 12px;
+  padding-bottom: 18px;
+}
+.desk-sourcing-offer .text-link {
+  justify-self: start;
+  min-height: 44px;
+}
 .commercial-form {
   border-block: 1px solid var(--desk-line);
   margin-block: 18px;
