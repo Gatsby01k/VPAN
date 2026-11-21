@@ -1,22 +1,25 @@
 import { useState } from 'react';
 import { useLocale } from '../locale';
+import { BriefTickets, briefIntents } from '../components/BriefTickets';
 import { NLink as Link } from '../components/NetworkLayout';
 import { ConnectionStudio } from '../components/ConnectionStudio';
 import { ThreadLink } from '../components/Editorial';
-import { SignatureArrow } from '../components/ConnectionProtocol';
-import { CounterSeal, Engraving, HeroImpression, StitchMark } from '../components/CounterpartArt';
+import {
+  CounterSeal,
+  CoverTicketThreads,
+  Engraving,
+  HeroImpression,
+  StitchMark,
+} from '../components/CounterpartArt';
 import { KnowledgeTeaser } from '../components/KnowledgeTeaser';
 import { ConnectionThread } from '../components/ConnectionThread';
 import { PaymentAtlas } from '../components/PaymentAtlas';
+import { RegionImpression } from '../components/MarketImpression';
+import { regions } from '../network';
 import { scenarioLink } from '../brief';
 import '../counterpart-home.css';
 
 type Side = 'need' | 'offer';
-
-const intents = [
-  ['need', 'I NEED', 'Find a partner', 'Найти партнёра'],
-  ['offer', 'I OFFER', 'Join the network', 'Стать партнёром'],
-] as const;
 
 const participants = [
   [
@@ -99,8 +102,8 @@ export default function Home() {
     <div className="counterpart-home">
       <section className="world-cover" aria-labelledby="hero-title">
         <Engraving className="cover-engraving" />
-        <HeroImpression />
         <div className="world-cover-inner">
+          <CoverTicketThreads />
           <div className="world-cover-title">
             <p className="world-label">{t('Independent B2B network', 'Независимая B2B-сеть')}</p>
             <h1 id="hero-title">
@@ -108,29 +111,17 @@ export default function Home() {
               <em>{t('side.', 'сторона.')}</em>
             </h1>
           </div>
+          <div className="cover-print" aria-hidden="true">
+            <HeroImpression />
+          </div>
           <div className="world-cover-invitation">
             <p>
               {t(
-                'We source payment partners and make qualified commercial introductions.',
-                'Находим платёжных партнёров и организуем деловые знакомства после проверки.',
+                'We find payment partners for your business and arrange an introduction when both sides are ready to talk.',
+                'Подбираем платёжных партнёров под вашу задачу и знакомим вас, когда обе стороны готовы к разговору.',
               )}
             </p>
-            <div className="world-cover-choices">
-              {intents.map(([id, code, en, ru]) => (
-                <Link
-                  to={id === 'need' ? '/find-a-partner' : '/join'}
-                  key={id}
-                  className="thread-ticket"
-                  data-intent={id}
-                >
-                  <span>
-                    <small>{code}</small>
-                    <strong>{t(en, ru)}</strong>
-                  </span>
-                  <SignatureArrow />
-                </Link>
-              ))}
-            </div>
+            <BriefTickets />
             <ThreadLink
               to="/#connection"
               direction="down"
@@ -140,15 +131,21 @@ export default function Home() {
               {t('Follow the thread', 'Следуйте за нитью')}
             </ThreadLink>
           </div>
-          <p className="cover-territories">
-            {t('Asia / Latin America / Africa', 'Азия / Латинская Америка / Африка')}
-          </p>
-          <p className="cover-colophon">
-            <span aria-hidden="true" />
-            {t('Two sides. One connection.', 'Две стороны. Одна связь.')}
-          </p>
         </div>
       </section>
+      <nav className="cover-markets" aria-label={t('Market directory', 'Каталог рынков')}>
+        <div className="cover-market-inner">
+          <Link to="/markets" className="cover-market-index">
+            {t('Market directory', 'Каталог рынков')}
+          </Link>
+          {regions.map((region) => (
+            <Link key={region.id} to={'/markets?region=' + region.id} className="cover-market-stop">
+              <RegionImpression region={region.id} />
+              <span>{t(region.en, region.ru)}</span>
+            </Link>
+          ))}
+        </div>
+      </nav>
 
       <section className="world-connection" id="connection" aria-labelledby="object-title">
         <div className="connection-station">
@@ -170,7 +167,7 @@ export default function Home() {
               <legend className="sr-only">
                 {t('Choose your intention', 'Выберите намерение')}
               </legend>
-              {intents.map(([id, code, en, ru]) => (
+              {briefIntents.map(([id, code, en, ru]) => (
                 <label key={id} className="station-choice">
                   <input
                     type="radio"

@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { preload } from 'react-dom';
 
 const engravingAngles = Array.from({ length: 24 }, (_, index) => index * 7.5);
@@ -94,27 +94,74 @@ export function HeroImpression() {
   return (
     <svg
       className="hero-impression"
-      viewBox="0 0 900 480"
+      viewBox="0 0 575 452"
       aria-hidden="true"
       fill="none"
       data-page-art={artwork}
     >
       <defs>
         <clipPath id={edge}>
-          <path d="M0 49l13-5 6 2 11-8 13 1 14-13 8 2 17-11 16-5 15 8 12-2 11 4 15-10h130l13 6 13-1 8 7 10-3 14 11 21 5 11-4 13 6 18-6 13 2 19-11 19 3 19-12 22-2l-2 12 7 2-3 10 5 8-12 18 4 13-7 13 6 10-6 14 9 12 5 18-4 14 12 10 1 13 16 10-3 9 13 12 6 14 9 5 4 18 19 15 5 12 13 8-3 14 16 18 5 18 15 11-1 12 14 18-4 14 10 17-6 9 11 20-2 13H0Z" />
+          <path d="M0 12H495l-2 8 3 3-6 7 3 8-11 14 3 12-6 12 4 10-5 11 4 12-3 14 7 12-1 9 8 12-2 9 10 12 1 10 8 9-3 8 12 12 2 11 11 8-1 10 14 12 3 12 10 9-1 10 12 13 3 11 10 8v140H0Z" />
         </clipPath>
       </defs>
       <image href={artwork} y="12" width="700" height="438" clipPath={`url(#${edge})`} />
       <path
         className="hero-thread-shadow"
-        d="M449 82c34 10 12 55 45 79 27 20 3 47 29 63 52 32 161 27 302 25"
+        d="M449 82c25 2 36 15 33 39-4 29-21 33-20 16 1-21 39-26 54-3 10 16 20 19 46 15"
       />
       <path
         className="hero-thread-path"
         pathLength="1"
-        d="M449 82c34 10 12 55 45 79 27 20 3 47 29 63 52 32 161 27 302 25"
+        d="M449 82c25 2 36 15 33 39-4 29-21 33-20 16 1-21 39-26 54-3 10 16 20 19 46 15"
       />
-      <circle className="hero-thread-eye" cx="825" cy="249" r="4" />
+      <circle className="hero-thread-eye" cx="562" cy="149" r="4" />
+    </svg>
+  );
+}
+
+// The eyelet lives inside the illustration, while the perforations follow the live text layout.
+export function CoverTicketThreads() {
+  const overlay = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const svg = overlay.current;
+    const spread = svg?.parentElement;
+    const eyelet = spread?.querySelector('.hero-thread-eye');
+    const tickets = spread?.querySelectorAll<HTMLElement>('.thread-ticket');
+    if (!svg || !spread || !eyelet || !tickets?.length || typeof ResizeObserver === 'undefined')
+      return;
+
+    const draw = () => {
+      const frame = svg.getBoundingClientRect();
+      if (!frame.width) return;
+      const eye = eyelet.getBoundingClientRect();
+      const x = eye.left + eye.width / 2 - frame.left;
+      const y = eye.top + eye.height / 2 - frame.top;
+      const seam = (x + tickets[0].getBoundingClientRect().left - frame.left) / 2;
+      tickets.forEach((link) => {
+        const rect = link.getBoundingClientRect();
+        const left = rect.left - frame.left;
+        const right = rect.right - frame.left;
+        const mid = rect.top - frame.top + rect.height / 2;
+        const top = rect.top - frame.top - 9;
+        const curve =
+          link.dataset.intent === 'need'
+            ? `M${x} ${y} C${seam + 18} ${y},${seam - 28} ${mid},${left + 2} ${mid}`
+            : `M${x} ${y} C${seam + 18} ${y},${seam - 18} ${top},${seam + 34} ${top} H${right - 15} Q${right + 10} ${top},${right + 10} ${top + 19} V${mid - 11} Q${right + 10} ${mid},${right - 2} ${mid}`;
+        svg.querySelector(`[data-thread="${link.dataset.intent}"]`)?.setAttribute('d', curve);
+      });
+    };
+    const observer = new ResizeObserver(draw);
+    observer.observe(spread);
+    spread
+      .querySelectorAll('.world-cover-title, .world-cover-invitation, .thread-ticket')
+      .forEach((element) => observer.observe(element));
+    draw();
+    return () => observer.disconnect();
+  }, []);
+  return (
+    <svg ref={overlay} className="cover-ticket-threads" aria-hidden="true" focusable="false">
+      <path data-thread="need" pathLength="1" />
+      <path data-thread="offer" pathLength="1" />
     </svg>
   );
 }

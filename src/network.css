@@ -1234,7 +1234,7 @@
   margin: 0 auto 30px;
   color: var(--pink);
 }
-.network-product .receipt h2 {
+.network-product .receipt h1 {
   font-size: 54px;
   margin-bottom: 25px;
 }
@@ -2330,7 +2330,7 @@
     padding: 35px 20px;
     margin: 35px auto;
   }
-  .network-product .receipt h2 {
+  .network-product .receipt h1 {
     font-size: 41px;
   }
   .network-product .receipt p {

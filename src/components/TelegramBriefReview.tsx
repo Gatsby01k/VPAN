@@ -38,10 +38,10 @@ export function TelegramBriefReview({ text, onEdit }: { text: string; onEdit: ()
           <Send size={13} aria-hidden="true" /> Telegram
         </span>
       </div>
-      <h2 id="telegram-review-title">
+      <h1 id="telegram-review-title">
         {t('Your brief.', 'Ваш бриф.')}
         <em>{t('A direct conversation.', 'Прямой разговор.')}</em>
-      </h2>
+      </h1>
       <p className="telegram-review-intro">
         {t(
           'Check the text, open the private chat and press Send in Telegram.',

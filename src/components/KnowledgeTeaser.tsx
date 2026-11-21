@@ -1,8 +1,7 @@
-import { SignatureArrow } from './ConnectionProtocol';
 import { NLink as Link } from './NetworkLayout';
 import { useGrowth } from '../growth';
 import { useLocale } from '../locale';
-import { Eyebrow } from './UI';
+import { FieldNotebook } from './FieldNotebook';
 
 export function KnowledgeTeaser({ market = '' }: { market?: string }) {
   const { data } = useGrowth();
@@ -12,26 +11,23 @@ export function KnowledgeTeaser({ market = '' }: { market?: string }) {
     .slice(0, 3);
   if (!guides.length) return null;
   return (
-    <section className="knowledge-teaser wrap">
-      <div>
-        <Eyebrow>
-          {t(
-            'VlaDDoS Network / Practical preparation',
-            'VlaDDoS Network / Практическая подготовка',
-          )}
-        </Eyebrow>
-        <h2>{t('Before the first conversation.', 'До первого разговора.')}</h2>
-        <Link className="text-link" to="/knowledge">
-          {t('All partner guides', 'Все материалы')} <SignatureArrow />
+    <section className="field-shelf" aria-labelledby="field-shelf-title">
+      <FieldNotebook />
+      <div className="field-shelf-copy">
+        <p className="world-label">{t('Field notes', 'Полевые заметки')}</p>
+        <h2 id="field-shelf-title">
+          {t('Before the first', 'До первого')} <em>{t('conversation.', 'разговора.')}</em>
+        </h2>
+        <ul className="field-shelf-index">
+          {guides.map((guide) => (
+            <li key={guide.slug}>
+              <Link to={'/knowledge/' + guide.slug}>{t(guide.title, guide.titleRu)}</Link>
+            </li>
+          ))}
+        </ul>
+        <Link className="field-library-link" to="/knowledge">
+          {t('All field notes', 'Все материалы')}
         </Link>
-      </div>
-      <div>
-        {guides.map((guide) => (
-          <Link to={'/knowledge/' + guide.slug} key={guide.slug}>
-            <span>{t(guide.title, guide.titleRu)}</span>
-            <SignatureArrow />
-          </Link>
-        ))}
       </div>
     </section>
   );

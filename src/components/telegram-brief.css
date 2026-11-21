@@ -31,12 +31,12 @@
   font-size: 10px;
   color: var(--text-secondary);
 }
-.network-product .telegram-review h2 {
+.network-product .telegram-review h1 {
   font-size: clamp(38px, 4.5vw, 58px);
   line-height: 1.08;
   margin-bottom: 22px;
 }
-.network-product .telegram-review h2 em {
+.network-product .telegram-review h1 em {
   color: var(--ink);
 }
 .network-product .telegram-review-intro {
@@ -181,7 +181,7 @@
     padding: 6px 8px;
     font-size: 9px;
   }
-  .network-product .telegram-review h2 {
+  .network-product .telegram-review h1 {
     font-size: 38px;
   }
   .network-product .telegram-review-intro {

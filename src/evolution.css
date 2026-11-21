@@ -821,7 +821,7 @@ button {
   width: 64px;
   height: 64px;
 }
-.network-product .connection-engine .receipt h2 {
+.network-product .connection-engine .receipt h1 {
   margin-block: 20px;
   font-size: clamp(36px, 4vw, 56px);
 }
@@ -1619,7 +1619,7 @@ button {
     padding: 30px 22px;
     margin-block: 24px;
   }
-  .network-product .connection-engine .receipt h2 {
+  .network-product .connection-engine .receipt h1 {
     font-size: 39px;
   }
   .network-product .connection-engine .receipt-reference {

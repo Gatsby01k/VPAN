@@ -1,4 +1,7 @@
-import { Engraving } from '../components/CounterpartArt';
+import { FieldNotebook } from '../components/FieldNotebook';
+import { CounterSeal, Engraving } from '../components/CounterpartArt';
+import { BriefTickets } from '../components/BriefTickets';
+import { ContactAddress } from '../components/ContactAddress';
 import { EditorialRule, SignatureArrow } from '../components/ConnectionProtocol';
 import { useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
@@ -274,59 +277,53 @@ export function Contact() {
   const { t } = useLocale();
   const artwork = '/assets/editorial/contact.webp';
   return (
-    <section className="counter-contact" aria-labelledby="contact-title">
-      <Engraving className="contact-engraving" />
-      <div className="contact-plate" aria-hidden="true" data-page-art={artwork}>
-        <img src={artwork} alt="" width="1586" height="992" fetchPriority="high" />
-      </div>
-      <div className="counter-contact-copy">
-        <p className="world-label">{t('Correspondence', 'Переписка')}</p>
-        <h1 className="counter-title" id="contact-title">
-          {t('Let’s discuss', 'Обсудим')} <em>{t('your brief.', 'вашу задачу.')}</em>
-        </h1>
-        <div className="counter-contact-paths">
-          <div>
-            <span className="folio">I NEED</span>
-            <ThreadLink to="/find-a-partner">{t('Find a partner', 'Найти партнёра')}</ThreadLink>
-            <p>
-              {t(
-                'A specific business need, a country and the right capabilities.',
-                'Конкретная задача, страна и нужные возможности.',
-              )}
-            </p>
-          </div>
-          <div>
-            <span className="folio">I OFFER</span>
-            <ThreadLink to="/join">{t('Join the network', 'Стать партнёром')}</ThreadLink>
-            <p>
-              {t(
-                'Your company, local expertise and what you can provide.',
-                'Ваша компания, локальная экспертиза и предложение.',
-              )}
-            </p>
-          </div>
+    <div className="contact-edition">
+      <section className="contact-postcard" aria-labelledby="contact-title">
+        <div className="contact-plate" aria-hidden="true" data-page-art={artwork}>
+          <img src={artwork} alt="" width="1586" height="992" fetchPriority="high" />
         </div>
-        <div className="counter-contact-channels">
-          <span className="folio">{t('OR JUST SAY HELLO', 'ИЛИ ПРОСТО НАПИШИТЕ')}</span>
-          <a href="mailto:hello@vladdos.com">
-            hello@vladdos.com <Arrow />
+        <div className="contact-heading">
+          <CounterSeal className="contact-postmark" />
+          <p className="world-label">{t('Direct contact', 'Прямая связь')}</p>
+          <h1 id="contact-title">
+            {t('Write', 'Напишите')} <em>{t('to us.', 'нам.')}</em>
+          </h1>
+        </div>
+        <div className="contact-addresses">
+          <ContactAddress
+            label={t('Email', 'Почта')}
+            address="hello@vladdos.com"
+            href="mailto:hello@vladdos.com"
+            copyLabel={t('Copy email address', 'Скопировать адрес почты')}
+          />
+          <ContactAddress
+            label={t('Private Telegram', 'Личный Telegram')}
+            address={'@' + telegramUsername}
+            href={telegramUrl}
+            external
+            copyLabel={t('Copy Telegram username', 'Скопировать имя в Telegram')}
+          />
+        </div>
+      </section>
+      <div className="contact-directory">
+        <section aria-labelledby="contact-briefs-title">
+          <h2 id="contact-briefs-title">{t('Partnership briefs', 'Брифы для партнёрства')}</h2>
+          <BriefTickets />
+        </section>
+        <section className="contact-community" aria-labelledby="contact-community-title">
+          <h2 id="contact-community-title">{t('Community', 'Сообщество')}</h2>
+          <a href="https://t.me/vladdos_network" target="_blank" rel="noopener noreferrer">
+            @vladdos_network <SignatureArrow />
           </a>
-          <a href={telegramUrl} target="_blank" rel="noopener noreferrer">
-            {t('Private Telegram', 'Личный Telegram')} · @{telegramUsername}
-            <Arrow />
-          </a>
-          <a href="https://t.me/vladdos_network" target="_blank" rel="noreferrer">
-            {t('Telegram community', 'Telegram-сообщество')} <Arrow />
-          </a>
-          <p className="community-note">
+          <p>
             {t(
-              'The community is public. For commercial details, use the partnership brief, private Telegram chat or email.',
-              'Сообщество публичное. Для коммерческих деталей используйте бриф, личный чат в Telegram или электронную почту.',
+              'A public Telegram community. For business enquiries, write to us directly.',
+              'Публичное сообщество в Telegram. По деловым вопросам пишите нам лично.',
             )}
           </p>
-        </div>
+        </section>
       </div>
-    </section>
+    </div>
   );
 }
 export function Legal({ type }: { type: 'privacy' | 'terms' }) {
@@ -479,20 +476,33 @@ export function Knowledge() {
         {t('Loading field note…', 'Загрузка материала…')}
       </div>
     );
+  const checklist = (language === 'ru' ? article?.checklistRu : article?.checklist) ?? [];
+  const sources = data.sources.filter((source) => article?.sourceIds.includes(source.id));
   return (
     <>
-      <PageIntro
-        index={t('Field notes / partner research', 'Материалы / поиск партнёров')}
-        title={article ? t(article.title, article.titleRu) : t('Field notes.', 'Материалы.')}
-        description={
-          article
-            ? t(article.summary, article.summaryRu)
-            : t(
-                'Practical preparation for evaluating and introducing payment partners.',
-                'Практическая подготовка к оценке и знакомству с платёжными партнёрами.',
-              )
-        }
-      />
+      {article ? (
+        <PageIntro
+          index={t('Field notes / partner research', 'Полевые заметки / поиск партнёров')}
+          title={t(article.title, article.titleRu)}
+          description={t(article.summary, article.summaryRu)}
+        />
+      ) : (
+        <header className="field-library-cover">
+          <div className="field-library-intro">
+            <p className="world-label">{t('Network library', 'Библиотека сети')}</p>
+            <h1>
+              {t('Field', 'Полевые')} <em>{t('notes.', 'заметки.')}</em>
+            </h1>
+            <p>
+              {t(
+                'What to ask a payment partner, which documents to request and what to agree before an introduction.',
+                'О чём спросить платёжного партнёра, какие документы запросить и что согласовать до знакомства.',
+              )}
+            </p>
+          </div>
+          <FieldNotebook cover />
+        </header>
+      )}
       {article ? (
         <div className="field-note-layout wrap">
           {article.sections.length > 1 && (
@@ -512,6 +522,16 @@ export function Knowledge() {
                     </li>
                   );
                 })}
+                {checklist.length > 0 && (
+                  <li>
+                    <NLink
+                      to={`/knowledge/${article.slug}#note-checklist`}
+                      aria-current={hash === '#note-checklist' ? 'location' : undefined}
+                    >
+                      {t('Preparation checklist', 'Что подготовить')}
+                    </NLink>
+                  </li>
+                )}
               </ol>
             </nav>
           )}
@@ -537,16 +557,32 @@ export function Knowledge() {
                 </ul>
               </section>
             ))}
-            <h2>{t('Primary sources', 'Первоисточники')}</h2>
-            {data.sources
-              .filter((s) => article.sourceIds.includes(s.id))
-              .map((s) => (
-                <p key={s.id}>
-                  <a href={s.url} target="_blank" rel="noreferrer">
-                    {s.name}
-                  </a>
-                </p>
-              ))}
+            {checklist.length > 0 && (
+              <section className="field-checklist" id="note-checklist" key={article.slug}>
+                <h2>{t('Preparation checklist', 'Что подготовить')}</h2>
+                <ul>
+                  {checklist.map((item, index) => (
+                    <li key={index}>
+                      <label>
+                        <input type="checkbox" /> <span>{item}</span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+            {sources.length > 0 && (
+              <>
+                <h2>{t('Primary sources', 'Первоисточники')}</h2>
+                {sources.map((source) => (
+                  <p key={source.id}>
+                    <a href={source.url} target="_blank" rel="noreferrer">
+                      {source.name}
+                    </a>
+                  </p>
+                ))}
+              </>
+            )}
           </article>
         </div>
       ) : (

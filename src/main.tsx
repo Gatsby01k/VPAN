@@ -15,6 +15,8 @@ import './commercial-public.css';
 import './counterpart-public.css';
 import './counterpart-editions.css';
 import './counterpart-finishing.css';
+import './brief-edition.css';
+import './contact-edition.css';
 import { emptyGrowth, type GrowthData } from './growth';
 import { languageFromSearch } from './locale';
 

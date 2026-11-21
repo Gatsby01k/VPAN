@@ -17,13 +17,15 @@ import {
 import { briefEntry, scenarioFor } from '../brief';
 import { NLink, Eyebrow, Arrow } from '../components/NetworkLayout';
 import { acquisition, allowsAttribution, type Attribution } from '../components/acquisition';
+import { BriefCounterfoil, type ScopeField, type ScopeRow } from '../components/BriefCounterfoil';
+import { CounterSeal, Engraving } from '../components/CounterpartArt';
 import { BriefRolePicker } from '../components/BriefRolePicker';
 import { TelegramBriefReview } from '../components/TelegramBriefReview';
 import { telegramUsername } from '../telegram';
 import { useTelegramDelivery } from '../useDelivery';
 import '../components/brief-controls.css';
 
-type BriefField = 'role' | 'industry' | 'country' | 'capability' | 'contact' | 'consent';
+type BriefField = ScopeField | 'contact' | 'consent';
 type FieldErrors = Partial<Record<BriefField, boolean>>;
 type FormError = '' | 'rate' | 'conflict' | 'invalid' | 'unavailable' | 'copy' | 'save';
 
@@ -272,7 +274,9 @@ export default function ConnectionEngine() {
       const group = document.getElementById('engine-' + field);
       const control = group?.matches('input')
         ? group
-        : group?.querySelector<HTMLElement>('input, button:not(:disabled)');
+        : (group?.querySelector<HTMLElement>(
+            'input:checked, button[aria-pressed="true"]:enabled',
+          ) ?? group?.querySelector<HTMLElement>('input, button:enabled'));
       (control || group)?.focus({ preventScroll: true });
       group?.scrollIntoView({ block: 'center' });
     });
@@ -348,18 +352,26 @@ export default function ConnectionEngine() {
     focusField(field);
     return false;
   };
-  const scopeSummary = [
-    label(
-      industries.find((i) => i.id === brief.industry),
-      language,
-    ),
-    chosen.map((c) => label(c, language)).join(' / '),
-    brief.methods.map((method) => paymentMethodLabel(method, language)).join(' / '),
-    capabilities
-      .filter((c) => brief.capabilities.includes(c.id))
-      .map((c) => label(c, language))
-      .join(' / '),
-  ].filter(Boolean);
+  const roleName =
+    scenario && scenario.id === brief.companyType
+      ? t(scenario.en, scenario.ru)
+      : label(
+          companyTypes.find((c) => c.id === brief.companyType),
+          language,
+        );
+  const industryName = label(
+    industries.find((i) => i.id === brief.industry),
+    language,
+  );
+  const countryNames = chosen.map((country) => label(country, language)).join(' / ');
+  const capabilityNames = capabilities
+    .filter((item) => brief.capabilities.includes(item.id))
+    .map((item) => label(item, language))
+    .join(' / ');
+  const methodNames = brief.methods
+    .map((method) => paymentMethodLabel(method, language))
+    .join(' / ');
+  const scopeSummary = [industryName, countryNames, methodNames, capabilityNames].filter(Boolean);
   const summary = [
     `VlaDDoS Network / I ${brief.side.toUpperCase()}`,
     `${t('Company type', 'Тип компании')}: ${label(
@@ -528,57 +540,75 @@ export default function ConnectionEngine() {
       brief.capabilities.includes(c.id),
   );
   const more = capabilities.filter((c) => !relevant.includes(c));
-  const checkpoints: { field: BriefField; title: string; done: boolean }[] = [
-    { field: 'role', title: t('Role', 'Роль'), done: !!brief.companyType },
-    { field: 'industry', title: t('Industry', 'Индустрия'), done: !!brief.industry },
-    { field: 'country', title: t('Markets', 'Рынки'), done: brief.countries.length > 0 },
-    {
-      field: 'capability',
-      title: t('Capabilities', 'Возможности'),
-      done: brief.capabilities.length > 0,
-    },
+  const rows: ScopeRow[] = [
+    { field: 'role', title: t('Role', 'Роль'), value: roleName },
+    { field: 'industry', title: t('Industry', 'Индустрия'), value: industryName },
+    { field: 'country', title: t('Countries', 'Страны'), value: countryNames },
+    { field: 'capability', title: t('Capabilities', 'Возможности'), value: capabilityNames },
   ];
-  const completed = checkpoints.filter((item) => item.done).length;
+  const counterfoil = {
+    rows,
+    methods: methodNames,
+    currencies: brief.settlementCurrencies.join(' / '),
+    disabled: busy || !ready,
+    onEdit: (field: ScopeField) => {
+      setStep('scope');
+      setError('');
+      focusField(field);
+    },
+  };
+  const seeking = brief.side === 'need';
+  const stamp = seeking ? 'doorway' : 'clasps';
   return (
-    <section className="connection-engine wrap">
-      <div className="engine-title">
-        <div>
-          <Eyebrow>CONNECTION ENGINE</Eyebrow>
-          <h1>
-            {brief.side === 'need' ? t('Find the', 'Найдите') : t('Bring your', 'Предложите')}{' '}
-            <em>
-              {brief.side === 'need'
-                ? t('right partner.', 'нужного партнёра.')
-                : t('local advantage.', 'ваши возможности.')}
-            </em>
-          </h1>
-          <p>
-            {t(
-              telegramBriefEnabled
-                ? `Build your brief, review the message and send it in a private Telegram chat to @${telegramUsername}.`
-                : 'One private brief for a specific business opportunity. A person reviews the fit before any introduction.',
-              telegramBriefEnabled
-                ? `Составьте бриф, проверьте сообщение и отправьте его в личный Telegram @${telegramUsername}.`
-                : 'Один конфиденциальный бриф под конкретную B2B-задачу. До знакомства соответствие проверяет человек.',
-            )}
-          </p>
-          <div className="engine-trust">
-            <LockKeyhole size={14} aria-hidden="true" />
-            <span>{t('Private by default', 'Конфиденциально по умолчанию')}</span>
-            <i />
-            <span>{t('Reviewed by a person', 'Проверяет человек')}</span>
+    <section className="connection-engine wrap" data-side={brief.side}>
+      {!receipt && !telegramReview && (
+        <header className="brief-cover">
+          <div className="brief-cover-title">
+            <p className="brief-cover-kicker">
+              <LockKeyhole size={15} aria-hidden="true" />
+              {t('Private partnership brief', 'Конфиденциальный бриф')}
+            </p>
+            <h1>
+              {seeking ? t('Find a', 'Найти') : t('Join the', 'Стать')}{' '}
+              <em>{seeking ? t('partner.', 'партнёра.') : t('network.', 'партнёром.')}</em>
+            </h1>
           </div>
-        </div>
-        <NLink className="text-link" to="/contact">
-          {t('General enquiry', 'Общий вопрос')}
-          <Arrow />
-        </NLink>
-      </div>
+          <div className="brief-cover-stub" aria-hidden="true">
+            <Engraving className="brief-stub-engraving" />
+            <div className="brief-postage">
+              <img
+                src={`/assets/editorial/brief-${stamp}.webp`}
+                alt=""
+                width="510"
+                height="340"
+                decoding="async"
+              />
+            </div>
+          </div>
+          <div className="brief-cover-guide">
+            <p>
+              {seeking
+                ? t(
+                    'Tell us which market you have in mind and what you need a partner to handle. We review the fit before an introduction.',
+                    'Укажите рынок и задачу для партнёра. До знакомства мы уточним, подходит ли он вам.',
+                  )
+                : t(
+                    'Tell us which markets you serve and what you offer. This helps us assess who could benefit from an introduction.',
+                    'Укажите свои рынки и услуги. По этим данным мы оценим, кому будет полезно знакомство.',
+                  )}
+            </p>
+            <NLink className="brief-enquiry" to="/contact">
+              {t('General enquiry', 'Задать общий вопрос')}
+            </NLink>
+          </div>
+        </header>
+      )}
       {receipt ? (
         <div className="receipt" id="engine-result" tabIndex={-1}>
           <ThreadProgress state="resolved" />
           <Eyebrow>{t('SAVED TO THE DEAL DESK', 'СОХРАНЕНО В DEAL DESK')}</Eyebrow>
-          <h2>{t('Your brief is received.', 'Ваш бриф получен.')}</h2>
+          <CounterSeal className="brief-receipt-seal" />
+          <h1>{t('Your brief is received.', 'Ваш бриф получен.')}</h1>
           <p>
             {t(
               'This reference confirms that your enquiry is saved for review. Partner availability, verification and permission to share are the next steps.',
@@ -644,33 +674,7 @@ export default function ConnectionEngine() {
                 )}
           </p>
           <form onSubmit={submit} className="engine-form" noValidate>
-            <details className="brief-mobile-summary">
-              <summary>
-                <span>
-                  {t('Your brief', 'Ваш бриф')}
-                  <small>
-                    I {brief.side.toUpperCase()} · {completed}/4
-                  </small>
-                </span>
-                <ChevronDown size={18} aria-hidden="true" />
-              </summary>
-              <p>
-                {completed
-                  ? [
-                      label(
-                        companyTypes.find((item) => item.id === brief.companyType),
-                        language,
-                      ),
-                      ...scopeSummary,
-                    ]
-                      .filter(Boolean)
-                      .join(' · ')
-                  : t(
-                      'Your selections will appear here as you build your brief.',
-                      'Здесь появятся выбранные вами параметры брифа.',
-                    )}
-              </p>
-            </details>
+            <BriefCounterfoil mobile {...counterfoil} />
             <div className="engine-main">
               <fieldset className="engine-fields" disabled={busy || !ready} aria-busy={busy}>
                 <legend className="sr-only">
@@ -689,7 +693,9 @@ export default function ConnectionEngine() {
                           aria-pressed={brief.side === side}
                           onClick={() => update({ side })}
                         >
-                          <span>I {side.toUpperCase()}</span>
+                          <span>
+                            {side === 'need' ? t('I need', 'Ищу') : t('I offer', 'Предлагаю')}
+                          </span>
                           <strong>
                             {side === 'need'
                               ? t('Find a partner', 'Найти партнёра')
@@ -888,11 +894,7 @@ export default function ConnectionEngine() {
                   <>
                     <div className="scope-confirmation">
                       <span className="folio">
-                        I {brief.side.toUpperCase()} /{' '}
-                        {label(
-                          companyTypes.find((c) => c.id === brief.companyType),
-                          language,
-                        )}
+                        I {brief.side.toUpperCase()} / {roleName}
                       </span>
                       <p>{scopeSummary.join(' · ')}</p>
                       <button type="button" className="text-link" onClick={showScope}>
@@ -1244,102 +1246,7 @@ export default function ConnectionEngine() {
                 </div>
               )}
             </div>
-            <aside
-              className="live-brief"
-              aria-label={t('Your opportunity profile', 'Ваш профиль возможности')}
-            >
-              <Eyebrow>PRIVATE BRIEF / {brief.side.toUpperCase()}</Eyebrow>
-              <div className="brief-completion">
-                <span>{t('Business scope', 'Задача бизнеса')}</span>
-                <strong>
-                  {completed}
-                  <span> / 4</span>
-                </strong>
-                <progress
-                  max={4}
-                  value={completed}
-                  aria-label={t('Completed scope sections', 'Заполнено разделов задачи')}
-                />
-              </div>
-              <h2>
-                {t('Your business.', 'Ваш бизнес.')}
-                <em>{t('In context.', 'В контексте.')}</em>
-              </h2>
-              <dl>
-                <dt>{t('Role', 'Роль')}</dt>
-                <dd>
-                  {label(
-                    companyTypes.find((c) => c.id === brief.companyType),
-                    language,
-                  ) || t('Your place in the partnership', 'Ваша роль в партнёрстве')}
-                </dd>
-                <dt>{t('Industry', 'Индустрия')}</dt>
-                <dd>
-                  {label(
-                    industries.find((i) => i.id === brief.industry),
-                    language,
-                  ) || t('Choose your industry', 'Выберите индустрию')}
-                </dd>
-                <dt>{t('Countries', 'Страны')}</dt>
-                <dd>
-                  {chosen.map((c) => label(c, language)).join(' / ') ||
-                    t('Choose a country', 'Выберите страну')}
-                </dd>
-                <dt>{t('Capabilities', 'Возможности')}</dt>
-                <dd>
-                  {capabilities
-                    .filter((c) => brief.capabilities.includes(c.id))
-                    .map((c) => label(c, language))
-                    .join(' / ') ||
-                    t('Define what you need or offer', 'Укажите задачу или предложение')}
-                </dd>
-                {brief.methods.length > 0 && (
-                  <>
-                    <dt>{t('Methods', 'Методы')}</dt>
-                    <dd>{brief.methods.join(' / ')}</dd>
-                  </>
-                )}
-                {brief.settlementCurrencies.length > 0 && (
-                  <>
-                    <dt>{t('Settlement', 'Расчёты')}</dt>
-                    <dd>{brief.settlementCurrencies.join(' / ')}</dd>
-                  </>
-                )}
-              </dl>
-              <nav
-                className="brief-checkpoints"
-                aria-label={t('Edit brief sections', 'Изменить разделы брифа')}
-              >
-                {checkpoints.map((item, index) => (
-                  <button
-                    type="button"
-                    key={item.field}
-                    disabled={busy}
-                    data-complete={item.done}
-                    onClick={() => {
-                      setStep('scope');
-                      focusField(item.field);
-                    }}
-                  >
-                    <span>
-                      {item.done ? <Check size={12} aria-hidden="true" /> : `0${index + 1}`}
-                    </span>
-                    {item.title}
-                    <SignatureArrow direction="forward" />
-                  </button>
-                ))}
-              </nav>
-              <div className="brief-status">
-                <span />
-                {t('Draft · not submitted', 'Черновик · не отправлен')}
-              </div>
-              <p>
-                {t(
-                  'Your selections describe a request, not a confirmed match. Qualification → relevant introduction → evidenced commercial outcome.',
-                  'Ваш выбор описывает запрос, а не подтверждённое совпадение. Проверка → подходящее знакомство → подтверждённый коммерческий результат.',
-                )}
-              </p>
-            </aside>
+            <BriefCounterfoil {...counterfoil} />
           </form>
         </>
       )}

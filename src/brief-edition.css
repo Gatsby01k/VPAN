@@ -1,0 +1,423 @@
+/* The ticket opens into a working brief with a detachable, editable counterfoil. */
+#main[data-public-page='brief'].network-product {
+  padding-top: calc(var(--counter-header-height) + clamp(18px, 3vw, 48px));
+}
+.brief-cover {
+  --stamp-ground: #291e19;
+  --stamp-etch: #d9b47f;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  margin-bottom: clamp(18px, 2.3vw, 32px);
+  border: 1px solid #b0956b;
+  box-shadow: 2px 3px 0 #d1bfa1;
+  background: #f8f0dc url('/assets/editorial/paper.webp');
+}
+.connection-engine[data-side='offer'] .brief-cover {
+  --stamp-ground: #c5a571;
+  --stamp-etch: #69461e;
+}
+.brief-cover-title,
+.brief-cover-guide {
+  min-width: 0;
+  padding-inline: clamp(20px, 3.1vw, 52px);
+}
+.brief-cover-title {
+  align-self: end;
+  padding-top: clamp(19px, 2.35vw, 35px);
+}
+.brief-cover-title .brief-cover-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  color: #755025;
+  font: 710 0.75rem/1.4 var(--counter-meta);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.brief-cover-kicker svg {
+  flex: none;
+}
+.brief-cover-title h1 {
+  margin: 0;
+  color: var(--counter-ink);
+  font: 530 clamp(3rem, 5.45vw, 5.95rem)/0.99 var(--counter-display);
+  letter-spacing: -0.06em;
+}
+.brief-cover-title h1 em {
+  display: inline;
+  color: var(--counter-mark);
+  font-weight: 490;
+}
+.brief-cover-guide {
+  grid-column: 1;
+  padding-bottom: clamp(14px, 1.7vw, 30px);
+}
+.brief-cover-guide p {
+  max-width: 51ch;
+  margin: 14px 0 4px;
+  color: var(--counter-dim);
+  font: 510 1rem/1.55 var(--counter-sans);
+}
+.brief-cover-guide .brief-enquiry {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font: 680 0.875rem/1.35 var(--counter-sans);
+  color: #803152;
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+.brief-cover-stub {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  grid-area: 1 / 2 / 3 / 3;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  border-left: 1px dashed #976d48;
+  background: var(--stamp-ground) url('/assets/editorial/paper.webp');
+  background-blend-mode: multiply;
+}
+.brief-stub-engraving {
+  position: absolute;
+  z-index: -1;
+  width: 90%;
+  right: -39%;
+  top: -38%;
+  color: var(--stamp-etch);
+  opacity: 0.38;
+}
+.brief-cover-stub::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  width: 28%;
+  height: 15px;
+  right: -2%;
+  bottom: 18%;
+  background: repeating-linear-gradient(0deg, var(--stamp-etch) 0 1px, transparent 1px 6px);
+  transform: rotate(-9deg);
+  opacity: 0.72;
+}
+.brief-postage {
+  width: min(70%, 300px);
+  padding: 7px;
+  transform: rotate(4deg);
+  background: #f6e8cc;
+  mask:
+    linear-gradient(black, black) center / calc(100% - 8px) calc(100% - 8px) no-repeat,
+    radial-gradient(circle at 4px 0, transparent 2.4px, black 2.8px) top left / 8px 50% repeat-x,
+    radial-gradient(circle at 4px 100%, transparent 2.4px, black 2.8px) bottom left / 8px 50%
+      repeat-x;
+}
+.connection-engine[data-side='offer'] .brief-postage {
+  transform: rotate(-4deg);
+}
+.brief-postage img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #85653e;
+}
+#main[data-public-page='brief'] .engine-progress {
+  gap: 8px;
+}
+#main[data-public-page='brief'] .engine-progress button {
+  font: 670 0.91rem/1.35 var(--counter-sans);
+}
+#main[data-public-page='brief'] .engine-progress button[aria-current='step'] {
+  color: var(--counter-ink);
+  background: #e4d2ac70;
+  box-shadow: inset 0 -2px var(--counter-mark);
+}
+#main[data-public-page='brief'] .engine-step-hint {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--counter-dim);
+  margin: 10px 0 18px;
+}
+#main[data-public-page='brief'] .intent-selector button {
+  min-height: 72px;
+  padding: 12px 37px 12px 17px;
+  border: 1px solid #ad937268;
+  background: #efe2ce;
+  color: var(--counter-ink);
+}
+#main[data-public-page='brief'] .intent-selector button[aria-pressed='true'] {
+  background: #28201d;
+  border-color: #33231a;
+  color: #fff3df;
+}
+#main[data-public-page='brief'] .intent-selector button[aria-pressed='true'] > span {
+  color: #efc39b;
+}
+#main[data-public-page='brief'] .intent-selector button > span {
+  margin: 0 0 4px;
+  color: #78552f;
+  text-transform: uppercase;
+  font: 710 0.75rem/1.2 var(--counter-meta);
+}
+#main[data-public-page='brief'] .intent-selector button > strong {
+  margin: 0;
+  font: 650 clamp(1.14rem, 1.65vw, 1.55rem)/1.13 var(--counter-display);
+}
+#main[data-public-page='brief'] .intent-selector button > svg {
+  color: inherit;
+}
+#main[data-public-page='brief'] .engine-role-option {
+  min-height: 60px;
+  padding: 12px 14px;
+  background: #f9efdd88;
+  border-color: #ad916c99;
+  font: 620 0.94rem/1.35 var(--counter-sans);
+}
+#main[data-public-page='brief'] .engine-role-option[data-selected='true'] {
+  background: #f4dfdc;
+  border-color: var(--counter-mark);
+  box-shadow: inset 3px 0 var(--counter-mark);
+}
+
+.brief-counterfoil {
+  align-self: start;
+  min-width: 0;
+  background: #fbf3e4;
+  border: 1px solid #b39973;
+  border-top: 3px double #946a37;
+  box-shadow: 2px 3px 0 #cbbc9f;
+}
+.counterfoil-sheet {
+  max-height: calc(100dvh - var(--counter-header-height) - 32px);
+  overflow: auto;
+  position: sticky;
+  top: calc(var(--counter-header-height) + 16px);
+  padding: 19px clamp(16px, 1.65vw, 26px) 0;
+}
+.counterfoil-heading,
+.counterfoil-pocket summary {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.counterfoil-heading {
+  justify-content: space-between;
+}
+.counterfoil-heading h2,
+.counterfoil-pocket summary > span {
+  font: 550 clamp(1.65rem, 2.5vw, 2.5rem)/1.1 var(--counter-display);
+  letter-spacing: -0.04em;
+}
+.counterfoil-heading small,
+.counterfoil-pocket small {
+  color: var(--counter-mark);
+  white-space: nowrap;
+  font: 650 0.875rem/1.3 var(--counter-meta);
+  font-variant-numeric: tabular-nums;
+}
+.brief-counterfoil progress {
+  display: block;
+  appearance: none;
+  width: 100%;
+  height: 3px;
+  border: 0;
+  margin: 12px 0 8px;
+  background: #e3d2b7;
+  color: var(--counter-mark);
+}
+.brief-counterfoil progress::-webkit-progress-bar {
+  background: #e3d2b7;
+}
+.brief-counterfoil progress::-webkit-progress-value {
+  background: var(--counter-mark);
+}
+.brief-counterfoil progress::-moz-progress-bar {
+  background: var(--counter-mark);
+}
+.brief-counterfoil nav button {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) 14px;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 1px;
+  border: 0;
+  border-bottom: 1px solid #a3855b52;
+  text-align: left;
+  background: transparent;
+  color: var(--counter-ink);
+}
+.counterfoil-punch {
+  width: 15px;
+  height: 15px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #987248;
+  border-radius: 50%;
+  background: #f3e5ce;
+}
+.brief-counterfoil button[data-filled='true'] .counterfoil-punch {
+  background: var(--counter-mark);
+  color: #fff;
+  border-color: var(--counter-mark);
+}
+.counterfoil-label {
+  display: block;
+  color: #73522f;
+  font: 680 0.75rem/1.4 var(--counter-sans);
+}
+.brief-counterfoil button strong {
+  display: block;
+  margin-top: 2px;
+  overflow-wrap: anywhere;
+  font: 640 0.9375rem/1.4 var(--counter-sans);
+}
+.brief-counterfoil button[data-filled='false'] strong {
+  color: var(--counter-dim);
+  font-weight: 490;
+}
+.brief-counterfoil button > svg {
+  color: #906f4f;
+}
+.brief-counterfoil nav button:is(:hover, :focus-visible) strong {
+  color: var(--counter-mark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.counterfoil-extras {
+  margin: 12px 0;
+}
+.counterfoil-extras div + div {
+  margin-top: 8px;
+}
+.counterfoil-extras dt {
+  color: #73522f;
+  font: 680 0.75rem/1.4 var(--counter-sans);
+}
+.counterfoil-extras dd {
+  margin: 2px 0 0;
+  font: 560 0.9375rem/1.45 var(--counter-sans);
+}
+.brief-counterfoil .counterfoil-status {
+  margin: 14px 0 0;
+  padding: 12px 0 15px;
+  border-top: 1px dashed #b3926f;
+  color: #704925;
+  font: 650 0.8125rem/1.4 var(--counter-meta);
+}
+.counterfoil-pocket {
+  display: none;
+}
+#main[data-public-page='brief'] .receipt {
+  position: relative;
+  padding-right: clamp(64px, 10vw, 125px);
+  border-top: 3px double #946a37;
+}
+.brief-receipt-seal {
+  position: absolute;
+  top: 20px;
+  right: 12px;
+  width: clamp(46px, 6vw, 82px);
+  color: #866239;
+  transform: rotate(9deg);
+}
+@media (max-height: 660px) {
+  .counterfoil-sheet {
+    position: static;
+    max-height: none;
+  }
+}
+@media (max-width: 900px) {
+  .counterfoil-sheet {
+    display: none;
+  }
+  .counterfoil-pocket {
+    display: block;
+    padding: 0 16px;
+    margin: 0 0 16px;
+  }
+  .counterfoil-pocket summary {
+    min-height: 52px;
+    cursor: pointer;
+    list-style: none;
+  }
+  .counterfoil-pocket summary::-webkit-details-marker {
+    display: none;
+  }
+  .counterfoil-pocket summary > span {
+    font-size: 1.45rem;
+    flex: 1;
+  }
+  .counterfoil-pocket[open] summary > svg {
+    transform: rotate(180deg);
+  }
+  .counterfoil-pocket progress {
+    margin-top: 0;
+  }
+}
+@media (max-width: 620px) {
+  .brief-cover {
+    grid-template-columns: minmax(0, 1fr) clamp(68px, 22vw, 118px);
+    margin-bottom: 14px;
+  }
+  .brief-cover-title {
+    padding: 15px 12px 10px;
+    align-self: center;
+  }
+  .brief-cover-title .brief-cover-kicker {
+    gap: 5px;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    margin-bottom: 8px;
+  }
+  .brief-cover-title h1 {
+    font-size: clamp(2.3rem, 8.8vw, 3.25rem);
+  }
+  .brief-cover-stub {
+    grid-row: 1;
+    padding: 6px;
+  }
+  .brief-postage {
+    width: 91%;
+    padding: 4px;
+  }
+  .brief-postage img {
+    aspect-ratio: 0.84;
+    object-fit: cover;
+  }
+  .brief-cover-guide {
+    grid-column: 1 / -1;
+    border-top: 1px dashed #a589695e;
+    padding: 0 13px 3px;
+  }
+  .brief-cover-guide p {
+    margin-top: 10px;
+  }
+  #main[data-public-page='brief'] .engine-progress {
+    gap: 4px;
+  }
+  #main[data-public-page='brief'] .engine-progress button {
+    padding-inline: 6px;
+    font-size: 0.84rem;
+  }
+  #main[data-public-page='brief'] .intent-selector button {
+    padding: 10px 24px 10px 10px;
+  }
+  #main[data-public-page='brief'] .intent-selector button > svg {
+    right: 6px;
+    width: 15px;
+    min-width: 0;
+  }
+  #main[data-public-page='brief'] .receipt {
+    padding: 24px 16px;
+  }
+  .brief-receipt-seal {
+    width: 44px;
+    top: 10px;
+    right: 9px;
+  }
+}

@@ -21,60 +21,6 @@
   pointer-events: none;
 }
 
-.cover-colophon {
-  position: absolute;
-  right: 0;
-  bottom: 15px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 0;
-  color: #6e4c2e;
-  font-size: 0.875rem;
-  font-style: italic;
-}
-
-.cover-colophon > span {
-  width: 43px;
-  border-top: 1px solid #a46b2480;
-}
-
-.cover-colophon > span::after {
-  content: '';
-  display: block;
-  width: 5px;
-  height: 5px;
-  border: 1px solid var(--counter-mark);
-  border-radius: 50%;
-  margin: -3px 0 0 auto;
-  background: var(--counter-paper);
-}
-
-.world-cover-choices .thread-ticket {
-  min-height: 66px;
-  padding-block: 12px;
-}
-
-.world-cover-choices .thread-ticket small {
-  font-size: 0.75rem;
-}
-
-.world-cover-choices .thread-ticket::before {
-  transition: background 180ms;
-}
-
-.world-cover-choices .thread-ticket::after {
-  box-shadow: 0 0 0 2px #a46b2433;
-}
-
-.world-cover-choices .thread-ticket[data-intent='need']:is(:hover, :focus-visible)::before {
-  background: #381422;
-}
-
-.world-cover-choices .thread-ticket[data-intent='offer']:is(:hover, :focus-visible)::before {
-  background: #d8bd8e;
-}
-
 /* Three illustrated folios continue the original knot plate. */
 .world-network .network-impression {
   inset: 0 -4% auto auto;
@@ -310,24 +256,6 @@
 }
 
 @media (max-width: 740px) {
-  .cover-colophon {
-    display: none;
-  }
-  .world-cover-invitation > p {
-    font-size: 1rem;
-    line-height: 1.45;
-  }
-  .world-cover-choices .thread-ticket {
-    min-height: 67px;
-  }
-  .world-cover-choices .thread-ticket strong {
-    font-size: 0.875rem;
-    line-height: 1.3;
-  }
-  .world-cover-title .world-label {
-    font-size: 0.75rem;
-    letter-spacing: 0.11em;
-  }
   .world-network .network-impression {
     width: 115%;
     right: -16%;

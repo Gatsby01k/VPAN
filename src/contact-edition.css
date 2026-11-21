@@ -1,0 +1,241 @@
+.contact-edition {
+  width: var(--counter-span);
+  margin-inline: auto;
+  padding: calc(var(--counter-header-height) + clamp(20px, 3.6vw, 60px)) 0 clamp(36px, 5vw, 82px);
+}
+.contact-postcard {
+  --card-inset: clamp(24px, 3.7vw, 65px);
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 0.96fr) minmax(0, 1.04fr);
+  grid-template-rows: 1fr auto;
+  border: 1px solid #aa916e;
+  background: #f7efdf url('/assets/editorial/paper.webp');
+  box-shadow: 2px 3px 0 #d1bfa1;
+}
+.contact-postcard::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 5px;
+  background: repeating-linear-gradient(
+    145deg,
+    #a00045 0 11px,
+    transparent 11px 22px,
+    #9e753e 22px 33px,
+    transparent 33px 44px
+  );
+  pointer-events: none;
+}
+.contact-plate {
+  position: relative;
+  grid-area: 1 / 1 / 3 / 2;
+  min-height: clamp(340px, 32vw, 530px);
+  border-right: 1px dashed #a18a67;
+  background: var(--counter-paper);
+}
+.contact-plate img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: left center;
+}
+.contact-heading {
+  grid-area: 1 / 2;
+  align-self: end;
+  padding: clamp(36px, 4.4vw, 78px) var(--card-inset) clamp(18px, 2vw, 34px);
+}
+.contact-heading h1 {
+  margin: 0;
+  color: var(--counter-ink);
+  font: 530 clamp(3rem, 5.1vw, 5.7rem)/0.96 var(--counter-display);
+  letter-spacing: -0.055em;
+}
+.contact-heading h1 em {
+  color: var(--counter-mark);
+  font-weight: 490;
+}
+.contact-postmark {
+  position: absolute;
+  width: clamp(50px, 5.6vw, 99px);
+  right: clamp(17px, 2.8vw, 46px);
+  top: clamp(10px, 1.3vw, 22px);
+  color: #855c30;
+  transform: rotate(11deg);
+  pointer-events: none;
+}
+.contact-addresses {
+  grid-area: 2 / 2;
+  margin: 0 var(--card-inset) clamp(24px, 3vw, 50px);
+  border-bottom: 1px solid var(--counter-rule);
+}
+.contact-address {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  border-top: 1px solid var(--counter-rule);
+}
+.contact-address > a {
+  display: grid;
+  grid-template-columns: minmax(0, max-content) auto;
+  justify-content: start;
+  align-items: baseline;
+  gap: 3px 9px;
+  min-width: 0;
+  padding-block: clamp(10px, 1.2vw, 22px);
+}
+.contact-label {
+  grid-column: 1 / -1;
+  color: #72522e;
+  font: 700 0.7rem/1.3 var(--counter-meta);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.contact-address strong {
+  color: var(--counter-ink);
+  overflow-wrap: anywhere;
+  font: 560 clamp(1.6rem, 2.6vw, 2.95rem)/1.12 var(--counter-display);
+  letter-spacing: -0.035em;
+}
+.contact-address .signature-arrow,
+.contact-community .signature-arrow {
+  align-self: center;
+  color: var(--counter-mark);
+}
+.contact-address > a:is(:hover, :focus-visible) strong,
+.contact-community a:is(:hover, :focus-visible) {
+  color: var(--counter-mark);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+}
+.contact-address button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--counter-rule);
+  color: #674c2c;
+}
+.contact-address button:is(:hover, :focus-visible) {
+  color: var(--counter-mark);
+  border-color: currentColor;
+}
+.contact-address button svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.5;
+}
+.contact-copy-status {
+  grid-column: 1 / -1;
+  font: 620 0.78rem/1.35 var(--counter-meta);
+  color: var(--counter-mark);
+}
+.contact-copy-status:not(:empty) {
+  padding-bottom: 8px;
+}
+.contact-directory {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  gap: clamp(30px, 6vw, 100px);
+  margin-top: clamp(28px, 3.3vw, 56px);
+}
+.contact-directory > section {
+  padding-top: 12px;
+  border-top: 1px solid #927044;
+}
+.contact-directory h2 {
+  margin: 0 0 15px;
+  color: var(--counter-ink);
+  font: 560 clamp(1.55rem, 2.1vw, 2.3rem)/1.07 var(--counter-display);
+  letter-spacing: -0.035em;
+}
+.contact-directory .world-cover-choices {
+  max-width: none;
+}
+.contact-community a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font: 650 1rem/1.4 var(--counter-meta);
+}
+.contact-community p {
+  max-width: 44ch;
+  color: var(--counter-dim);
+  font: 500 0.9rem/1.5 var(--counter-sans);
+}
+@media (max-width: 740px) {
+  .contact-postcard {
+    --card-inset: clamp(14px, 4.5vw, 30px);
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .contact-plate,
+  .contact-heading {
+    grid-area: 1 / 1;
+  }
+  .contact-plate {
+    min-height: clamp(168px, 50vw, 310px);
+    border: 0;
+  }
+  .contact-plate img {
+    object-position: left 48%;
+  }
+  .contact-heading {
+    z-index: 1;
+    align-self: center;
+    padding: 26px 10px 0 55%;
+  }
+  .contact-postmark {
+    top: 7px;
+    right: 13px;
+    width: clamp(27px, 7vw, 46px);
+  }
+  .contact-heading .world-label {
+    margin-bottom: 8px;
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+  }
+  .contact-heading .world-label::before {
+    display: none;
+  }
+  .contact-heading h1 {
+    font-size: clamp(2rem, 8.8vw, 3.7rem);
+  }
+  .contact-heading em {
+    display: block;
+  }
+  .contact-addresses {
+    grid-area: 2 / 1;
+    margin: 0 var(--card-inset) 15px;
+  }
+  .contact-address > a {
+    padding-block: 11px;
+  }
+  .contact-directory {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+}
+@media (max-width: 389px), (min-width: 741px) and (max-width: 880px) {
+  .contact-address > a {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .contact-address .signature-arrow {
+    display: none;
+  }
+  .contact-address strong {
+    font-size: 1.4rem;
+  }
+}
+@media (max-width: 379px) {
+  .contact-heading {
+    padding-left: 54%;
+  }
+  .contact-heading h1 {
+    font-size: clamp(1.72rem, 8.2vw, 1.93rem);
+  }
+}
